@@ -1,0 +1,6 @@
+{
+  "versionCode": 2, 
+  "versionName": "1.1.0",
+  "downloadUrl": "https://github.com/DEDEMARDIYANTO10/A3MART-APP/releases/latest/download/A3Mart.apk",
+  "changelog": "- Perbaikan sistem cetak PDF\n- Penambahan fitur auto-update\n- Perbaikan bug filter"
+}

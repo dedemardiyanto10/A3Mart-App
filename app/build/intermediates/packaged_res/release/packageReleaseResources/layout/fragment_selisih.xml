@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:app="http://schemas.android.com/apk/res-auto"
+     xmlns:tools="http://schemas.android.com/tools"
+     android:layout_height="match_parent"
+     android:layout_width="match_parent"
+     android:padding="8dp"
+     tools:context=".ui.selisih.SelisihFragment">
+
+    <LinearLayout
+         android:layout_height="wrap_content"
+         android:layout_width="wrap_content"
+         android:visibility="gone"
+         android:gravity="center"
+         app:layout_constraintTop_toTopOf="parent"
+         android:orientation="vertical"
+         app:layout_constraintStart_toStartOf="parent"
+         app:layout_constraintEnd_toEndOf="parent"
+         app:layout_constraintBottom_toBottomOf="parent"
+         android:id="@+id/layout_empty_rekap">
+
+        <ImageView
+             android:layout_height="120dp"
+             android:layout_width="120dp"
+             android:src="@drawable/ic_empty_box"
+             android:alpha="0.5"
+             app:tint="?attr/colorOnSurfaceVariant" />
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             android:alpha="0.6"
+             android:textSize="16sp"
+             android:textColor="?attr/colorOnSurfaceVariant"
+             android:layout_marginTop="12dp"
+             android:id="@+id/tv_empty_rekap_msg"
+             android:text="Semua hutang lunas!"
+             android:textStyle="bold" />
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             android:alpha="0.5"
+             android:textSize="12sp"
+             android:textColor="?attr/colorOnSurfaceVariant"
+             android:text="Tidak ada rekap hutang saat ini" />
+
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+         android:layout_height="match_parent"
+         android:layout_width="match_parent"
+         app:layout_constraintBottom_toBottomOf="parent"
+         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+         android:id="@+id/rv_rekap_hutang" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+         android:layout_height="wrap_content"
+         android:layout_width="wrap_content"
+         android:layout_marginBottom="24dp"
+         android:layout_marginEnd="24dp"
+         android:contentDescription="Tambah Deposit"
+         app:backgroundTint="?attr/colorOnPrimary"
+         app:layout_constraintEnd_toEndOf="parent"
+         app:layout_constraintBottom_toBottomOf="parent"
+         app:srcCompat="@drawable/ic_add"
+         android:id="@+id/fab_add_deposit" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

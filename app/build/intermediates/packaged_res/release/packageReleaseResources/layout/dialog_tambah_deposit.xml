@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:app="http://schemas.android.com/apk/res-auto"
+     android:layout_height="wrap_content"
+     android:layout_width="match_parent"
+     android:padding="24dp"
+     android:orientation="vertical">
+
+    <com.google.android.material.card.MaterialCardView
+         android:layout_height="6dp"
+         android:layout_width="50dp"
+         android:layout_marginBottom="24dp"
+         app:cardElevation="1dp"
+         app:cardBackgroundColor="?attr/colorOnSurfaceVariant"
+         style="?attr/materialCardViewFilledStyle"
+         app:cardCornerRadius="24dp"
+         android:layout_gravity="center_horizontal">
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <TextView
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:layout_marginBottom="20dp"
+         android:textSize="20sp"
+         android:text="Tambah Deposit Konsumen"
+         android:textStyle="bold" />
+
+    <TextView
+         android:layout_height="wrap_content"
+         android:layout_width="wrap_content"
+         android:layout_marginTop="8dp"
+         android:text="Pilih Konsumen" />
+
+    <com.google.android.material.card.MaterialCardView
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:layout_marginBottom="12dp"
+         app:cardElevation="1dp"
+         style="?attr/materialCardViewFilledStyle"
+         android:layout_marginTop="4dp"
+         app:cardCornerRadius="8dp"
+         android:layout_gravity="center_horizontal">
+
+        <Spinner
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:paddingEnd="8dp"
+             android:paddingStart="8dp"
+             android:id="@+id/spinnerKonsumen">
+
+        </Spinner>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.textfield.TextInputLayout
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         app:boxCornerRadiusTopEnd="8dp"
+         android:hint="Nama Konsumen Manual"
+         app:boxCornerRadiusBottomStart="8dp"
+         app:boxCornerRadiusBottomEnd="8dp"
+         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+         android:layout_marginTop="8dp"
+         app:boxCornerRadiusTopStart="8dp"
+         android:id="@+id/tilNamaManual">
+
+        <com.google.android.material.textfield.TextInputEditText
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:inputType="textPersonName"
+             android:id="@+id/etNamaManual" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <LinearLayout
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:visibility="gone"
+         android:orientation="vertical"
+         android:id="@+id/layout_info_saldo">
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:textSize="14sp"
+             android:textColor="#F44336"
+             android:layout_marginTop="4dp"
+             android:id="@+id/tv_sisa_atau_nabung"
+             android:textStyle="italic"
+             android:text="Sisa Hutang: Rp 0" />
+
+    </LinearLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         app:boxCornerRadiusTopEnd="8dp"
+         android:layout_marginBottom="24dp"
+         app:boxCornerRadiusBottomStart="8dp"
+         app:boxCornerRadiusBottomEnd="8dp"
+         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+         android:layout_marginTop="8dp"
+         app:prefixText="Rp"
+         app:boxCornerRadiusTopStart="8dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:hint="Nominal Deposit"
+             android:inputType="number"
+             android:id="@+id/etNominal" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.button.MaterialButton
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:backgroundTint="#FF9800"
+         style="@style/Widget.Material3.Button.TonalButton"
+         android:id="@+id/btnSimpan"
+         android:text="Simpan Deposit"
+         android:textStyle="bold" />
+
+</LinearLayout>

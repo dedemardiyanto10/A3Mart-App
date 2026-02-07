@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:app="http://schemas.android.com/apk/res-auto"
+     android:layout_height="wrap_content"
+     android:layout_width="match_parent"
+     android:clickable="true"
+     android:layout_margin="6dp"
+     app:cardElevation="2dp"
+     style="?attr/materialCardViewFilledStyle"
+     app:cardCornerRadius="16dp"
+     android:focusable="true"
+     android:id="@+id/cardTransaksi"
+     android:foreground="?android:attr/selectableItemBackground">
+
+    <FrameLayout
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent">
+
+        <LinearLayout
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:padding="16dp"
+             android:orientation="horizontal">
+
+            <LinearLayout
+                 android:layout_height="wrap_content"
+                 android:layout_width="0dp"
+                 android:orientation="vertical"
+                 android:layout_weight="1">
+
+                <TextView
+                     android:layout_height="wrap_content"
+                     android:layout_width="match_parent"
+                     android:textSize="10sp"
+                     android:text="Nama Konsumen" />
+
+                <TextView
+                     android:layout_height="wrap_content"
+                     android:layout_width="wrap_content"
+                     android:textSize="16sp"
+                     android:textColor="?attr/colorPrimary"
+                     android:id="@+id/tv_konsumen_transaksi"
+                     android:textStyle="bold"
+                     android:text="Nama Konsumen" />
+
+                <TextView
+                     android:layout_height="wrap_content"
+                     android:layout_width="match_parent"
+                     android:textSize="10sp"
+                     android:layout_marginTop="8dp"
+                     android:text="Nama Produk" />
+
+                <TextView
+                     android:layout_height="wrap_content"
+                     android:layout_width="wrap_content"
+                     android:textSize="16sp"
+                     android:textColor="?attr/colorPrimary"
+                     android:id="@+id/tv_nama_transaksi"
+                     android:textStyle="bold"
+                     android:text="Nama Produk" />
+
+                <TextView
+                     android:layout_height="wrap_content"
+                     android:layout_width="match_parent"
+                     android:textSize="10sp"
+                     android:layout_marginTop="8dp"
+                     android:text="Qty Produk" />
+
+                <TextView
+                     android:layout_height="wrap_content"
+                     android:layout_width="wrap_content"
+                     android:textSize="16sp"
+                     android:textColor="?attr/colorPrimary"
+                     android:id="@+id/tv_qty_transaksi"
+                     android:textStyle="bold"
+                     android:text="Qty" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                 android:layout_height="wrap_content"
+                 android:layout_width="0dp"
+                 android:orientation="vertical"
+                 android:layout_weight="1">
+
+                <TextView
+                     android:layout_height="wrap_content"
+                     android:layout_width="match_parent"
+                     android:textSize="10sp"
+                     android:text="Waktu Transaksi" />
+
+                <TextView
+                     android:layout_height="wrap_content"
+                     android:layout_width="wrap_content"
+                     android:textSize="16sp"
+                     android:textColor="?attr/colorPrimary"
+                     android:id="@+id/tv_tanggal_transaksi"
+                     android:textStyle="bold"
+                     android:text="Tanggal" />
+
+                <TextView
+                     android:layout_height="wrap_content"
+                     android:layout_width="match_parent"
+                     android:textSize="10sp"
+                     android:layout_marginTop="8dp"
+                     android:text="Total Transaksi" />
+
+                <TextView
+                     android:layout_height="wrap_content"
+                     android:layout_width="wrap_content"
+                     android:textSize="16sp"
+                     android:textColor="?attr/colorPrimary"
+                     android:id="@+id/tv_total_transaksi"
+                     android:textStyle="bold"
+                     android:text="Rp 0" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <ImageView
+             android:layout_height="100dp"
+             android:layout_width="180dp"
+             android:layout_marginBottom="40dp"
+             android:scaleType="fitCenter"
+             android:src="@drawable/ic_lunas"
+             android:layout_marginEnd="-30dp"
+             android:rotation="-45"
+             android:alpha="0.5"
+             android:id="@+id/iv_status_transaksi"
+             android:layout_gravity="bottom|end" />
+
+    </FrameLayout>
+
+</com.google.android.material.card.MaterialCardView>

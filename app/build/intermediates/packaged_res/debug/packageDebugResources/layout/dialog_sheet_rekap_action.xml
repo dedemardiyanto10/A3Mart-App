@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:app="http://schemas.android.com/apk/res-auto"
+     android:layout_height="wrap_content"
+     android:layout_width="match_parent"
+     android:padding="24dp"
+     android:orientation="vertical">
+
+    <com.google.android.material.card.MaterialCardView
+         android:layout_height="6dp"
+         android:layout_width="50dp"
+         android:layout_marginBottom="24dp"
+         app:cardElevation="1dp"
+         app:cardBackgroundColor="?attr/colorOnSurfaceVariant"
+         style="?attr/materialCardViewFilledStyle"
+         app:cardCornerRadius="24dp"
+         android:layout_gravity="center_horizontal">
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <TextView
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:textAlignment="center"
+         android:textSize="16sp"
+         android:textColor="?attr/colorPrimary"
+         android:id="@+id/tvTitleSheet"
+         android:text="Nama Konsumen"
+         android:textStyle="bold" />
+
+    <TextView
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:layout_marginBottom="16dp"
+         android:textAlignment="center"
+         android:textSize="12sp"
+         android:text="Pilih tindakan untuk rekap ini:" />
+
+    <com.google.android.material.button.MaterialButton
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         app:icon="@android:drawable/ic_menu_save"
+         android:textAllCaps="false"
+         style="@style/Widget.Material3.Button.OutlinedButton"
+         android:id="@+id/btnSimpanPdf"
+         android:textStyle="bold"
+         android:text="Simpan ke Perangkat (.pdf)" />
+
+    <com.google.android.material.button.MaterialButton
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         app:icon="@android:drawable/ic_menu_share"
+         android:textAllCaps="false"
+         android:backgroundTint="#4CAF50"
+         style="@style/Widget.Material3.Button.TonalButton"
+         android:layout_marginTop="8dp"
+         android:id="@+id/btnSharePdf"
+         android:textStyle="bold"
+         android:text="Share via WhatsApp" />
+
+</LinearLayout>

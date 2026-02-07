@@ -1,0 +1,54 @@
+[
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-mergeDebugResources-46:/layout/item_transaksi.xml",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/layout/item_transaksi.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-mergeDebugResources-46:/layout/item_produk.xml",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/layout/item_produk.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-mergeDebugResources-46:/layout/fragment_selisih.xml",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/layout/fragment_selisih.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-mergeDebugResources-46:/layout/dialog_tambah_transaksi.xml",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/layout/dialog_tambah_transaksi.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-mergeDebugResources-46:/layout/fragment_transaksi.xml",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/layout/fragment_transaksi.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-mergeDebugResources-46:/layout/activity_main.xml",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/layout/activity_main.xml"
+    },
+    {
+        "merged": "com.a3mart.app-mergeDebugResources-46:/layout/item_selisih.xml",
+        "source": "com.a3mart.app-main-49:/layout/item_selisih.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-mergeDebugResources-46:/layout/dialog_tambah_deposit.xml",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/layout/dialog_tambah_deposit.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-mergeDebugResources-46:/layout/dialog_sheet_rekap_action.xml",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/layout/dialog_sheet_rekap_action.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-mergeDebugResources-46:/layout/fragment_produk.xml",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/layout/fragment_produk.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-mergeDebugResources-46:/layout/item_produk_rekap.xml",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/layout/item_produk_rekap.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-mergeDebugResources-46:/layout/item_selisih.xml",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/layout/item_selisih.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-mergeDebugResources-46:/layout/dialog_tambah_produk.xml",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/layout/dialog_tambah_produk.xml"
+    }
+]

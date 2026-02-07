@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:app="http://schemas.android.com/apk/res-auto"
+     android:layout_height="wrap_content"
+     android:layout_width="match_parent"
+     android:padding="24dp"
+     android:orientation="vertical">
+
+    <com.google.android.material.card.MaterialCardView
+         android:layout_height="6dp"
+         android:layout_width="50dp"
+         android:layout_marginBottom="24dp"
+         app:cardElevation="1dp"
+         app:cardBackgroundColor="?attr/colorOnSurfaceVariant"
+         style="?attr/materialCardViewFilledStyle"
+         app:cardCornerRadius="24dp"
+         android:layout_gravity="center_horizontal">
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <TextView
+         android:layout_height="wrap_content"
+         android:layout_width="wrap_content"
+         android:layout_marginBottom="20dp"
+         android:textSize="20sp"
+         android:id="@+id/tv_judul_sheet"
+         android:text="Tambah Produk Baru"
+         android:textStyle="bold" />
+
+    <com.google.android.material.textfield.TextInputLayout
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:layout_marginBottom="8dp"
+         app:boxCornerRadiusTopEnd="8dp"
+         app:boxCornerRadiusBottomStart="8dp"
+         app:boxCornerRadiusBottomEnd="8dp"
+         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+         app:boxCornerRadiusTopStart="8dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:hint="Nama Produk"
+             android:inputType="textCapWords"
+             android:id="@+id/et_nama_produk" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:layout_marginBottom="8dp"
+         app:boxCornerRadiusTopEnd="8dp"
+         app:boxCornerRadiusBottomStart="8dp"
+         app:boxCornerRadiusBottomEnd="8dp"
+         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+         app:prefixText="Rp"
+         app:boxCornerRadiusTopStart="8dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:hint="Harga"
+             android:inputType="number"
+             android:id="@+id/et_harga_produk" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:layout_marginBottom="24dp"
+         app:boxCornerRadiusTopEnd="8dp"
+         app:boxCornerRadiusBottomStart="8dp"
+         app:boxCornerRadiusBottomEnd="8dp"
+         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+         app:boxCornerRadiusTopStart="8dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:hint="Stok"
+             android:inputType="number"
+             android:id="@+id/et_stok_produk" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <LinearLayout
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:gravity="center"
+         android:orientation="horizontal">
+
+        <com.google.android.material.button.MaterialButton
+             android:layout_height="wrap_content"
+             android:layout_width="0dp"
+             android:visibility="gone"
+             app:icon="@drawable/ic_delete"
+             android:layout_margin="5dp"
+             app:iconTint="#F44336"
+             android:textColor="#F44336"
+             style="@style/Widget.Material3.Button.OutlinedButton"
+             android:layout_weight="1"
+             android:id="@+id/btn_hapus"
+             android:textStyle="bold"
+             android:text="Hapus" />
+
+        <com.google.android.material.button.MaterialButton
+             android:layout_height="wrap_content"
+             android:layout_width="0dp"
+             app:icon="@drawable/ic_edit"
+             android:layout_margin="5dp"
+             android:textAllCaps="false"
+             style="@style/Widget.Material3.Button.TonalButton"
+             android:layout_weight="1"
+             android:id="@+id/btn_simpan"
+             android:textStyle="bold"
+             android:text="Simpan" />
+
+    </LinearLayout>
+
+</LinearLayout>

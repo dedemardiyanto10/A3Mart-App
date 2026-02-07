@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_backup"
+        android:title="Backup Data"
+        android:icon="@drawable/ic_backup"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_restore"
+        android:title="Restore Data"
+        android:icon="@drawable/ic_restore"
+        app:showAsAction="ifRoom" />
+</menu>

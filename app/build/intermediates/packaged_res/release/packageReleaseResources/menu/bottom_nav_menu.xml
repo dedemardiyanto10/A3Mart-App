@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_transaksi"
+        android:icon="@drawable/ic_add_chart"
+        android:title="@string/title_transaksi" />
+
+    <item
+        android:id="@+id/navigation_produk"
+        android:icon="@drawable/ic_chart"
+        android:title="@string/title_produk" />
+
+    <item
+        android:id="@+id/navigation_selisih"
+        android:icon="@drawable/ic_balance"
+        android:title="@string/title_selisih" />
+
+</menu>

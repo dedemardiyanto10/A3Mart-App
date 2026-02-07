@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:app="http://schemas.android.com/apk/res-auto"
+     android:layout_height="match_parent"
+     android:layout_width="match_parent"
+     android:padding="8dp">
+
+    <com.google.android.material.card.MaterialCardView
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:clickable="true"
+         android:layout_margin="6dp"
+         app:cardElevation="2dp"
+         style="?attr/materialCardViewFilledStyle"
+         app:cardCornerRadius="16dp"
+         android:focusable="true"
+         android:id="@+id/card_summary"
+         android:foreground="?android:attr/selectableItemBackground">
+
+        <LinearLayout
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:padding="12dp"
+             android:orientation="vertical">
+
+            <LinearLayout
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:orientation="horizontal"
+                 android:baselineAligned="false">
+
+                <LinearLayout
+                     android:layout_height="wrap_content"
+                     android:layout_width="0dp"
+                     android:gravity="center"
+                     android:orientation="vertical"
+                     android:layout_weight="1">
+
+                    <TextView
+                         android:layout_height="wrap_content"
+                         android:layout_width="wrap_content"
+                         android:textSize="10sp"
+                         android:text="Lunas" />
+
+                    <TextView
+                         android:layout_height="wrap_content"
+                         android:layout_width="wrap_content"
+                         android:textSize="16sp"
+                         android:textColor="#4CAF50"
+                         android:id="@+id/tv_total_lunas"
+                         android:text="Rp 0"
+                         android:textStyle="bold" />
+
+                </LinearLayout>
+
+                <View
+                     android:layout_height="match_parent"
+                     android:layout_width="1dp"
+                     android:background="?attr/colorOnSurfaceVariant"
+                     android:alpha="0.2"
+                     android:layout_marginHorizontal="4dp" />
+
+                <LinearLayout
+                     android:layout_height="wrap_content"
+                     android:layout_width="0dp"
+                     android:gravity="center"
+                     android:orientation="vertical"
+                     android:layout_weight="1">
+
+                    <TextView
+                         android:layout_height="wrap_content"
+                         android:layout_width="wrap_content"
+                         android:textSize="10sp"
+                         android:text="Hutang" />
+
+                    <TextView
+                         android:layout_height="wrap_content"
+                         android:layout_width="wrap_content"
+                         android:textSize="16sp"
+                         android:textColor="#F44336"
+                         android:id="@+id/tv_total_hutang"
+                         android:text="Rp 0"
+                         android:textStyle="bold" />
+
+                </LinearLayout>
+
+                <View
+                     android:layout_height="match_parent"
+                     android:layout_width="1dp"
+                     android:background="?attr/colorOnSurfaceVariant"
+                     android:alpha="0.2"
+                     android:layout_marginHorizontal="4dp" />
+
+                <LinearLayout
+                     android:layout_height="wrap_content"
+                     android:layout_width="0dp"
+                     android:gravity="center"
+                     android:orientation="vertical"
+                     android:layout_weight="1">
+
+                    <TextView
+                         android:layout_height="wrap_content"
+                         android:layout_width="wrap_content"
+                         android:textSize="10sp"
+                         android:text="Deposit Aktif" />
+
+                    <TextView
+                         android:layout_height="wrap_content"
+                         android:layout_width="wrap_content"
+                         android:textSize="16sp"
+                         android:textColor="#FF9800"
+                         android:id="@+id/tv_total_deposit"
+                         android:text="Rp 0"
+                         android:textStyle="bold" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <com.github.mikephil.charting.charts.BarChart
+                 android:layout_height="200dp"
+                 android:layout_width="match_parent"
+                 android:visibility="gone"
+                 android:layout_marginBottom="8dp"
+                 android:id="@+id/barChart" />
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.chip.ChipGroup
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         app:singleSelection="true"
+         android:layout_marginTop="8dp"
+         android:layout_marginStart="8dp"
+         app:selectionRequired="true"
+         app:layout_constraintTop_toBottomOf="@id/card_summary"
+         android:id="@+id/chip_group_filter">
+
+        <com.google.android.material.chip.Chip
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             app:rippleColor="?attr/colorPrimary"
+             style="@style/Widget.MaterialComponents.Chip.Choice"
+             android:checked="true"
+             android:id="@+id/chip_all"
+             android:text="Semua" />
+
+        <com.google.android.material.chip.Chip
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             app:rippleColor="#4CAF50"
+             style="@style/Widget.MaterialComponents.Chip.Choice"
+             android:id="@+id/chip_lunas"
+             android:text="Lunas" />
+
+        <com.google.android.material.chip.Chip
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             app:rippleColor="#F44336"
+             style="@style/Widget.MaterialComponents.Chip.Choice"
+             android:id="@+id/chip_hutang"
+             android:text="Hutang" />
+
+        <com.google.android.material.chip.Chip
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             app:rippleColor="#FF9800"
+             style="@style/Widget.MaterialComponents.Chip.Choice"
+             android:id="@+id/chip_deposit"
+             android:text="Deposit" />
+
+    </com.google.android.material.chip.ChipGroup>
+
+    <LinearLayout
+         android:layout_height="wrap_content"
+         android:layout_width="wrap_content"
+         android:visibility="gone"
+         android:gravity="center"
+         android:orientation="vertical"
+         app:layout_constraintStart_toStartOf="parent"
+         app:layout_constraintEnd_toEndOf="parent"
+         app:layout_constraintBottom_toBottomOf="parent"
+         app:layout_constraintTop_toBottomOf="@id/chip_group_filter"
+         android:id="@+id/layout_empty">
+
+        <ImageView
+             android:layout_height="120dp"
+             android:layout_width="120dp"
+             android:src="@drawable/ic_empty_box"
+             android:alpha="0.5"
+             app:tint="?attr/colorOnSurfaceVariant" />
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             android:alpha="0.6"
+             android:textSize="16sp"
+             android:textColor="?attr/colorOnSurfaceVariant"
+             android:layout_marginTop="12dp"
+             android:id="@+id/tv_empty_msg"
+             android:text="Belum ada transaksi"
+             android:textStyle="bold" />
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             android:alpha="0.5"
+             android:textSize="12sp"
+             android:textColor="?attr/colorOnSurfaceVariant"
+             android:text="Klik tombol + untuk menambah" />
+
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+         android:layout_height="0dp"
+         android:layout_width="match_parent"
+         android:layout_marginTop="8dp"
+         app:layout_constraintBottom_toBottomOf="parent"
+         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+         app:layout_constraintTop_toBottomOf="@id/chip_group_filter"
+         android:id="@+id/rv_transaksi" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+         android:layout_height="wrap_content"
+         android:layout_width="wrap_content"
+         android:layout_marginBottom="24dp"
+         android:layout_marginEnd="24dp"
+         android:contentDescription="Tambah Transaksi"
+         app:backgroundTint="?attr/colorOnPrimary"
+         app:layout_constraintEnd_toEndOf="parent"
+         app:layout_constraintBottom_toBottomOf="parent"
+         app:srcCompat="@drawable/ic_add"
+         android:id="@+id/fab_add_transaksi" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

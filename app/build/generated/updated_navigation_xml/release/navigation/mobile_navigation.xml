@@ -1,0 +1,22 @@
+<navigation
+xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:id="@+id/mobile_navigation"
+app:startDestination="@+id/navigation_transaksi" >
+<fragment
+    android:id="@+id/navigation_transaksi"
+    android:name=".ui.transaksi.TransaksiFragment"
+    android:label="@string/title_transaksi"
+    tools:layout="@layout/fragment_tansaksi" />
+<fragment
+    android:id="@+id/navigation_produk"
+    android:name=".ui.produk.ProdukFragment"
+    android:label="@string/title_produk"
+    tools:layout="@layout/fragment_produk" />
+<fragment
+    android:id="@+id/navigation_selisih"
+    android:name=".ui.selisih.SelisihFragment"
+    android:label="@string/title_selisih"
+    tools:layout="@layout/fragment_selisih" />
+</navigation>

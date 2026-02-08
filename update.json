@@ -4,7 +4,7 @@
   "updateDate": "08-02-2026",
   "fileSize": "4.5 MB",
   "releaseType": "Official Release",
-  "isForceUpdate": false,
+  "isForceUpdate": true,
   "downloadUrl": "https://github.com/dedemardiyanto10/A3Mart-App/releases/download/v1.1.0/A3Mart.apk",
   "changelog": "Daftar Perubahan:\n\n1. Optimasi manajemen database transaksi.\n2. Sinkronisasi stok produk lebih akurat.\n3. Penyesuaian antarmuka pada dialog informasi.\n4. Perbaikan sistem notifikasi pada Android 14.\n5. Peningkatan stabilitas aplikasi secara keseluruhan."
 }

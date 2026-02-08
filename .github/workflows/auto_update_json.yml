@@ -1,0 +1,47 @@
+name: Auto Update JSON on Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  update-json:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Get Current Date
+        id: date
+        run: echo "date=$(date +'%d-%m-%Y')" >> $GITHUB_OUTPUT
+
+      - name: Update update.json
+        run: |
+          # Mengambil tag name (misal v1.1.0) dari release
+          VERSION_NAME=${{ github.event.release.tag_name }}
+          # Membersihkan huruf 'v' jika ada (v1.1.0 jadi 1.1.0)
+          CLEAN_VERSION=$(echo $VERSION_NAME | sed 's/v//g')
+          # Mengambil tanggal hari ini
+          CURRENT_DATE=${{ steps.date.outputs.date }}
+          
+          # Menggunakan python untuk update file JSON agar rapi
+          python3 -c "
+          import json
+          with open('update.json', 'r') as f:
+              data = json.load(f)
+          
+          data['versionName'] = '$CLEAN_VERSION'
+          data['versionCode'] = data['versionCode'] + 1
+          data['updateDate'] = '$CURRENT_DATE'
+          
+          with open('update.json', 'w') as f:
+              json.dump(data, f, indent=2)
+          "
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git add update.json
+          git commit -m "Auto update JSON for release ${{ github.event.release.tag_name }}"
+          git push

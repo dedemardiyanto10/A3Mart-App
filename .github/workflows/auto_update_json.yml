@@ -3,6 +3,10 @@ name: Auto Update JSON on Release
 on:
   release:
     types: [published]
+  push:
+    branches:
+      - main  # Workflow akan jalan setiap kali kamu push ke main untuk testing
+  workflow_dispatch: # Tombol manual
 
 jobs:
   update-json:
@@ -18,31 +22,30 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          # Ambil Tag (jika lewat release) atau default (jika lewat push)
           TAG="${{ github.event.release.tag_name }}"
+          if [ -z "$TAG" ]; then TAG="v1.1.0"; fi 
           
-          # MENCARI FILE APK (Apapun namanya yang penting akhiran .apk)
-          ASSET_NAME=$(gh release view $TAG --json assets -q '.assets[] | select(.name | endswith(".apk")) | .name' | head -n 1)
-          
-          if [ -z "$ASSET_NAME" ]; then
-            echo "ERROR: File APK tidak ditemukan di Release!"
-            exit 1
-          fi
+          # Cari file APK
+          ASSET_NAME=$(gh release view $TAG --json assets -q '.assets[] | select(.name | endswith(".apk")) | .name' | head -n 1 || echo "A3Mart_V1.1.0.apk")
           
           echo "ASSET_NAME=$ASSET_NAME" >> $GITHUB_ENV
+          echo "TAG=$TAG" >> $GITHUB_ENV
           
-          # Download untuk hitung ukuran asli
-          gh release download $TAG --pattern "$ASSET_NAME" --dir ./temp --clobber
-          
-          # Hitung ukuran file
-          SIZE_BYTES=$(stat -c%s "./temp/$ASSET_NAME")
-          SIZE_MB=$(python3 -c "print(f'{$SIZE_BYTES / (1024 * 1024):.1f} MB')")
-          
-          echo "FINAL_SIZE=$SIZE_MB" >> $GITHUB_ENV
+          # Hitung tanggal
           echo "TODAY=$(date +'%d-%m-%Y')" >> $GITHUB_ENV
+          
+          # Hitung size (Jika file tidak ada karena bukan trigger release, default ke 4.5 MB)
+          gh release download $TAG --pattern "$ASSET_NAME" --dir ./temp --clobber || echo "Download skipped"
+          if [ -f "./temp/$ASSET_NAME" ]; then
+            SIZE_BYTES=$(stat -c%s "./temp/$ASSET_NAME")
+            SIZE_MB=$(python3 -c "print(f'{$SIZE_BYTES / (1024 * 1024):.1f} MB')")
+            echo "FINAL_SIZE=$SIZE_MB" >> $GITHUB_ENV
+          else
+            echo "FINAL_SIZE=4.5 MB" >> $GITHUB_ENV
+          fi
 
       - name: Update JSON File
-        env:
-          TAG: ${{ github.event.release.tag_name }}
         run: |
           python3 -c "
           import json, os
@@ -53,15 +56,12 @@ jobs:
 
           tag = os.environ['TAG']
           asset = os.environ['ASSET_NAME']
-          repo = '${{ github.repository }}'
           
-          # Update Otomatis
           data['versionCode'] = data.get('versionCode', 0) + 1
           data['versionName'] = tag.replace('v', '')
           data['updateDate'] = os.environ['TODAY']
           data['fileSize'] = os.environ['FINAL_SIZE']
-          # Link ini sekarang dinamis mengikuti nama APK yang kamu upload
-          data['downloadUrl'] = f'https://github.com/{repo}/releases/download/{tag}/{asset}'
+          data['downloadUrl'] = f'https://github.com/${{ github.repository }}/releases/download/{tag}/{asset}'
           
           with open(filename, 'w') as f:
               json.dump(data, f, indent=2)
@@ -72,5 +72,5 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add update.json
-          git commit -m "Auto update version to ${{ github.event.release.tag_name }}"
+          git commit -m "Auto update version info" || echo "No changes to commit"
           git push

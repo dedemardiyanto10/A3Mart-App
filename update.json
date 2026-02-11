@@ -6,6 +6,6 @@
   "releaseType": "Official Release",
   "isForceUpdate": false,
   "downloadUrl": "https://github.com/dedemardiyanto10/A3Mart-App/releases/download/v1.1.0/A3Mart.apk",
-  "changelog": "Daftar Perubahan:\n\n• K0NT0LLL Auto Backup telah ditambahkan\n• Blur dialog interface\n• Scanner barcode telah ditambahkan\n• Menambahkan barcode produk\n• Optimasi manajemen database transaksi.\n• Sinkronisasi stok produk lebih akurat.\n• Penyesuaian antarmuka pada dialog informasi.\n• Perbaikan sistem notifikasi pada Android 14.\n• Peningkatan stabilitas aplikasi secara keseluruhan."
+  "changelog": "Daftar Perubahan:\n\n• Auto Backup telah ditambahkan\n• Blur dialog interface\n• Scanner barcode telah ditambahkan\n• Menambahkan barcode produk\n• Optimasi manajemen database transaksi.\n• Sinkronisasi stok produk lebih akurat.\n• Penyesuaian antarmuka pada dialog informasi.\n• Perbaikan sistem notifikasi pada Android 14.\n• Peningkatan stabilitas aplikasi secara keseluruhan."
 }
 

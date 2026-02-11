@@ -25,9 +25,9 @@ jobs:
           # Download & Timbang
           gh release download $TAG --pattern "$ASSET_NAME" --dir ./temp --clobber
           SIZE_BYTES=$(stat -c%s "./temp/$ASSET_NAME")
+          # Konversi ke MB (Contoh: 4.5 MB)
           SIZE_MB=$(python3 -c "print(f'{$SIZE_BYTES / (1024 * 1024):.1f} MB')")
           
-          # Simpan ke env agar bisa dibaca step berikutnya
           echo "ASSET_NAME=$ASSET_NAME" >> $GITHUB_ENV
           echo "FINAL_SIZE=$SIZE_MB" >> $GITHUB_ENV
           echo "TODAY=$(date +'%d-%m-%Y')" >> $GITHUB_ENV
@@ -35,22 +35,28 @@ jobs:
       - name: Update JSON File
         env:
           TAG: ${{ github.event.release.tag_name }}
-          BODY: ${{ github.event.release.body }}
         run: |
           python3 -c "
           import json, os
 
-          with open('update.json', 'r') as f:
-              data = json.load(f)
+          filename = 'update.json'
+          if os.path.exists(filename):
+              with open(filename, 'r') as f:
+                  data = json.load(f)
+          else:
+              print('File update.json tidak ditemukan!')
+              exit(1)
 
-          data['versionCode'] += 1
+          # Update otomatis bagian teknis saja
+          data['versionCode'] = data.get('versionCode', 0) + 1
           data['versionName'] = os.environ['TAG'].replace('v', '')
           data['updateDate'] = os.environ['TODAY']
           data['fileSize'] = os.environ['FINAL_SIZE']
           data['downloadUrl'] = f\"https://github.com/${{ github.repository }}/releases/download/{os.environ['TAG']}/{os.environ['ASSET_NAME']}\"
-          data['changelog'] = f\"Daftar Perubahan:\\n\\n{os.environ.get('BODY', 'Peningkatan stabilitas.')}\"
-
-          with open('update.json', 'w') as f:
+          
+          # Bagian 'changelog' TIDAK disentuh agar editan manual kamu tetap aman
+          
+          with open(filename, 'w') as f:
               json.dump(data, f, indent=2)
           "
 
@@ -59,5 +65,5 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add update.json
-          git commit -m "Auto update JSON to ${{ github.event.release.tag_name }}"
+          git commit -m "Auto update release metadata to ${{ github.event.release.tag_name }} (Changelog preserved)"
           git push

@@ -14,64 +14,50 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Get Current Date
-        id: date
-        run: echo "date=$(date +'%d-%m-%Y')" >> $GITHUB_OUTPUT
-
-      - name: Download Asset to Measure Size
+      - name: Get Metadata & Size
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Mendownload file APK untuk menghitung ukuran aslinya
-          # Sesuaikan '--pattern' jika nama file APK berbeda
-          gh release download ${{ github.event.release.tag_name }} --pattern "*.apk" --dir ./downloads --clobber
-          FILE_PATH=$(ls ./downloads/*.apk | head -n 1)
-          FILE_SIZE_BYTES=$(stat -c%s "$FILE_PATH")
-          echo "FILE_SIZE_MB=$(echo "scale=2; $FILE_SIZE_BYTES / 1048576" | bc) MB" >> $GITHUB_ENV
+          # Ambil Nama File & Link
+          TAG="${{ github.event.release.tag_name }}"
+          ASSET_NAME=$(gh release view $TAG --json assets -q '.assets[0].name')
+          
+          # Download & Timbang
+          gh release download $TAG --pattern "$ASSET_NAME" --dir ./temp --clobber
+          SIZE_BYTES=$(stat -c%s "./temp/$ASSET_NAME")
+          SIZE_MB=$(python3 -c "print(f'{$SIZE_BYTES / (1024 * 1024):.1f} MB')")
+          
+          # Simpan ke env agar bisa dibaca step berikutnya
+          echo "ASSET_NAME=$ASSET_NAME" >> $GITHUB_ENV
+          echo "FINAL_SIZE=$SIZE_MB" >> $GITHUB_ENV
+          echo "TODAY=$(date +'%d-%m-%Y')" >> $GITHUB_ENV
 
-      - name: Update update.json
+      - name: Update JSON File
         env:
-          TAG_NAME: ${{ github.event.release.tag_name }}
-          CHANGELOG: ${{ github.event.release.body }}
-          # Ganti 'A3Mart.apk' di bawah sesuai nama file yang kamu upload ke release
-          DOWNLOAD_URL: "https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/A3Mart.apk"
+          TAG: ${{ github.event.release.tag_name }}
+          BODY: ${{ github.event.release.body }}
         run: |
           python3 -c "
-          import json
-          import os
+          import json, os
 
-          filename = 'update.json'
-          version_name = os.environ['TAG_NAME']
-          clean_version = version_name.replace('v', '')
-          
-          # Baca file lama
-          if os.path.exists(filename):
-              with open(filename, 'r') as f:
-                  data = json.load(f)
-          else:
-              data = {}
+          with open('update.json', 'r') as f:
+              data = json.load(f)
 
-          # Update field sesuai struktur kamu
-          data['versionCode'] = data.get('versionCode', 0) + 1
-          data['versionName'] = clean_version
-          data['updateDate'] = '${{ steps.date.outputs.date }}'
-          data['fileSize'] = '${{ env.FILE_SIZE_MB }}'
-          data['releaseType'] = 'Official Release'
-          data['isForceUpdate'] = data.get('isForceUpdate', False)
-          data['downloadUrl'] = os.environ['DOWNLOAD_URL']
-          
-          # Ambil changelog dari deskripsi release GitHub
-          raw_changelog = os.environ.get('CHANGELOG', 'Peningkatan stabilitas.')
-          data['changelog'] = f'Daftar Perubahan:\n\n{raw_changelog}'
-          
-          with open(filename, 'w') as f:
+          data['versionCode'] += 1
+          data['versionName'] = os.environ['TAG'].replace('v', '')
+          data['updateDate'] = os.environ['TODAY']
+          data['fileSize'] = os.environ['FINAL_SIZE']
+          data['downloadUrl'] = f\"https://github.com/${{ github.repository }}/releases/download/{os.environ['TAG']}/{os.environ['ASSET_NAME']}\"
+          data['changelog'] = f\"Daftar Perubahan:\\n\\n{os.environ.get('BODY', 'Peningkatan stabilitas.')}\"
+
+          with open('update.json', 'w') as f:
               json.dump(data, f, indent=2)
           "
 
-      - name: Commit and Push Changes
+      - name: Push Updates
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add update.json
-          git commit -m "Chore: Auto update release info to $TAG_NAME"
+          git commit -m "Auto update JSON to ${{ github.event.release.tag_name }}"
           git push

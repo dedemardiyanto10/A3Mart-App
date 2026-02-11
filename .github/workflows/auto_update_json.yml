@@ -19,17 +19,24 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           TAG="${{ github.event.release.tag_name }}"
-          # Mengambil nama file APK yang diupload
-          ASSET_NAME=$(gh release view $TAG --json assets -q '.assets[0].name')
           
-          # Download sementara untuk hitung size
-          gh release download $TAG --pattern "$ASSET_NAME" --dir ./temp --clobber
+          # MENCARI FILE APK (Apapun namanya yang penting akhiran .apk)
+          ASSET_NAME=$(gh release view $TAG --json assets -q '.assets[] | select(.name | endswith(".apk")) | .name' | head -n 1)
           
-          SIZE_BYTES=$(stat -c%s "./temp/$ASSET_NAME")
-          # Hitung size otomatis (Contoh hasil: 4.5 MB)
-          SIZE_MB=$(python3 -c "print(f'{$SIZE_BYTES / (1024 * 1024):.1f} MB')")
+          if [ -z "$ASSET_NAME" ]; then
+            echo "ERROR: File APK tidak ditemukan di Release!"
+            exit 1
+          fi
           
           echo "ASSET_NAME=$ASSET_NAME" >> $GITHUB_ENV
+          
+          # Download untuk hitung ukuran asli
+          gh release download $TAG --pattern "$ASSET_NAME" --dir ./temp --clobber
+          
+          # Hitung ukuran file
+          SIZE_BYTES=$(stat -c%s "./temp/$ASSET_NAME")
+          SIZE_MB=$(python3 -c "print(f'{$SIZE_BYTES / (1024 * 1024):.1f} MB')")
+          
           echo "FINAL_SIZE=$SIZE_MB" >> $GITHUB_ENV
           echo "TODAY=$(date +'%d-%m-%Y')" >> $GITHUB_ENV
 
@@ -44,18 +51,19 @@ jobs:
           with open(filename, 'r') as f:
               data = json.load(f)
 
-          # DATA OTOMATIS (Berubah tiap release)
+          tag = os.environ['TAG']
+          asset = os.environ['ASSET_NAME']
+          repo = '${{ github.repository }}'
+          
+          # Update Otomatis
           data['versionCode'] = data.get('versionCode', 0) + 1
-          data['versionName'] = os.environ['TAG'].replace('v', '')
+          data['versionName'] = tag.replace('v', '')
           data['updateDate'] = os.environ['TODAY']
           data['fileSize'] = os.environ['FINAL_SIZE']
-          data['downloadUrl'] = f\"https://github.com/${{ github.repository }}/releases/download/{os.environ['TAG']}/{os.environ['ASSET_NAME']}\"
+          # Link ini sekarang dinamis mengikuti nama APK yang kamu upload
+          data['downloadUrl'] = f'https://github.com/{repo}/releases/download/{tag}/{asset}'
           
-          # DATA MANUAL (Tetap pakai isi lama kamu)
-          # changelog, releaseType, dan isForceUpdate tidak diubah di sini
-
           with open(filename, 'w') as f:
-              # indent=2 supaya format JSON tetap rapi dan terbaca
               json.dump(data, f, indent=2)
           "
 

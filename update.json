@@ -1,10 +1,10 @@
 {
-  "versionCode": 4,
+  "versionCode": 2,
   "versionName": "1.1.0",
   "updateDate": "14-02-2026",
   "fileSize": "17.9 MB",
   "releaseType": "Official Release",
   "isForceUpdate": false,
   "downloadUrl": "https://github.com/dedemardiyanto10/A3Mart-App/releases/download/v1.1.0/A3Mart_V1.1.0.apk",
-  "changelog": "Daftar Perubahan:\n\n\n\u2022 Swipe to action transaksi\n2022 Daftar rekap menyesuaikan tanggal update transaksi\n\u2022 Auto Backup telah ditambahkan\n\u2022 Blur dialog interface\n\u2022 Scanner barcode telah ditambahkan\n\u2022 Menambahkan barcode produk\n\u2022 Optimasi manajemen database transaksi.\n\u2022 Sinkronisasi stok produk lebih akurat.\n\u2022 Penyesuaian antarmuka pada dialog informasi.\n\u2022 Perbaikan sistem notifikasi pada Android 14.\n\u2022 Peningkatan stabilitas aplikasi secara keseluruhan."
+  "changelog": "Daftar Perubahan:\n\n\u2022 Swipe to action transaksi\n• Daftar rekap menyesuaikan tanggal update transaksi\n\u2022 Auto Backup telah ditambahkan\n\u2022 Blur dialog interface\n\u2022 Scanner barcode telah ditambahkan\n\u2022 Menambahkan barcode produk\n\u2022 Optimasi manajemen database transaksi.\n\u2022 Sinkronisasi stok produk lebih akurat.\n\u2022 Penyesuaian antarmuka pada dialog informasi.\n\u2022 Perbaikan sistem notifikasi pada Android 14.\n\u2022 Peningkatan stabilitas aplikasi secara keseluruhan."
 }

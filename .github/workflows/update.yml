@@ -1,26 +1,55 @@
-name: A3Mart Auto Update Sync
+#!/bin/bash
 
-on:
-  push:
-    branches: [ main ] # Jalan otomatis pas lo push ke main
-    paths:
-      - 'update.json'  # Hanya jalan kalau file update.json berubah
+# --- KONFIGURASI (Ubah sesuai punya lo) ---
+USERNAME="username_lo"
+REPO="repo_lo"
+BRANCH="main"
+GRADLE_FILE="app/build.gradle"
+JSON_FILE="update.json"
 
-jobs:
-  notify-update:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+echo "🤖 A3 Mart Workbot: Memulai sinkronisasi..."
 
-      - name: Validate JSON
-        run: |
-          echo "🤖 Mengecek format update.json..."
-          cat update.json | python3 -m json.tool
-          echo "✅ Format JSON valid!"
+# 1. Cari file APK di folder project
+APK_FILE=$(ls *.apk | head -n 1)
 
-      - name: Summary Release
-        run: |
-          VERSION=$(python3 -c "import json; print(json.load(open('update.json'))['versionName'])")
-          echo "🚀 Versi Baru Terdeteksi: $VERSION"
-          echo "📢 Silakan build APK dan upload ke repo."
+if [ -z "$APK_FILE" ]; then
+    echo "❌ ERROR: File APK nggak ketemu! Build dulu di AndroidIDE."
+    exit 1
+fi
+
+# 2. Ambil Data Otomatis
+SIZE=$(du -h "$APK_FILE" | cut -f1)
+TANGGAL=$(date +%d-%m-%Y)
+V_CODE=$(grep "versionCode" $GRADLE_FILE | awk '{print $2}')
+V_NAME=$(grep "versionName" $GRADLE_FILE | awk '{print $2}' | tr -d '"')
+URL="https://github.com/$USERNAME/$REPO/raw/$BRANCH/$APK_FILE"
+
+echo "📊 Data Terdeteksi: v$V_NAME ($V_CODE) | Size: $SIZE"
+
+# 3. Update update.json pake Python (Biar formatnya gak rusak)
+python3 -c "
+import json
+try:
+    with open('$JSON_FILE', 'r') as f:
+        data = json.load(f)
+except:
+    data = {}
+
+data['versionName'] = '$V_NAME'
+data['versionCode'] = int('$V_CODE')
+data['releaseDate'] = '$TANGGAL'
+data['appSize'] = '$SIZE'
+data['downloadUrl'] = '$URL'
+
+with open('$JSON_FILE', 'w') as f:
+    json.dump(data, f, indent=4)
+"
+
+# 4. Prosedur Backup (Safety First!)
+mkdir -p backups
+BACKUP_NAME="backups/src_backup_v${V_CODE}_$(date +%H%M).tar.gz"
+tar -czf "$BACKUP_NAME" app/src
+echo "✅ Backup kode tersimpan di: $BACKUP_NAME"
+
+echo "🚀 SEMUA SINKRON! Sekarang tinggal Push ke GitHub."
+echo "URL Download lo: $URL"

@@ -1,13 +1,11 @@
-name: A3Mart Auto Sync
+name: Sync Update from Release
 
 on:
-  push:
-    branches: [ main ]
-    # Hapus filter path sementara biar dia jalan tiap kali ada push apapun
-  workflow_dispatch: # Tambahan: Tombol manual di tab Actions
+  release:
+    types: [published] # Robot jalan otomatis saat lo klik "Publish Release"
 
 jobs:
-  sync:
+  sync-manifest:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -15,38 +13,38 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Ambil semua history biar gak error pas push
 
-      - name: Update Manifest
+      - name: Get Release Info & Update JSON
         run: |
-          # Cari file APK (case insensitive)
-          APK_FILE=$(ls *.apk 2>/dev/null | head -n 1)
+          # 1. Ambil nama Tag (misal: v1.0.6)
+          TAG_NAME="${{ github.event.release.tag_name }}"
           
-          if [ -z "$APK_FILE" ]; then
-            echo "⚠️ Gak ada file APK di root repo. Robot berhenti."
-            exit 0
-          fi
-
-          SIZE=$(du -h "$APK_FILE" | cut -f1)
+          # 2. Ambil URL APK dari aset release pertama
+          # Robot mencari file yang berakhiran .apk di dalam Release tersebut
+          DOWNLOAD_URL="https://github.com/${{ github.repository }}/releases/download/$TAG_NAME/A3Mart.apk"
+          
           TANGGAL=$(date +'%d-%m-%Y')
-          # Gunakan variabel env github untuk username/repo
-          URL="https://github.com/${{ github.repository }}/raw/main/$APK_FILE"
-
+          
+          # 3. Update update.json
           python3 -c "
           import json, os
           path = 'update.json'
           data = json.load(open(path)) if os.path.exists(path) else {}
-          data.update({'appSize': '$SIZE', 'releaseDate': '$TANGGAL', 'downloadUrl': '$URL'})
+          
+          # Update data berdasarkan Release baru
+          data['versionName'] = '$TAG_NAME'.replace('v', '')
+          data['releaseDate'] = '$TANGGAL'
+          data['downloadUrl'] = '$DOWNLOAD_URL'
+          
           with open(path, 'w') as f:
               json.dump(data, f, indent=4)
           "
-          echo "✅ update.json sinkron dengan $APK_FILE"
+          echo "✅ update.json sinkron ke Release $TAG_NAME"
 
-      - name: Commit & Push
+      - name: Commit & Push Changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add update.json
-          # Commit hanya jika ada perubahan agar tidak error "nothing to commit"
-          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: auto-sync update.json [skip ci]" && git push)
+          git commit -m "chore: update manifest to release $TAG_NAME [skip ci]" || echo "No changes"
+          git push

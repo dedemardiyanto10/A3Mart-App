@@ -1,9 +1,9 @@
 {
-  "versionCode": 2,
+  "versionCode": 3,
   "versionName": "1.1.0",
   "updateDate": "18-02-2026",
-  "downloadUrl": "https://github.com/dedemardiyanto10/A3Mart-App/releases/download/v1.1.0/A3Mart_V1.1.0.apk",
-  "changelog": "• Pembaruan sistem terbaru\n• Perbaikan bug dan stabilitas.",
+  "downloadUrl": "https://github.com/dedemardiyanto10/A3Mart-App/releases/download/v1.1.0/",
+  "changelog": "\u2022 Pembaruan sistem terbaru\n\u2022 Perbaikan bug dan stabilitas.",
   "fileSize": "4.5 MB",
   "releaseType": "Official Release",
   "isForceUpdate": true

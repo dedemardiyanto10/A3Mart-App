@@ -3,47 +3,57 @@ name: Auto Update JSON on Release
 on:
   release:
     types: [published]
-  push:
-    branches:
-      - main  # Workflow akan jalan setiap kali kamu push ke main untuk testing
-  workflow_dispatch: # Tombol manual
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   update-json:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Get Metadata & Size
+      - name: Get Accurate Metadata
+        id: meta
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Ambil Tag (jika lewat release) atau default (jika lewat push)
+          # 1. Ambil Tag
           TAG="${{ github.event.release.tag_name }}"
-          if [ -z "$TAG" ]; then TAG="v1.1.0"; fi 
+          # Jika jalan manual tanpa release, ambil tag terbaru
+          if [ -z "$TAG" ]; then TAG=$(git describe --tags --abbrev=0); fi
           
-          # Cari file APK
-          ASSET_NAME=$(gh release view $TAG --json assets -q '.assets[] | select(.name | endswith(".apk")) | .name' | head -n 1 || echo "A3Mart_V1.1.0.apk")
+          # 2. Ambil data Asset (APK) menggunakan GitHub API
+          # Ini mengambil Nama File, Ukuran (bytes), dan URL secara real-time
+          ASSET_DATA=$(gh api repos/${{ github.repository }}/releases/tags/$TAG --jq '.assets[] | select(.name | endswith(".apk"))' | head -n 1)
           
-          echo "ASSET_NAME=$ASSET_NAME" >> $GITHUB_ENV
+          ASSET_NAME=$(echo "$ASSET_DATA" | jq -r '.name')
+          ASSET_SIZE=$(echo "$ASSET_DATA" | jq -r '.size')
+          DL_URL=$(echo "$ASSET_DATA" | jq -r '.browser_download_url')
+          
+          # 3. Konversi Size ke MB
+          FINAL_SIZE=$(python3 -c "print(f'{$ASSET_SIZE / (1024 * 1024):.1f} MB')")
+          
+          # 4. Tentukan Release Type & Force Update
+          # Cek jika rilis diset sebagai Pre-release di GitHub
+          IS_PRERELEASE=$(gh api repos/${{ github.repository }}/releases/tags/$TAG --jq '.prerelease')
+          if [ "$IS_PRERELEASE" = "true" ]; then TYPE="Beta Release"; else TYPE="Official Release"; fi
+          
+          # Cek kata [FORCE] di deskripsi rilis
+          BODY=$(gh api repos/${{ github.repository }}/releases/tags/$TAG --jq '.body')
+          if echo "$BODY" | grep -iq "\[FORCE\]"; then FORCE="true"; else FORCE="false"; fi
+
+          # Simpan ke env untuk dipakai di step python
           echo "TAG=$TAG" >> $GITHUB_ENV
-          
-          # Hitung tanggal
+          echo "ASSET_NAME=$ASSET_NAME" >> $GITHUB_ENV
+          echo "FINAL_SIZE=$FINAL_SIZE" >> $GITHUB_ENV
+          echo "DL_URL=$DL_URL" >> $GITHUB_ENV
+          echo "REL_TYPE=$TYPE" >> $GITHUB_ENV
+          echo "IS_FORCE=$FORCE" >> $GITHUB_ENV
           echo "TODAY=$(date +'%d-%m-%Y')" >> $GITHUB_ENV
-          
-          # Hitung size (Jika file tidak ada karena bukan trigger release, default ke 4.5 MB)
-          gh release download $TAG --pattern "$ASSET_NAME" --dir ./temp --clobber || echo "Download skipped"
-          if [ -f "./temp/$ASSET_NAME" ]; then
-            SIZE_BYTES=$(stat -c%s "./temp/$ASSET_NAME")
-            SIZE_MB=$(python3 -c "print(f'{$SIZE_BYTES / (1024 * 1024):.1f} MB')")
-            echo "FINAL_SIZE=$SIZE_MB" >> $GITHUB_ENV
-          else
-            echo "FINAL_SIZE=4.5 MB" >> $GITHUB_ENV
-          fi
+
       - name: Update JSON File
         run: |
           python3 -c "
@@ -51,22 +61,23 @@ jobs:
           filename = 'update.json'
           with open(filename, 'r') as f:
               data = json.load(f)
-          tag = os.environ['TAG']
-          asset = os.environ['ASSET_NAME']
-          
+
           data['versionCode'] = data.get('versionCode', 0) + 1
-          data['versionName'] = tag.replace('v', '')
+          data['versionName'] = os.environ['TAG'].replace('v', '')
           data['updateDate'] = os.environ['TODAY']
           data['fileSize'] = os.environ['FINAL_SIZE']
-          data['downloadUrl'] = f'https://github.com/${{ github.repository }}/releases/download/{tag}/{asset}'
+          data['downloadUrl'] = os.environ['DL_URL']
+          data['releaseType'] = os.environ['REL_TYPE']
+          data['isForceUpdate'] = os.environ['IS_FORCE'].lower() == 'true'
           
           with open(filename, 'w') as f:
               json.dump(data, f, indent=2)
           "
+
       - name: Push Updates
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add update.json
-          git commit -m "Auto update version info" || echo "No changes to commit"
+          git commit -m "chore: auto update version to ${{ env.TAG }}" || echo "No changes"
           git push

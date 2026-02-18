@@ -3,7 +3,7 @@ name: Update Version Manifest
 on:
   release:
     types: [published]
-  workflow_dispatch: 
+  workflow_dispatch: # Biar bisa ditest manual tanpa bikin release baru
 
 jobs:
   update-json:
@@ -15,30 +15,38 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Extract Release Data
+      - name: Get Release Data
         id: get_data
         run: |
-          # 1. Ambil Tag Name (V1.2.0 -> 1.2.0)
-          TAG_NAME="${{ github.event.release.tag_name }}"
+          # Ambil data dari release event, kalau manual ambil dari latest release API
+          if [ "${{ github.event_name }}" = "release" ]; then
+            RELEASE_JSON='${{ toJson(github.event.release) }}'
+          else
+            RELEASE_JSON=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/latest)
+          fi
+
+          # 1. Ambil Tag & Name (V1.2.0 -> 1.2.0)
+          TAG_NAME=$(echo "$RELEASE_JSON" | jq -r .tag_name)
           VERSION_NAME=$(echo $TAG_NAME | sed 's/[vV]//g')
+          RELEASE_ID=$(echo "$RELEASE_JSON" | jq -r .id)
           
-          # 2. Cari Asset yang berakhiran .apk
-          # Mengambil URL download dan ukuran file (dalam bytes)
-          APK_INFO=$(echo '${{ toJson(github.event.release.assets) }}' | jq -r '.[] | select(.name | endswith(".apk")) | "\(.browser_download_url)|\(.size)"' | head -n 1)
+          # 2. Cari Asset APK, URL, dan Size
+          APK_INFO=$(echo "$RELEASE_JSON" | jq -r '.assets[] | select(.name | endswith(".apk")) | "\(.browser_download_url)|\(.size)"' | head -n 1)
           
           if [ -z "$APK_INFO" ]; then
-            DOWNLOAD_URL="${{ github.event.release.html_url }}"
-            FILE_SIZE="Unknown"
+            DOWNLOAD_URL=$(echo "$RELEASE_JSON" | jq -r .html_url)
+            FILE_SIZE="0 MB"
           else
             DOWNLOAD_URL=$(echo $APK_INFO | cut -d'|' -f1)
             SIZE_BYTES=$(echo $APK_INFO | cut -d'|' -f2)
-            # Konversi Bytes ke Megabytes (MB) dengan 1 angka di belakang koma
             FILE_SIZE=$(awk "BEGIN {printf \"%.1f MB\", $SIZE_BYTES/1048576}")
           fi
           
-          # 3. Ambil Changelog (handle newline agar tidak merusak JSON)
-          CHANGELOG=$(echo '${{ github.event.release.body }}' | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g')
+          # 3. Ambil Changelog
+          CHANGELOG=$(echo "$RELEASE_JSON" | jq -r .body | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g')
           
+          # Output ke GitHub Step
+          echo "v_code=$RELEASE_ID" >> $GITHUB_OUTPUT
           echo "v_name=$VERSION_NAME" >> $GITHUB_OUTPUT
           echo "d_url=$DOWNLOAD_URL" >> $GITHUB_OUTPUT
           echo "f_size=$FILE_SIZE" >> $GITHUB_OUTPUT
@@ -49,7 +57,7 @@ jobs:
         run: |
           cat <<EOF > update.json
           {
-            "versionCode": ${{ github.event.release.id }},
+            "versionCode": ${{ steps.get_data.outputs.v_code }},
             "versionName": "${{ steps.get_data.outputs.v_name }}",
             "updateDate": "${{ steps.get_data.outputs.date }}",
             "downloadUrl": "${{ steps.get_data.outputs.d_url }}",

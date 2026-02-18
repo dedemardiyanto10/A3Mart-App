@@ -18,33 +18,43 @@ jobs:
       - name: Extract Release Data
         id: get_data
         run: |
-          # Ambil Tag (V1.2.0 -> 1.2.0)
+          # 1. Ambil Tag Name (V1.2.0 -> 1.2.0)
           TAG_NAME="${{ github.event.release.tag_name }}"
-          if [ -z "$TAG_NAME" ]; then TAG_NAME="1.2.0"; fi
           VERSION_NAME=$(echo $TAG_NAME | sed 's/[vV]//g')
           
-          # Ambil URL APK
-          DOWNLOAD_URL=$(echo '${{ toJson(github.event.release.assets) }}' | jq -r '.[0].browser_download_url // "https://github.com/${{ github.repository }}/releases"')
+          # 2. Cari Asset yang berakhiran .apk
+          # Mengambil URL download dan ukuran file (dalam bytes)
+          APK_INFO=$(echo '${{ toJson(github.event.release.assets) }}' | jq -r '.[] | select(.name | endswith(".apk")) | "\(.browser_download_url)|\(.size)"' | head -n 1)
           
-          # Ambil Changelog
+          if [ -z "$APK_INFO" ]; then
+            DOWNLOAD_URL="${{ github.event.release.html_url }}"
+            FILE_SIZE="Unknown"
+          else
+            DOWNLOAD_URL=$(echo $APK_INFO | cut -d'|' -f1)
+            SIZE_BYTES=$(echo $APK_INFO | cut -d'|' -f2)
+            # Konversi Bytes ke Megabytes (MB) dengan 1 angka di belakang koma
+            FILE_SIZE=$(awk "BEGIN {printf \"%.1f MB\", $SIZE_BYTES/1048576}")
+          fi
+          
+          # 3. Ambil Changelog (handle newline agar tidak merusak JSON)
           CHANGELOG=$(echo '${{ github.event.release.body }}' | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g')
           
           echo "v_name=$VERSION_NAME" >> $GITHUB_OUTPUT
           echo "d_url=$DOWNLOAD_URL" >> $GITHUB_OUTPUT
+          echo "f_size=$FILE_SIZE" >> $GITHUB_OUTPUT
           echo "c_log=$CHANGELOG" >> $GITHUB_OUTPUT
           echo "date=$(date +'%d-%m-%Y')" >> $GITHUB_OUTPUT
 
       - name: Update update.json
         run: |
-          # Mengisi JSON dengan data dari step sebelumnya
           cat <<EOF > update.json
           {
-            "versionCode": ${{ github.event.release.id || 1000 }},
+            "versionCode": ${{ github.event.release.id }},
             "versionName": "${{ steps.get_data.outputs.v_name }}",
             "updateDate": "${{ steps.get_data.outputs.date }}",
             "downloadUrl": "${{ steps.get_data.outputs.d_url }}",
             "changelog": "${{ steps.get_data.outputs.c_log }}",
-            "fileSize": "4.5 MB",
+            "fileSize": "${{ steps.get_data.outputs.f_size }}",
             "releaseType": "Official Release",
             "isForceUpdate": true
           }

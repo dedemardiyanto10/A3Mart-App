@@ -1,12 +1,10 @@
 {
-  "versionName": "1.2.0",
   "versionCode": 3,
-  "releaseDate": "18-02-2026",
-  "appSize": "18.02 MB",
+  "versionName": "1.2.0",
+  "updateDate": "18-02-2026",
   "downloadUrl": "https://github.com/dedemardiyanto10/A3Mart-App/releases/download/v1.2.0/A3Mart.apk",
-  "forceUpdate": true,
-  "changelog": [
-    "Update ke versi v1.2.0",
-    "Pastikan download APK terbaru"
-  ]
+  "fileSize": "22.54 MB",
+  "releaseType": "Official Release",
+  "isForceUpdate": true,
+  "changelog": "• Pembaruan sistem versi v1.2.0\n• Perbaikan bug dan stabilitas."
 }

@@ -19,7 +19,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Ambil Tag
+          # 1. Ambil Tag dan Nama Repo
           TAG="${{ github.event.release.tag_name }}"
           if [ -z "$TAG" ]; then TAG="v1.1.0"; fi
           
@@ -31,19 +31,22 @@ jobs:
           echo "ASSET_NAME=$ASSET_NAME" >> $GITHUB_ENV
           echo "TODAY=$(date +'%d-%m-%Y')" >> $GITHUB_ENV
 
-          # Jeda agar upload asset selesai sepenuhnya
-          echo "Menunggu asset tersedia di GitHub..."
+          # Jeda 30 detik agar GitHub selesai memproses upload asset
+          echo "Waiting for GitHub Release to finalize assets..."
           sleep 30
           
           mkdir -p ./temp
-          # Download untuk hitung size asli
+          
+          # 2. Coba download asset untuk ambil ukurannya
           if gh release download "$TAG" --pattern "$ASSET_NAME" --dir ./temp --clobber; then
             SIZE_BYTES=$(stat -c%s "./temp/$ASSET_NAME")
-            # Hitung MB via Python dengan aman
+            # Hitung MB
             SIZE_MB=$(python3 -c "print(f'{ $SIZE_BYTES / (1024 * 1024):.2f} MB')")
             echo "FINAL_SIZE=$SIZE_MB" >> $GITHUB_ENV
+            echo "STATUS=SUCCESS" >> $GITHUB_ENV
           else
-            echo "FINAL_SIZE=Gagal mengambil ukuran" >> $GITHUB_ENV
+            echo "FINAL_SIZE=Size tidak terbaca" >> $GITHUB_ENV
+            echo "STATUS=FAILED" >> $GITHUB_ENV
           fi
 
       - name: Update JSON File
@@ -52,26 +55,25 @@ jobs:
           import json, os
           filename = 'update.json'
           
-          # Baca data lama
+          # Load data lama agar data lain (seperti changelog) tidak hilang
           try:
               with open(filename, 'r') as f:
                   data = json.load(f)
-          except Exception:
+          except:
               data = {}
 
-          # Ambil data dari ENV
-          tag = os.getenv('TAG', 'v1.1.0')
-          asset = os.getenv('ASSET_NAME', 'A3Mart.apk')
-          repo = os.getenv('REPO', '')
-          size = os.getenv('FINAL_SIZE', '--- MB')
+          tag = os.getenv('TAG')
+          repo = os.environ['REPO']
+          asset = os.environ['ASSET_NAME']
           
-          # Update Field
+          # Update metadata
           data['versionCode'] = data.get('versionCode', 0) + 1
           data['versionName'] = tag.replace('v', '')
-          data['updateDate'] = os.getenv('TODAY', '')
-          data['fileSize'] = size
+          data['updateDate'] = os.environ['TODAY']
+          data['fileSize'] = os.environ['FINAL_SIZE']
           
-          # Perbaikan URL agar tidak error
+          # LINK DOWNLOAD: Pastikan formatnya benar
+          # github.com/USER/REPO/releases/download/v1.0.0/A3Mart.apk
           data['downloadUrl'] = f'https://github.com/{repo}/releases/download/{tag}/{asset}'
           
           with open(filename, 'w') as f:
@@ -83,5 +85,5 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add update.json
-          git commit -m "Auto Update Version: ${{ env.TAG }}" || echo "No changes"
+          git commit -m "Auto Update v${{ env.TAG }} - ${{ env.FINAL_SIZE }}" || echo "No changes"
           git push

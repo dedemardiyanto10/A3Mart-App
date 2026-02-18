@@ -1,9 +1,8 @@
-name: A3Mart Fix Sync
+name: A3Mart Ultimate Sync
 
 on:
   release:
     types: [published]
-  workflow_dispatch: # Tombol manual buat ngetes
 
 jobs:
   sync:
@@ -12,36 +11,50 @@ jobs:
       contents: write
 
     steps:
-      - name: Checkout
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Update JSON
+      - name: Get Release Data & APK Size
+        id: get_data
         run: |
-          # Ambil info tag dan tanggal
+          # 1. Ambil Version Code dari build.gradle
+          VCODE=$(grep "versionCode" app/build.gradle | awk '{print $2}')
+          
+          # 2. Ambil Tag & Info Tanggal
           TAG="${{ github.event.release.tag_name }}"
-          # Kalau manual (workflow_dispatch), pakai tag dummy
-          if [ -z "$TAG" ]; then TAG="v1.0.0"; fi
-          
           TANGGAL=$(date +'%d-%m-%Y')
-          URL="https://github.com/${{ github.repository }}/releases/download/$TAG/A3Mart.apk"
-
-          # Tulis paksa ke update.json tanpa baca file lama dulu (biar gak error)
-          echo "{
-            \"versionName\": \"${TAG#v}\",
-            \"versionCode\": $(date +%s),
-            \"releaseDate\": \"$TANGGAL\",
-            \"downloadUrl\": \"$URL\",
-            \"forceUpdate\": true,
-            \"changelog\": [\"New release $TAG\"]
-          }" > update.json
           
-          echo "HASIL JSON BARU:"
-          cat update.json
+          # 3. Cari URL Asset APK (Cari file yang namanya A3Mart.apk)
+          URL="https://github.com/${{ github.repository }}/releases/download/$TAG/A3Mart.apk"
+          
+          # 4. DOWNLOAD APK SEBENTAR UNTUK HITUNG SIZE (PENTING!)
+          # Robot perlu download filenya untuk tahu ukurannya
+          wget -O temp_a3mart.apk "$URL"
+          SIZE=$(du -h temp_a3mart.apk | cut -f1 | sed 's/$/ MB/' | sed 's/M MB/ MB/')
+          
+          # Kirim data ke step berikutnya
+          echo "vcode=$VCODE" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "size=$SIZE" >> $GITHUB_OUTPUT
+          echo "date=$TANGGAL" >> $GITHUB_OUTPUT
+          echo "url=$URL" >> $GITHUB_OUTPUT
 
-      - name: Push Perubahan
+      - name: Write update.json
+        run: |
+          echo "{
+            \"versionName\": \"${{ steps.get_data.outputs.tag }}\",
+            \"versionCode\": ${{ steps.get_data.outputs.vcode }},
+            \"releaseDate\": \"${{ steps.get_data.outputs.date }}\",
+            \"appSize\": \"${{ steps.get_data.outputs.size }}\",
+            \"downloadUrl\": \"${{ steps.get_data.outputs.url }}\",
+            \"forceUpdate\": true,
+            \"changelog\": [\"Pembaruan versi ${{ steps.get_data.outputs.tag }}\"]
+          }" > update.json
+
+      - name: Commit and Push
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add update.json
-          git commit -m "chore: auto-update manifest [skip ci]" || echo "No changes"
+          git commit -m "chore: auto-sync update.json for ${{ github.event.release.tag_name }} [skip ci]" || echo "No changes"
           git push origin main

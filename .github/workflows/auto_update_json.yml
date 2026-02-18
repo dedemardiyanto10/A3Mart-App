@@ -3,9 +3,6 @@ name: Auto Update JSON on Release
 on:
   release:
     types: [published]
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:
@@ -22,33 +19,28 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Ambil Tag, jika dari push main gunakan default v1.1.0
+          # 1. Ambil Tag dari Release
           TAG="${{ github.event.release.tag_name }}"
-          if [ -z "$TAG" ]; then TAG="v1.1.0"; fi
-          
           ASSET_NAME="A3Mart.apk"
+          REPO="${{ github.repository }}"
           
-          echo "ASSET_NAME=$ASSET_NAME" >> $GITHUB_ENV
           echo "TAG=$TAG" >> $GITHUB_ENV
-          echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
+          echo "REPO=$REPO" >> $GITHUB_ENV
+          echo "ASSET_NAME=$ASSET_NAME" >> $GITHUB_ENV
           echo "TODAY=$(date +'%d-%m-%Y')" >> $GITHUB_ENV
 
-          echo "Menunggu 15 detik agar upload selesai..."
-          sleep 15
+          # Tunggu agar upload asset stabil
+          echo "Waiting for assets..."
+          sleep 20
           
-          # Buat folder temp
           mkdir -p ./temp
-          
-          # Download APK untuk cek size asli
-          gh release download $TAG --pattern "$ASSET_NAME" --dir ./temp --clobber || echo "Download failed"
-          
-          if [ -f "./temp/$ASSET_NAME" ]; then
+          # 2. Download untuk hitung Size asli
+          if gh release download $TAG --pattern "$ASSET_NAME" --dir ./temp --clobber; then
             SIZE_BYTES=$(stat -c%s "./temp/$ASSET_NAME")
-            # Hitung MB dengan akurasi 2 desimal
             SIZE_MB=$(python3 -c "print(f'{ $SIZE_BYTES / (1024 * 1024):.2f} MB')")
             echo "FINAL_SIZE=$SIZE_MB" >> $GITHUB_ENV
           else
-            echo "FINAL_SIZE=--- MB" >> $GITHUB_ENV
+            echo "FINAL_SIZE=Gagal mengambil ukuran" >> $GITHUB_ENV
           fi
 
       - name: Update JSON File
@@ -57,23 +49,24 @@ jobs:
           import json, os
           filename = 'update.json'
           
-          # Baca file JSON yang ada
           if os.path.exists(filename):
               with open(filename, 'r') as f:
                   data = json.load(f)
           else:
               data = {}
 
+          # Ambil data dari ENV GitHub
           tag = os.environ['TAG']
           asset = os.environ['ASSET_NAME']
           repo = os.environ['REPO']
+          size = os.environ['FINAL_SIZE']
           
-          # Update data
+          # Update Field
           data['versionCode'] = data.get('versionCode', 0) + 1
           data['versionName'] = tag.lstrip('v')
           data['updateDate'] = os.environ['TODAY']
-          data['fileSize'] = os.environ['FINAL_SIZE']
-          # Perbaikan cara penulisan URL agar tidak corrupt
+          data['fileSize'] = size
+          # URL yang sudah diperbaiki
           data['downloadUrl'] = f'https://github.com/{repo}/releases/download/{tag}/{asset}'
           
           with open(filename, 'w') as f:
@@ -85,5 +78,5 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add update.json
-          git commit -m "Update version info to ${{ env.TAG }}" || echo "No changes to commit"
+          git commit -m "Auto Update: v${{ env.TAG }} [Size: ${{ env.FINAL_SIZE }}]" || echo "No changes"
           git push

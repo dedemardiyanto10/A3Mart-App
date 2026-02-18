@@ -14,73 +14,83 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Get Basic Data
+      - name: Get Data
         id: get_data
         run: |
-          echo "Waiting for GitHub API..."
-          sleep 15
+          # 1. Ambil Tag secara paksa dari sistem GitHub
+          if [ "${{ github.event_name }}" == "release" ]; then
+            TAG="${{ github.event.release.tag_name }}"
+          else
+            TAG=$(git describe --tags --abbrev=0 || echo "v1.0.0")
+          fi
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
           
-          # 1. Cari file build.gradle
+          # 2. Cari file build.gradle dan ambil versionCode & versionName
+          # Kita ambil baris yang mengandung 'version' tapi bukan yang di dalam komentar
           GRADLE_FILE=$(find . -name "build.gradle" | grep -v "settings" | head -n 1)
+          VCODE=$(grep "versionCode" $GRADLE_FILE | head -n 1 | awk '{print $2}' | tr -d '"' | tr -d "'")
+          VNAME=$(grep "versionName" $GRADLE_FILE | head -n 1 | awk '{print $2}' | tr -d '"' | tr -d "'")
           
-          # 2. Ambil vCode (Versi lebih kuat: ambil cuma angkanya saja)
-          VCODE=$(grep "versionCode" $GRADLE_FILE | sed 's/[^0-9]*//g')
-          echo "Found vCode: $VCODE"
+          # Jika gagal ambil dari gradle, pakai default agar tidak kosong
+          [ -z "$VCODE" ] && VCODE="1"
+          [ -z "$VNAME" ] && VNAME="${TAG#v}"
           
-          # 3. Info Tag & API
-          TAG="${{ github.event.release.tag_name }}"
-          TANGGAL=$(date +'%d-%m-%Y')
+          echo "vcode=$VCODE" >> $GITHUB_OUTPUT
+          echo "vname=$VNAME" >> $GITHUB_OUTPUT
+
+          # 3. Tunggu dan ambil info Aset APK
+          echo "Waiting for GitHub to process APK..."
+          sleep 20
           
           ASSET_INFO=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG)
+          # Cari URL yang beneran ada .apk
           URL=$(echo "$ASSET_INFO" | jq -r '.assets[] | select(.name | endswith(".apk")) | .browser_download_url' | head -n 1)
-          SIZE_BYTES=$(echo "$ASSET_INFO" | jq -r '.assets[] | select(.name | endswith(".apk")) | .size' | head -n 1)
+          BYTES=$(echo "$ASSET_INFO" | jq -r '.assets[] | select(.name | endswith(".apk")) | .size' | head -n 1)
 
-          if [ -z "$VCODE" ]; then VCODE="1"; fi # Backup kalau tetep gak ketemu
+          # Jika API telat, kita pakai fallback URL
+          if [ -z "$URL" ] || [ "$URL" == "null" ]; then
+             URL="https://github.com/${{ github.repository }}/releases/download/$TAG/A3Mart.apk"
+             BYTES="0"
+          fi
 
-          echo "vcode=$VCODE" >> $GITHUB_OUTPUT
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
-          echo "bytes=$SIZE_BYTES" >> $GITHUB_OUTPUT
-          echo "date=$TANGGAL" >> $GITHUB_OUTPUT
           echo "url=$URL" >> $GITHUB_OUTPUT
+          echo "bytes=$BYTES" >> $GITHUB_OUTPUT
+          echo "date=$(date +'%d-%m-%Y')" >> $GITHUB_OUTPUT
 
-      - name: Process JSON with Python
+      - name: Final JSON Process
         shell: python
         run: |
           import json
-          import os
-
-          raw_bytes = "${{ steps.get_data.outputs.bytes }}"
-          v_code = "${{ steps.get_data.outputs.vcode }}"
-          tag_name = "${{ steps.get_data.outputs.tag }}"
           
-          try:
-              size_mb = f"{int(raw_bytes) / (1024 * 1024):.2f} MB"
-          except:
-              size_mb = "0 MB"
-
+          # Ambil data dari step sebelumnya
+          raw_bytes = "${{ steps.get_data.outputs.bytes }}"
+          if not raw_bytes or raw_bytes == "null": raw_bytes = "0"
+          
+          size_mb = f"{int(raw_bytes) / (1024 * 1024):.2f} MB" if int(raw_bytes) > 0 else "Gagal Menghitung Size"
+          
           data = {
-              "versionName": tag_name.replace('v', ''),
-              "versionCode": int(v_code),
+              "versionName": "${{ steps.get_data.outputs.vname }}",
+              "versionCode": int("${{ steps.get_data.outputs.vcode }}"),
               "releaseDate": "${{ steps.get_data.outputs.date }}",
               "appSize": size_mb,
               "downloadUrl": "${{ steps.get_data.outputs.url }}",
               "forceUpdate": True,
               "changelog": [
-                  f"Rilis Versi {tag_name}",
-                  "Peningkatan performa aplikasi"
+                  "Update ke versi ${{ steps.get_data.outputs.tag }}",
+                  "Pastikan download APK terbaru"
               ]
           }
 
           with open('update.json', 'w') as f:
               json.dump(data, f, indent=2)
-          
-          print(f"✅ JSON Created for vCode: {v_code}")
 
-      - name: Push to Repository
+      - name: Push Perubahan
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add update.json
-          git commit -m "chore: auto-sync update.json [skip ci]" || echo "No changes"
+          git commit -m "fix: auto-update manifest [skip ci]" || echo "No changes"
           git push origin main

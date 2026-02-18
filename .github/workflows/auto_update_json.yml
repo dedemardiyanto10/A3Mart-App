@@ -19,8 +19,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # 1. Ambil Tag dari Release
+          # Ambil Tag
           TAG="${{ github.event.release.tag_name }}"
+          if [ -z "$TAG" ]; then TAG="v1.1.0"; fi
+          
           ASSET_NAME="A3Mart.apk"
           REPO="${{ github.repository }}"
           
@@ -29,14 +31,15 @@ jobs:
           echo "ASSET_NAME=$ASSET_NAME" >> $GITHUB_ENV
           echo "TODAY=$(date +'%d-%m-%Y')" >> $GITHUB_ENV
 
-          # Tunggu agar upload asset stabil
-          echo "Waiting for assets..."
-          sleep 20
+          # Jeda agar upload asset selesai sepenuhnya
+          echo "Menunggu asset tersedia di GitHub..."
+          sleep 30
           
           mkdir -p ./temp
-          # 2. Download untuk hitung Size asli
-          if gh release download $TAG --pattern "$ASSET_NAME" --dir ./temp --clobber; then
+          # Download untuk hitung size asli
+          if gh release download "$TAG" --pattern "$ASSET_NAME" --dir ./temp --clobber; then
             SIZE_BYTES=$(stat -c%s "./temp/$ASSET_NAME")
+            # Hitung MB via Python dengan aman
             SIZE_MB=$(python3 -c "print(f'{ $SIZE_BYTES / (1024 * 1024):.2f} MB')")
             echo "FINAL_SIZE=$SIZE_MB" >> $GITHUB_ENV
           else
@@ -49,24 +52,26 @@ jobs:
           import json, os
           filename = 'update.json'
           
-          if os.path.exists(filename):
+          # Baca data lama
+          try:
               with open(filename, 'r') as f:
                   data = json.load(f)
-          else:
+          except Exception:
               data = {}
 
-          # Ambil data dari ENV GitHub
-          tag = os.environ['TAG']
-          asset = os.environ['ASSET_NAME']
-          repo = os.environ['REPO']
-          size = os.environ['FINAL_SIZE']
+          # Ambil data dari ENV
+          tag = os.getenv('TAG', 'v1.1.0')
+          asset = os.getenv('ASSET_NAME', 'A3Mart.apk')
+          repo = os.getenv('REPO', '')
+          size = os.getenv('FINAL_SIZE', '--- MB')
           
           # Update Field
           data['versionCode'] = data.get('versionCode', 0) + 1
-          data['versionName'] = tag.lstrip('v')
-          data['updateDate'] = os.environ['TODAY']
+          data['versionName'] = tag.replace('v', '')
+          data['updateDate'] = os.getenv('TODAY', '')
           data['fileSize'] = size
-          # URL yang sudah diperbaiki
+          
+          # Perbaikan URL agar tidak error
           data['downloadUrl'] = f'https://github.com/{repo}/releases/download/{tag}/{asset}'
           
           with open(filename, 'w') as f:
@@ -78,5 +83,5 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add update.json
-          git commit -m "Auto Update: v${{ env.TAG }} [Size: ${{ env.FINAL_SIZE }}]" || echo "No changes"
+          git commit -m "Auto Update Version: ${{ env.TAG }}" || echo "No changes"
           git push

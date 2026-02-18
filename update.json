@@ -1,9 +1,9 @@
 {
-  "versionCode": 3,
+  "versionCode": 2,
   "versionName": "1.2.0",
   "updateDate": "18-02-2026",
   "downloadUrl": "https://github.com/dedemardiyanto10/A3Mart-App/releases/download/V1.2.0/A3Mart.apk",
-  "changelog": "A3Mart Update v1.2.0\n\n- Peningkatan stabilitas sistem dan optimasi performa aplikasi.\n- Perbaikan beberapa bug minor yang dilaporkan pengguna.\n- Pembaruan mekanisme pengecekan versi aplikasi secara real-time.\n",
+  "changelog": "**Pembaruan Sistem:**\n- Implementasi mekanisme pengecekan versi aplikasi secara real-time melalui integrasi GitHub Actions.\n- Optimasi sinkronisasi data manifest untuk memastikan validitas informasi pembaruan.\n- Peningkatan keamanan jalur akses unduhan paket aplikasi (APK).\n\n**Optimasi & Performa:**\n- Peningkatan stabilitas sistem secara keseluruhan untuk penggunaan jangka panjang.\n- Optimasi pemuatan aset gambar (Glide) guna mengurangi penggunaan memori pada perangkat.\n- Pengurangan latensi pada proses inisialisasi awal aplikasi.\n\n**Perbaikan Bug:**\n- Perbaikan masalah pada komponen dialog informasi yang terkadang tidak muncul secara presisi.\n- Penanganan beberapa bug minor yang dilaporkan pengguna terkait kompatibilitas pada versi Android lama.\n",
   "fileSize": "18.0 MB",
   "releaseType": "Official Release",
   "isForceUpdate": false

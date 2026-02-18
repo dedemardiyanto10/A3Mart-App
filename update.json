@@ -1,12 +1,12 @@
 {
-  "versionName": "1.2.0",
-  "versionCode": 3,
+  "versionName": "",
+  "versionCode": 2,
   "releaseDate": "18-02-2026",
-  "appSize": "4.52 MB",
-  "downloadUrl": "https://github.com/dedemardiyanto10/A3Mart-App/releases/download/v1.2.0/A3Mart.apk",
+  "appSize": "0 MB",
+  "downloadUrl": "",
   "forceUpdate": true,
   "changelog": [
-    "Update rilis versi v1.2.0",
-    "Sinkronisasi sistem otomatis"
+    "Rilis Versi ",
+    "Peningkatan performa aplikasi"
   ]
 }

@@ -3,35 +3,42 @@ name: Update Version Manifest
 on:
   release:
     types: [published]
-  workflow_dispatch: # Biar bisa ditest manual
+  workflow_dispatch: # Supaya lo bisa tes manual kapan aja
 
 jobs:
   update-json:
     runs-on: ubuntu-latest
+    permissions: # Memberikan izin bot untuk menulis ke repo
+      contents: write
+      
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Ambil seluruh histori agar git push lancar
 
       - name: Extract Release Data
         id: get_data
         run: |
-          # Ambil tag name (v1.1.0 -> 1.1.0)
-          TAG_NAME=${{ github.event.release.tag_name }}
+          # 1. Ambil Nama Tag (v1.1.0 -> 1.1.0)
+          TAG_NAME="${{ github.event.release.tag_name }}"
           VERSION_NAME=$(echo $TAG_NAME | sed 's/v//g')
           
-          # Ambil URL Download (mencari asset .apk pertama)
-          # Jika tidak ada apk, arahkan ke halaman release
+          # 2. Ambil URL Download APK (mencari file .apk pertama di Assets)
+          # Jika tidak ada APK, gunakan URL halaman rilis sebagai fallback
           DOWNLOAD_URL=$(echo '${{ toJson(github.event.release.assets) }}' | jq -r '.[0].browser_download_url // "${{ github.event.release.html_url }}"')
           
-          # Ambil Changelog dan bersihkan karakter bermasalah
+          # 3. Ambil Changelog dan bersihkan karakter bermasalah (new line & double quotes)
+          # Agar JSON tidak korup/error saat diparsing di Android
           CHANGELOG=$(echo '${{ github.event.release.body }}' | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g')
           
+          # 4. Set Output untuk digunakan di step berikutnya
           echo "v_name=$VERSION_NAME" >> $GITHUB_OUTPUT
           echo "d_url=$DOWNLOAD_URL" >> $GITHUB_OUTPUT
           echo "c_log=$CHANGELOG" >> $GITHUB_OUTPUT
           echo "date=$(date +'%d-%m-%Y')" >> $GITHUB_OUTPUT
 
-      - name: Write to update.json
+      - name: Create update.json
         run: |
           cat <<EOF > update.json
           {
@@ -50,6 +57,13 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
           git add update.json
-          git commit -m "chore: auto-update manifest to ${{ steps.get_data.outputs.v_name }}"
-          git push
+          
+          # Cek dulu ada perubahan atau nggak, biar nggak error kalau datanya sama
+          if git diff --quiet && git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: auto-update manifest to ${{ steps.get_data.outputs.v_name }}"
+            git push origin main
+          fi

@@ -15,26 +15,22 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-            - name: Get Release Data
+      - name: Get Release Data
         id: get_data
         run: |
-          # 1. Ambil data Release
+          # Ambil data dari release event, kalau manual ambil dari latest release API
           if [ "${{ github.event_name }}" = "release" ]; then
             RELEASE_JSON='${{ toJson(github.event.release) }}'
           else
             RELEASE_JSON=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/latest)
           fi
 
-          # 2. AMBIL VERSION CODE DARI build.gradle (LOGIKA BARU)
-          # Mencari baris versionCode di build.gradle dan ambil angkanya
-          V_CODE=$(grep "versionCode" app/build.gradle | awk '{print $2}' | sed 's/[^0-9]*//g')
-          if [ -z "$V_CODE" ]; then V_CODE="2"; fi # Fallback jika gagal baca
-
-          # 3. Ambil Tag & Name
+          # 1. Ambil Tag & Name (V1.2.0 -> 1.2.0)
           TAG_NAME=$(echo "$RELEASE_JSON" | jq -r .tag_name)
           VERSION_NAME=$(echo $TAG_NAME | sed 's/[vV]//g')
+          RELEASE_ID=$(echo "$RELEASE_JSON" | jq -r .id)
           
-          # 4. Cari Asset APK, URL, dan Size
+          # 2. Cari Asset APK, URL, dan Size
           APK_INFO=$(echo "$RELEASE_JSON" | jq -r '.assets[] | select(.name | endswith(".apk")) | "\(.browser_download_url)|\(.size)"' | head -n 1)
           
           if [ -z "$APK_INFO" ]; then
@@ -46,10 +42,11 @@ jobs:
             FILE_SIZE=$(awk "BEGIN {printf \"%.1f MB\", $SIZE_BYTES/1048576}")
           fi
           
-          # 5. Ambil Changelog
+          # 3. Ambil Changelog
           CHANGELOG=$(echo "$RELEASE_JSON" | jq -r .body | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g')
           
-          echo "v_code=$V_CODE" >> $GITHUB_OUTPUT
+          # Output ke GitHub Step
+          echo "v_code=$RELEASE_ID" >> $GITHUB_OUTPUT
           echo "v_name=$VERSION_NAME" >> $GITHUB_OUTPUT
           echo "d_url=$DOWNLOAD_URL" >> $GITHUB_OUTPUT
           echo "f_size=$FILE_SIZE" >> $GITHUB_OUTPUT

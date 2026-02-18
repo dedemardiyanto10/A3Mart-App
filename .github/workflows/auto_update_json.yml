@@ -1,100 +1,46 @@
-name: Auto Update JSON on Release
+name: Update Version Manifest
 
 on:
   release:
     types: [published]
-  workflow_dispatch:
-
-permissions:
-  contents: write
 
 jobs:
   update-json:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
+      - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: main # atau branch utama lo
 
-      - name: Get Metadata from GitHub API
-        id: meta
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Extract Release Info
+        id: release_info
         run: |
-          # 1. Ambil Tag
-          TAG="${{ github.event.release.tag_name }}"
-          if [ -z "$TAG" ]; then TAG=$(git describe --tags --abbrev=0); fi
-          
-          # 2. Ambil data Asset APK
-          ASSET_DATA=$(gh api repos/${{ github.repository }}/releases/tags/$TAG --jq '.assets[] | select(.name | endswith(".apk"))' | head -n 1)
-          
-          ASSET_NAME=$(echo "$ASSET_DATA" | jq -r '.name')
-          ASSET_SIZE=$(echo "$ASSET_DATA" | jq -r '.size')
-          DL_URL=$(echo "$ASSET_DATA" | jq -r '.browser_download_url')
-          
-          # 3. Hitung Size (MB)
-          if [ -z "$ASSET_SIZE" ] || [ "$ASSET_SIZE" = "null" ]; then
-            FINAL_SIZE="Size tidak terbaca"
-          else
-            FINAL_SIZE=$(python3 -c "print(f'{$ASSET_SIZE / (1024 * 1024):.1f} MB')")
-          fi
-          
-          # 4. Release Type & Force Update
-          IS_PRERELEASE=$(gh api repos/${{ github.repository }}/releases/tags/$TAG --jq '.prerelease')
-          if [ "$IS_PRERELEASE" = "true" ]; then TYPE="Beta Release"; else TYPE="Official Release"; fi
-          
-          BODY=$(gh api repos/${{ github.repository }}/releases/tags/$TAG --jq '.body')
-          if echo "$BODY" | grep -iq "\[FORCE\]"; then FORCE="true"; else FORCE="false"; fi
-          CLEAN_BODY=$(echo "$BODY" | sed 's/\[FORCE\]//gI' | xargs)
-
-          # Ekspor ke Env
-          echo "TAG=$TAG" >> $GITHUB_ENV
-          echo "DL_URL=$DL_URL" >> $GITHUB_ENV
-          echo "FINAL_SIZE=$FINAL_SIZE" >> $GITHUB_ENV
-          echo "REL_TYPE=$TYPE" >> $GITHUB_ENV
-          echo "IS_FORCE=$FORCE" >> $GITHUB_ENV
-          echo "CHANGELOG=$CLEAN_BODY" >> $GITHUB_ENV
-          echo "TODAY=$(date +'%d-%m-%Y')" >> $GITHUB_ENV
+          VERSION_NAME=${{ github.event.release.tag_name }}
+          # Menghapus huruf 'v' jika ada (misal v1.1.0 jadi 1.1.0)
+          CLEAN_VERSION=$(echo $VERSION_NAME | sed 's/v//g')
+          echo "version_name=$CLEAN_VERSION" >> $GITHUB_OUTPUT
+          echo "date=$(date +'%d-%m-%Y')" >> $GITHUB_OUTPUT
 
       - name: Update update.json
         run: |
-          python3 -c "
-          import json, os
-          filename = 'update.json'
-          with open(filename, 'r') as f:
-              data = json.load(f)
+          cat <<EOF > update.json
+          {
+            "versionCode": ${{ github.event.release.id }},
+            "versionName": "${{ steps.release_info.outputs.version_name }}",
+            "updateDate": "${{ steps.release_info.outputs.date }}",
+            "downloadUrl": "${{ github.event.release.html_url }}",
+            "changelog": "${{ github.event.release.body }}",
+            "fileSize": "Auto-check release assets",
+            "releaseType": "Official Release",
+            "isForceUpdate": true
+          }
+          EOF
 
-          data['versionCode'] = data.get('versionCode', 0) + 1
-          data['versionName'] = os.environ['TAG'].replace('v', '')
-          data['updateDate'] = os.environ['TODAY']
-          data['downloadUrl'] = os.environ['DL_URL']
-          data['fileSize'] = os.environ['FINAL_SIZE']
-          data['releaseType'] = os.environ['REL_TYPE']
-          data['isForceUpdate'] = os.environ['IS_FORCE'].lower() == 'true'
-          data['changelog'] = os.environ['CHANGELOG']
-          
-          with open(filename, 'w', encoding='utf-8') as f:
-              json.dump(data, f, indent=2, ensure_ascii=False)
-          "
-
-      - name: Push Updates (Anti-Rejected Version)
+      - name: Commit and Push
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          
-          # 1. Simpan perubahan JSON ke tempat sementara (stash)
           git add update.json
-          git stash
-          
-          # 2. Ambil data terbaru dari server dan sinkronkan branch
-          git pull --rebase origin main
-          
-          # 3. Kembalikan perubahan JSON kita
-          git stash pop
-          
-          # 4. Commit dan Push Paksa
-          git add update.json
-          git commit -m "chore: auto update version info to ${{ env.TAG }} [skip ci]" || echo "No changes"
-          git push origin main
+          git commit -m "chore: update update.json to ${{ steps.release_info.outputs.version_name }}"
+          git push

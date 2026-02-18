@@ -77,7 +77,7 @@ jobs:
             "changelog": "${{ steps.get_data.outputs.c_log }}",
             "fileSize": "${{ steps.get_data.outputs.f_size }}",
             "releaseType": "Official Release",
-            "isForceUpdate": true
+            "isForceUpdate": false
           }
           EOF
 

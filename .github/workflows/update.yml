@@ -1,55 +1,50 @@
-#!/bin/bash
+name: A3Mart Auto Sync Update
 
-# --- KONFIGURASI (Ubah sesuai punya lo) ---
-USERNAME="username_lo"
-REPO="repo_lo"
-BRANCH="main"
-GRADLE_FILE="app/build.gradle"
-JSON_FILE="update.json"
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '*.apk'        # Robot jalan HANYA kalau lo push file APK baru
 
-echo "🤖 A3 Mart Workbot: Memulai sinkronisasi..."
+jobs:
+  sync-manifest:
+    runs-on: ubuntu-latest
+    # Izin untuk menulis kembali ke Repo (Penting agar tidak Failure)
+    permissions:
+      contents: write
 
-# 1. Cari file APK di folder project
-APK_FILE=$(ls *.apk | head -n 1)
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-if [ -z "$APK_FILE" ]; then
-    echo "❌ ERROR: File APK nggak ketemu! Build dulu di AndroidIDE."
-    exit 1
-fi
+      - name: Update JSON Data
+        run: |
+          # 1. Cari file APK terbaru
+          APK_FILE=$(ls *.apk | head -n 1)
+          echo "Ditemukan APK: $APK_FILE"
 
-# 2. Ambil Data Otomatis
-SIZE=$(du -h "$APK_FILE" | cut -f1)
-TANGGAL=$(date +%d-%m-%Y)
-V_CODE=$(grep "versionCode" $GRADLE_FILE | awk '{print $2}')
-V_NAME=$(grep "versionName" $GRADLE_FILE | awk '{print $2}' | tr -d '"')
-URL="https://github.com/$USERNAME/$REPO/raw/$BRANCH/$APK_FILE"
+          # 2. Hitung Ukuran & Tanggal
+          SIZE=$(du -h "$APK_FILE" | cut -f1)
+          TANGGAL=$(date +'%d-%m-%Y')
+          
+          # 3. Update update.json pake Python
+          python3 -c "
+          import json
+          with open('update.json', 'r+') as f:
+              data = json.load(f)
+              data['appSize'] = '$SIZE'
+              data['releaseDate'] = '$TANGGAL'
+              data['downloadUrl'] = 'https://github.com/${{ github.repository }}/raw/main/' + '$APK_FILE'
+              f.seek(0)
+              json.dump(data, f, indent=4)
+              f.truncate()
+          "
+          echo "✅ update.json berhasil diperbarui di server."
 
-echo "📊 Data Terdeteksi: v$V_NAME ($V_CODE) | Size: $SIZE"
-
-# 3. Update update.json pake Python (Biar formatnya gak rusak)
-python3 -c "
-import json
-try:
-    with open('$JSON_FILE', 'r') as f:
-        data = json.load(f)
-except:
-    data = {}
-
-data['versionName'] = '$V_NAME'
-data['versionCode'] = int('$V_CODE')
-data['releaseDate'] = '$TANGGAL'
-data['appSize'] = '$SIZE'
-data['downloadUrl'] = '$URL'
-
-with open('$JSON_FILE', 'w') as f:
-    json.dump(data, f, indent=4)
-"
-
-# 4. Prosedur Backup (Safety First!)
-mkdir -p backups
-BACKUP_NAME="backups/src_backup_v${V_CODE}_$(date +%H%M).tar.gz"
-tar -czf "$BACKUP_NAME" app/src
-echo "✅ Backup kode tersimpan di: $BACKUP_NAME"
-
-echo "🚀 SEMUA SINKRON! Sekarang tinggal Push ke GitHub."
-echo "URL Download lo: $URL"
+      - name: Commit & Push Changes
+        run: |
+          git config --global user.name "A3Mart-Bot"
+          git config --global user.email "bot@a3mart.com"
+          git add update.json
+          git commit -m "chore: auto-sync update.json metadata [skip ci]" || echo "No changes to commit"
+          git push

@@ -15,101 +15,77 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Get Basic Data & Fetch Asset
+      - name: Get Data from Release
         id: get_data
         run: |
-          echo "Memulai pencarian aset APK..."
+          echo "Menunggu 45 detik agar GitHub selesai memproses upload APK..."
+          sleep 45
+          
           TAG="${{ github.event.release.tag_name }}"
           REPO="${{ github.repository }}"
           
-          # Loop 3 kali (Total 45 detik) untuk menunggu GitHub memproses ukuran file
-          for i in {1..3}; do
-            echo "Percobaan $i: Mengambil info aset untuk tag $TAG..."
-            ASSET_INFO=$(curl -s https://api.github.com/repos/$REPO/releases/tags/$TAG)
-            
-            # Mencari asset yang mengandung .apk
-            BYTES=$(echo "$ASSET_INFO" | jq -r '.assets[] | select(.name | contains(".apk")) | .size' | head -n 1)
-            URL=$(echo "$ASSET_INFO" | jq -r '.assets[] | select(.name | contains(".apk")) | .browser_download_url' | head -n 1)
-            
-            if [ "$BYTES" != "null" ] && [ ! -z "$BYTES" ] && [ "$BYTES" != "0" ]; then
-              echo "✅ Aset ditemukan! Ukuran: $BYTES bytes"
-              break
-            fi
-            echo "⚠️ Aset belum siap, menunggu 15 detik..."
-            sleep 15
-          done
+          # Ambil data aset dari API (pakai header untuk otentikasi biar lebih akurat)
+          ASSET_INFO=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/$REPO/releases/tags/$TAG")
+          
+          # CARI ASSET APK (Bisa apa saja namanya yang penting akhiran .apk)
+          # Kita ambil size dari asset pertama yang ketemu berakhiran .apk
+          BYTES=$(echo "$ASSET_INFO" | jq -r '.assets[] | select(.name | endswith(".apk")) | .size' | head -n 1)
+          URL=$(echo "$ASSET_INFO" | jq -r '.assets[] | select(.name | endswith(".apk")) | .browser_download_url' | head -n 1)
 
-          # Ambil versionCode & versionName dari build.gradle
+          # Cari vCode dan vName di build.gradle
           GRADLE_FILE=$(find . -name "build.gradle" | grep -v "settings" | head -n 1)
           VCODE=$(grep "versionCode" $GRADLE_FILE | sed 's/[^0-9]*//g' | head -n 1)
           VNAME=$(grep "versionName" $GRADLE_FILE | head -n 1 | awk '{print $2}' | tr -d '"' | tr -d "'")
 
-          # Fallback jika data kosong
-          [ -z "$BYTES" ] || [ "$BYTES" == "null" ] && BYTES="0"
-          [ -z "$VCODE" ] && VCODE="1"
-          [ -z "$VNAME" ] && VNAME="$TAG"
-          [ -z "$URL" ] || [ "$URL" == "null" ] && URL="https://github.com/$REPO/releases/download/$TAG/A3Mart.apk"
+          # Jika BYTES tidak ditemukan atau 0, kita set fallback
+          if [ -z "$BYTES" ] || [ "$BYTES" == "null" ]; then BYTES="0"; fi
+          if [ -z "$URL" ] || [ "$URL" == "null" ]; then URL="https://github.com/$REPO/releases/download/$TAG/A3Mart.apk"; fi
 
-          # Kirim data ke output
           echo "vcode=$VCODE" >> $GITHUB_OUTPUT
           echo "vname=$VNAME" >> $GITHUB_OUTPUT
           echo "bytes=$BYTES" >> $GITHUB_OUTPUT
           echo "url=$URL" >> $GITHUB_OUTPUT
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
           echo "date=$(date +'%d-%m-%Y')" >> $GITHUB_OUTPUT
 
-      - name: Generate update.json (The Final Boss Version)
+      - name: Generate JSON
         shell: python
         env:
-          # Menggunakan ENV agar data URL & Size tidak hilang/rusak
-          RAW_BYTES: ${{ steps.get_data.outputs.bytes }}
-          V_CODE: ${{ steps.get_data.outputs.vcode }}
-          V_NAME: ${{ steps.get_data.outputs.vname }}
-          DL_URL: ${{ steps.get_data.outputs.url }}
-          TAG_NAME: ${{ steps.get_data.outputs.tag }}
-          RELEASE_DATE: ${{ steps.get_data.outputs.date }}
+          B: ${{ steps.get_data.outputs.bytes }}
+          U: ${{ steps.get_data.outputs.url }}
+          VC: ${{ steps.get_data.outputs.vcode }}
+          VN: ${{ steps.get_data.outputs.vname }}
+          DT: ${{ steps.get_data.outputs.date }}
+          TG: ${{ github.event.release.tag_name }}
         run: |
           import json
           import os
 
-          # Ambil data dari Environment
-          raw_bytes = os.getenv("RAW_BYTES", "0")
-          v_code = os.getenv("V_CODE", "1")
-          v_name = os.getenv("V_NAME", "1.0.0")
-          dl_url = os.getenv("DL_URL", "")
-          tag_name = os.getenv("TAG_NAME", "")
-          release_date = os.getenv("RELEASE_DATE", "")
-          
-          # Konversi Byte ke MB yang Akurat
+          # Konversi bytes ke MB secara aman
           try:
-              b = int(raw_bytes)
-              size_text = f"{b / (1024 * 1024):.2f} MB" if b > 0 else "--- MB"
+              b_val = int(os.getenv("B", "0"))
+              size_str = f"{b_val / (1024 * 1024):.2f} MB" if b_val > 0 else "--- MB"
           except:
-              size_text = "--- MB"
+              size_str = "--- MB"
 
-          # Struktur JSON Sesuai Kode Java: json.optString("fileSize", "--- MB")
           data = {
-              "versionCode": int(v_code),
-              "versionName": v_name,
-              "updateDate": release_date,
-              "downloadUrl": dl_url,
-              "fileSize": size_text,
+              "versionCode": int(os.getenv("VC", "1")),
+              "versionName": os.getenv("VN"),
+              "updateDate": os.getenv("DT"),
+              "downloadUrl": os.getenv("U"),
+              "fileSize": size_str,
               "releaseType": "Official Release",
               "isForceUpdate": True,
-              "changelog": f"• Pembaruan sistem versi {tag_name}\n• Perbaikan bug dan stabilitas sistem."
+              "changelog": f"• Pembaruan versi {os.getenv('TG')}\n• Perbaikan bug dan optimalisasi."
           }
 
-          # Simpan ke file update.json
           with open('update.json', 'w') as f:
               json.dump(data, f, indent=2)
-          
-          print(f"✅ Sukses! Size: {size_text} | URL: {dl_url}")
 
-      - name: Push Perubahan ke Repo
+      - name: Push to Repo
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add update.json
-          # Commit hanya jika ada perubahan
-          git commit -m "chore: auto-sync update.json for $TAG [skip ci]" || echo "No changes to commit"
+          git commit -m "chore: sync update.json [skip ci]" || echo "No changes"
           git push origin main

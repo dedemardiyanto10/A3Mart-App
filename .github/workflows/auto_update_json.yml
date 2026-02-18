@@ -3,7 +3,7 @@ name: Auto Update JSON on Release
 on:
   release:
     types: [published]
-  workflow_dispatch:
+  workflow_dispatch: # Supaya bisa ngetes manual jika perlu
 
 permissions:
   contents: write
@@ -15,14 +15,14 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Mengambil seluruh histori agar rebase lancar
+          fetch-depth: 0 # Wajib agar proses rebase/pull tidak error
 
       - name: Get Accurate Metadata
         id: meta
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # 1. Ambil Tag terbaru
+          # 1. Ambil Tag terbaru (v1.1.0)
           TAG="${{ github.event.release.tag_name }}"
           if [ -z "$TAG" ]; then TAG=$(git describe --tags --abbrev=0); fi
           
@@ -44,13 +44,16 @@ jobs:
           IS_PRERELEASE=$(gh api repos/${{ github.repository }}/releases/tags/$TAG --jq '.prerelease')
           if [ "$IS_PRERELEASE" = "true" ]; then TYPE="Beta Release"; else TYPE="Official Release"; fi
           
+          # Ambil Body/Deskripsi Rilis
           BODY=$(gh api repos/${{ github.repository }}/releases/tags/$TAG --jq '.body')
+          
+          # Logika Force Update: Jika ada tulisan [FORCE] di deskripsi
           if echo "$BODY" | grep -iq "\[FORCE\]"; then FORCE="true"; else FORCE="false"; fi
           
-          # Bersihkan changelog dari tag [FORCE]
+          # Bersihkan changelog dari tag [FORCE] agar rapi di JSON
           CLEAN_BODY=$(echo "$BODY" | sed 's/\[FORCE\]//gI' | xargs)
 
-          # Simpan ke env
+          # Simpan semua ke environment variabel GitHub
           echo "TAG=$TAG" >> $GITHUB_ENV
           echo "DL_URL=$DL_URL" >> $GITHUB_ENV
           echo "FINAL_SIZE=$FINAL_SIZE" >> $GITHUB_ENV
@@ -59,7 +62,7 @@ jobs:
           echo "CHANGELOG=$CLEAN_BODY" >> $GITHUB_ENV
           echo "TODAY=$(date +'%d-%m-%Y')" >> $GITHUB_ENV
 
-      - name: Update JSON File
+      - name: Update JSON File using Python
         run: |
           python3 -c "
           import json, os
@@ -68,7 +71,7 @@ jobs:
           with open(filename, 'r') as f:
               data = json.load(f)
 
-          # Update semua field sesuai data asli dari GitHub
+          # Update semua field JSON
           data['versionCode'] = data.get('versionCode', 0) + 1
           data['versionName'] = os.environ['TAG'].replace('v', '')
           data['updateDate'] = os.environ['TODAY']
@@ -78,24 +81,26 @@ jobs:
           data['isForceUpdate'] = os.environ['IS_FORCE'].lower() == 'true'
           data['changelog'] = os.environ['CHANGELOG']
           
-          with open(filename, 'w') as f:
-              json.dump(data, f, indent=2)
+          with open(filename, 'w', encoding='utf-8') as f:
+              json.dump(data, f, indent=2, ensure_ascii=False)
           "
 
-      - name: Push Updates
+      - name: Push Updates (Anti-Rejected)
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
           git add update.json
           
-          # Jangan commit jika tidak ada perubahan
+          # Cek apakah ada perubahan (biar gak error kalau gak ada update)
           if git diff --staged --quiet; then
             echo "No changes to commit"
             exit 0
           fi
           
-          git commit -m "chore: auto update version to ${{ env.TAG }}"
+          git commit -m "chore: auto update version info to ${{ env.TAG }} [skip ci]"
           
-          # SOLUSI REJECTED: Tarik data terbaru dengan rebase sebelum push
-          git pull --rebase origin main
+          # SOLUSI ERROR REJECTED:
+          # Ambil data terbaru, gabungkan, dan jika bentrok menangkan file JSON kita.
+          git pull --rebase -X theirs origin main
           git push origin main

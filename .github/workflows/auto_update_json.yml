@@ -15,7 +15,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Ambil semua history biar rebase lancar
+          fetch-depth: 0
 
       - name: Fetch Metadata & Size
         id: get_data
@@ -26,7 +26,8 @@ jobs:
           REPO="${{ github.repository }}"
           ASSET_NAME="A3Mart.apk"
 
-          sleep 15
+          # Tunggu agar asset benar-benar terdaftar di API
+          sleep 20
 
           ASSET_DATA=$(gh api repos/$REPO/releases/tags/$TAG --jq ".assets[] | select(.name==\"$ASSET_NAME\")" || echo "")
           
@@ -74,8 +75,12 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          # Set strategi pull biar gak nanya lagi
+          git config pull.rebase true
+          
           git add update.json
-          # Pull dulu biar sinkron sebelum push
-          git pull --rebase origin main
-          git commit -m "Auto Update Version ${{ env.TAG }}" || echo "No changes"
+          git commit -m "Auto Update Version ${{ env.TAG }} [${{ env.SIZE }}]" || echo "No changes"
+          
+          # Pull dan Push dengan proteksi
+          git pull origin main
           git push origin main

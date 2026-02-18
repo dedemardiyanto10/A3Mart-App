@@ -3,7 +3,7 @@ name: Update Version Manifest
 on:
   release:
     types: [published]
-  workflow_dispatch: 
+  workflow_dispatch: # Biar bisa ditest manual
 
 jobs:
   update-json:
@@ -11,27 +11,35 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-        with:
-          ref: main # atau branch utama lo
 
-      - name: Extract Release Info
-        id: release_info
+      - name: Extract Release Data
+        id: get_data
         run: |
-          VERSION_NAME=${{ github.event.release.tag_name }}
-          # Menghapus huruf 'v' jika ada (misal v1.1.0 jadi 1.1.0)
-          CLEAN_VERSION=$(echo $VERSION_NAME | sed 's/v//g')
-          echo "version_name=$CLEAN_VERSION" >> $GITHUB_OUTPUT
+          # Ambil tag name (v1.1.0 -> 1.1.0)
+          TAG_NAME=${{ github.event.release.tag_name }}
+          VERSION_NAME=$(echo $TAG_NAME | sed 's/v//g')
+          
+          # Ambil URL Download (mencari asset .apk pertama)
+          # Jika tidak ada apk, arahkan ke halaman release
+          DOWNLOAD_URL=$(echo '${{ toJson(github.event.release.assets) }}' | jq -r '.[0].browser_download_url // "${{ github.event.release.html_url }}"')
+          
+          # Ambil Changelog dan bersihkan karakter bermasalah
+          CHANGELOG=$(echo '${{ github.event.release.body }}' | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g')
+          
+          echo "v_name=$VERSION_NAME" >> $GITHUB_OUTPUT
+          echo "d_url=$DOWNLOAD_URL" >> $GITHUB_OUTPUT
+          echo "c_log=$CHANGELOG" >> $GITHUB_OUTPUT
           echo "date=$(date +'%d-%m-%Y')" >> $GITHUB_OUTPUT
 
-      - name: Update update.json
+      - name: Write to update.json
         run: |
           cat <<EOF > update.json
           {
             "versionCode": ${{ github.event.release.id }},
-            "versionName": "${{ steps.release_info.outputs.version_name }}",
-            "updateDate": "${{ steps.release_info.outputs.date }}",
-            "downloadUrl": "${{ github.event.release.html_url }}",
-            "changelog": "${{ github.event.release.body }}",
+            "versionName": "${{ steps.get_data.outputs.v_name }}",
+            "updateDate": "${{ steps.get_data.outputs.date }}",
+            "downloadUrl": "${{ steps.get_data.outputs.d_url }}",
+            "changelog": "${{ steps.get_data.outputs.c_log }}",
             "fileSize": "Auto-check release assets",
             "releaseType": "Official Release",
             "isForceUpdate": true
@@ -43,5 +51,5 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add update.json
-          git commit -m "chore: update update.json to ${{ steps.release_info.outputs.version_name }}"
+          git commit -m "chore: auto-update manifest to ${{ steps.get_data.outputs.v_name }}"
           git push

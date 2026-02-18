@@ -15,64 +15,70 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Get Basic Data
+      - name: Get Basic Data & Fetch Asset
         id: get_data
         run: |
-          echo "Waiting 30 seconds for GitHub API to index APK..."
-          sleep 30
-          
-          # 1. Cari file build.gradle dimanapun (AndroidIDE support)
-          GRADLE_FILE=$(find . -name "build.gradle" | grep -v "settings" | head -n 1)
-          
-          # 2. Ambil vCode & vName (Hanya angka untuk vCode)
-          VCODE=$(grep "versionCode" $GRADLE_FILE | sed 's/[^0-9]*//g')
-          VNAME=$(grep "versionName" $GRADLE_FILE | head -n 1 | awk '{print $2}' | tr -d '"' | tr -d "'")
-          
-          # 3. Info Tag & Tanggal
+          echo "Starting Enhanced Asset Search..."
           TAG="${{ github.event.release.tag_name }}"
-          TANGGAL=$(date +'%d-%m-%Y')
+          REPO="${{ github.repository }}"
           
-          # 4. Ambil Info Asset (Size & URL) dari API
-          ASSET_INFO=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG)
-          URL=$(echo "$ASSET_INFO" | jq -r '.assets[] | select(.name | endswith(".apk")) | .browser_download_url' | head -n 1)
-          BYTES=$(echo "$ASSET_INFO" | jq -r '.assets[] | select(.name | endswith(".apk")) | .size' | head -n 1)
+          # Looping 3 kali untuk memastikan GitHub API sudah mencatat Size APK
+          for i in {1..3}; do
+            echo "Attempt $i: Fetching assets for tag $TAG..."
+            ASSET_INFO=$(curl -s https://api.github.com/repos/$REPO/releases/tags/$TAG)
+            
+            # Mencari asset yang mengandung ekstensi .apk
+            BYTES=$(echo "$ASSET_INFO" | jq -r '.assets[] | select(.name | contains(".apk")) | .size' | head -n 1)
+            URL=$(echo "$ASSET_INFO" | jq -r '.assets[] | select(.name | contains(".apk")) | .browser_download_url' | head -n 1)
+            
+            if [ "$BYTES" != "null" ] && [ ! -z "$BYTES" ] && [ "$BYTES" != "0" ]; then
+              echo "✅ Asset found with size: $BYTES bytes"
+              break
+            fi
+            echo "⚠️ Asset not ready or size is 0, waiting 15s..."
+            sleep 15
+          done
 
-          # Jika API Delay, gunakan Fallback URL manual
-          if [ -z "$URL" ] || [ "$URL" == "null" ]; then
-             URL="https://github.com/${{ github.repository }}/releases/download/$TAG/A3Mart.apk"
-             BYTES="0"
-          fi
+          # Ambil versionCode & versionName dari build.gradle (Support AndroidIDE)
+          GRADLE_FILE=$(find . -name "build.gradle" | grep -v "settings" | head -n 1)
+          VCODE=$(grep "versionCode" $GRADLE_FILE | sed 's/[^0-9]*//g' | head -n 1)
+          VNAME=$(grep "versionName" $GRADLE_FILE | head -n 1 | awk '{print $2}' | tr -d '"' | tr -d "'")
+
+          # Fallback jika data tidak ditemukan
+          [ -z "$BYTES" ] || [ "$BYTES" == "null" ] && BYTES="0"
+          [ -z "$VCODE" ] && VCODE="1"
+          [ -z "$VNAME" ] && VNAME="$TAG"
 
           echo "vcode=$VCODE" >> $GITHUB_OUTPUT
           echo "vname=$VNAME" >> $GITHUB_OUTPUT
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
           echo "bytes=$BYTES" >> $GITHUB_OUTPUT
-          echo "date=$TANGGAL" >> $GITHUB_OUTPUT
           echo "url=$URL" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "date=$(date +'%d-%m-%Y')" >> $GITHUB_OUTPUT
 
-      - name: Final JSON Process (Sync with Java)
+      - name: Generate update.json (Sync with Java Code)
         shell: python
         run: |
           import json
 
-          # Ambil data dari bash
+          # Ambil data dari step sebelumnya
           raw_bytes = "${{ steps.get_data.outputs.bytes }}"
           v_code = "${{ steps.get_data.outputs.vcode }}"
           v_name = "${{ steps.get_data.outputs.vname }}"
           dl_url = "${{ steps.get_data.outputs.url }}"
           tag_name = "${{ steps.get_data.outputs.tag }}"
           
-          # Hitung Size dalam MB
+          # Konversi Byte ke MB
           try:
               b = int(raw_bytes)
               size_text = f"{b / (1024 * 1024):.2f} MB" if b > 0 else "--- MB"
           except:
               size_text = "--- MB"
 
-          # Susun Data Sesuai Kode Java Lo
+          # Struktur JSON yang disamakan dengan Java (latestVersionCode, fileSize, dll)
           data = {
-              "versionCode": int(v_code) if v_code else 1,
-              "versionName": v_name if v_name else tag_name,
+              "versionCode": int(v_code),
+              "versionName": v_name,
               "updateDate": "${{ steps.get_data.outputs.date }}",
               "downloadUrl": dl_url,
               "fileSize": size_text,
@@ -84,12 +90,12 @@ jobs:
           with open('update.json', 'w') as f:
               json.dump(data, f, indent=2)
           
-          print(f"✅ update.json berhasil diperbarui dengan size: {size_text}")
+          print(f"✅ update.json created with size: {size_text}")
 
       - name: Push to Repository
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add update.json
-          git commit -m "chore: auto-sync update.json [skip ci]" || echo "No changes"
+          git commit -m "chore: sync manifest $TAG [skip ci]" || echo "No changes"
           git push origin main

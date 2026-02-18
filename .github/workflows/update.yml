@@ -2,73 +2,65 @@ name: A3Mart Ultimate Sync
 
 on:
   release:
-    types: [published] # Robot jalan otomatis saat lo klik 'Publish Release'
+    types: [published]
+  workflow_dispatch: # Supaya lo bisa klik tombol "Run" manual buat ngetes
 
 jobs:
-  sync-update-json:
+  sync:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Izin wajib supaya robot bisa nulis ke update.json
+      contents: write
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }} # Pakai token bawaan
 
-      - name: Ambil Data Dari Project
-        id: get_data
+      - name: Ambil Info Gradle
+        id: info
         run: |
-          # 1. Ambil Version Code dari build.gradle (Cari baris versionCode)
-          V_CODE=$(grep "versionCode" app/build.gradle | awk '{print $2}')
+          # Cari versionCode & versionName di app/build.gradle
+          VCODE=$(grep "versionCode" app/build.gradle | awk '{print $2}')
+          VNAME=$(grep "versionName" app/build.gradle | awk '{print $2}' | tr -d '"')
+          TAG="${{ github.event.release.tag_name }}"
+          # Link Release Asset (Pastikan nama file pas upload adalah A3Mart.apk)
+          URL="https://github.com/${{ github.repository }}/releases/download/$TAG/A3Mart.apk"
           
-          # 2. Ambil Version Name dari build.gradle (Hapus tanda kutip)
-          V_NAME=$(grep "versionName" app/build.gradle | awk '{print $2}' | tr -d '"')
-          
-          # 3. Ambil Nama Tag (misal v1.0.6)
-          TAG_NAME="${{ github.event.release.tag_name }}"
-          
-          # 4. Ambil Tanggal Hari Ini
-          TANGGAL=$(date +'%d-%m-%Y')
-          
-          # 5. Cari Link Download APK dari Asset Release
-          # Kita ambil link asset pertama yang ekstensinya .apk
-          DOWNLOAD_URL="https://github.com/${{ github.repository }}/releases/download/$TAG_NAME/A3Mart.apk"
+          echo "vcode=$VCODE" >> $GITHUB_OUTPUT
+          echo "vname=$VNAME" >> $GITHUB_OUTPUT
+          echo "url=$URL" >> $GITHUB_OUTPUT
 
-          echo "v_code=$V_CODE" >> $GITHUB_OUTPUT
-          echo "v_name=$V_NAME" >> $GITHUB_OUTPUT
-          echo "url=$DOWNLOAD_URL" >> $GITHUB_OUTPUT
-          echo "date=$TANGGAL" >> $GITHUB_OUTPUT
-
-      - name: Update update.json
+      - name: Update JSON File
         run: |
           python3 -c "
-          import json, os
-          
+          import json, os, datetime
           path = 'update.json'
-          # Baca file lama, kalau gak ada bikin baru
+          # Buat template kalau file hilang/rusak
+          data = {'versionName': '0', 'versionCode': 0, 'changelog': []}
           if os.path.exists(path):
-              with open(path, 'r') as f:
-                  data = json.load(f)
-          else:
-              data = {}
+              try:
+                  with open(path, 'r') as f: data = json.load(f)
+              except: pass
 
-          # Masukkan data baru hasil scan robot
-          data['versionName'] = '${{ steps.get_data.outputs.v_name }}'
-          data['versionCode'] = int('${{ steps.get_data.outputs.v_code }}')
-          data['releaseDate'] = '${{ steps.get_data.outputs.date }}'
-          data['downloadUrl'] = '${{ steps.get_data.outputs.url }}'
-          data['forceUpdate'] = True
-          data['changelog'] = [\"Update rilis versi ${{ github.event.release.tag_name }}\"]
-
+          data['versionName'] = '${{ steps.info.outputs.vname }}'
+          data['versionCode'] = int('${{ steps.info.outputs.vcode }}')
+          data['releaseDate'] = datetime.datetime.now().strftime('%d-%m-%Y')
+          data['downloadUrl'] = '${{ steps.info.outputs.url }}'
+          
           with open(path, 'w') as f:
-              json.dump(data, f, indent=4)
+              json.dump(data, f, indent=2)
           "
 
-      - name: Push Perubahan ke Repo
+      - name: Commit & Push Force
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add update.json
-          git commit -m "chore: auto-update update.json for version ${{ steps.get_data.outputs.v_name }} [skip ci]" || echo "Tidak ada perubahan"
-          git push
+          # Pakai git status buat cek apakah ada perubahan
+          if git diff --staged --quiet; then
+            echo "Gak ada perubahan di JSON."
+          else
+            git commit -m "chore: auto-sync update.json [skip ci]"
+            git push origin main
+          fi

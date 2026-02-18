@@ -3,7 +3,7 @@ name: Update Version Manifest
 on:
   release:
     types: [published]
-  workflow_dispatch: # Biar bisa ditest manual tanpa bikin release baru
+  workflow_dispatch: # Biar bisa ngetes manual kapan aja
 
 jobs:
   update-json:
@@ -14,46 +14,59 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Get Release Data
+      - name: Get Data From Release and Gradle
         id: get_data
         run: |
-          # Ambil data dari release event, kalau manual ambil dari latest release API
+          # 1. Ambil data Release (Event rilis atau API rilis terbaru)
           if [ "${{ github.event_name }}" = "release" ]; then
             RELEASE_JSON='${{ toJson(github.event.release) }}'
           else
             RELEASE_JSON=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/latest)
           fi
 
-          # 1. Ambil Tag & Name (V1.2.0 -> 1.2.0)
+          # 2. AMBIL VERSION CODE ASLI DARI GRADLE (Biar dapet angka 2, dst)
+          # Mencari file build.gradle baik versi Groovy (.gradle) atau Kotlin (.kts)
+          GRADLE_FILE=$(find . -name "build.gradle*" | grep "app/build.gradle" | head -n 1)
+          if [ -f "$GRADLE_FILE" ]; then
+            V_CODE=$(grep "versionCode" "$GRADLE_FILE" | awk '{print $2}' | sed 's/[^0-9]*//g')
+          else
+            V_CODE="2" # Fallback kalau file gak ketemu
+          fi
+
+          # 3. Ambil Tag & Version Name (V1.2.0 -> 1.2.0)
           TAG_NAME=$(echo "$RELEASE_JSON" | jq -r .tag_name)
           VERSION_NAME=$(echo $TAG_NAME | sed 's/[vV]//g')
-          RELEASE_ID=$(echo "$RELEASE_JSON" | jq -r .id)
           
-          # 2. Cari Asset APK, URL, dan Size
+          # 4. Cari Asset APK, URL, dan Size
+          # Mencari file yang berakhiran .apk
           APK_INFO=$(echo "$RELEASE_JSON" | jq -r '.assets[] | select(.name | endswith(".apk")) | "\(.browser_download_url)|\(.size)"' | head -n 1)
           
           if [ -z "$APK_INFO" ]; then
+            # Jika APK belum diupload, arahkan ke link release dulu
             DOWNLOAD_URL=$(echo "$RELEASE_JSON" | jq -r .html_url)
-            FILE_SIZE="0 MB"
+            FILE_SIZE="-- MB"
           else
             DOWNLOAD_URL=$(echo $APK_INFO | cut -d'|' -f1)
             SIZE_BYTES=$(echo $APK_INFO | cut -d'|' -f2)
+            # Konversi Bytes ke MB
             FILE_SIZE=$(awk "BEGIN {printf \"%.1f MB\", $SIZE_BYTES/1048576}")
           fi
           
-          # 3. Ambil Changelog
-          CHANGELOG=$(echo "$RELEASE_JSON" | jq -r .body | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g')
+          # 5. Ambil Changelog (catatan rilis)
+          CHANGELOG=$(echo "$RELEASE_JSON" | jq -r .body | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g' | sed 's/null/Pembaruan sistem terbaru/g')
           
-          # Output ke GitHub Step
-          echo "v_code=$RELEASE_ID" >> $GITHUB_OUTPUT
+          # Set hasil ke Output GitHub
+          echo "v_code=$V_CODE" >> $GITHUB_OUTPUT
           echo "v_name=$VERSION_NAME" >> $GITHUB_OUTPUT
           echo "d_url=$DOWNLOAD_URL" >> $GITHUB_OUTPUT
           echo "f_size=$FILE_SIZE" >> $GITHUB_OUTPUT
           echo "c_log=$CHANGELOG" >> $GITHUB_OUTPUT
           echo "date=$(date +'%d-%m-%Y')" >> $GITHUB_OUTPUT
 
-      - name: Update update.json
+      - name: Generate update.json
         run: |
           cat <<EOF > update.json
           {
@@ -68,14 +81,14 @@ jobs:
           }
           EOF
 
-      - name: Commit and Push
+      - name: Push to Repository
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add update.json
           if git diff --quiet && git diff --staged --quiet; then
-            echo "No changes"
+            echo "Gak ada perubahan data rilis."
           else
-            git commit -m "chore: auto-update manifest [skip ci]"
+            git commit -m "chore: auto-update update.json [skip ci]"
             git push origin main
           fi

@@ -1,30 +1,85 @@
-name: Test Auto Update
+name: Update Release JSON
 
 on:
   release:
     types: [published]
 
 permissions:
-  contents: write
-content:read
+  contents: write # Wajib 'write' agar bisa update file update.json secara otomatis
 
 jobs:
-  update:
+  update-json-file:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      
-      - name: Update JSON
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Process Release Data
+        id: data
         run: |
-          # Ambil info versi dari tag
-          VERSION="${{ github.event.release.tag_name }}"
-          # Update file update.json (pake sed biar simpel buat tes)
-          sed -i "s/\"versionName\": \".*\"/\"versionName\": \"$VERSION\"/" update.json
+          # 1. Version Name dari Tag (v1.1.0 -> 1.1.0)
+          VN=$(echo "${{ github.event.release.tag_name }}" | sed 's/v//')
           
-      - name: Commit
+          # 2. Ambil Link Download APK
+          URL=$(echo '${{ toJson(github.event.release.assets) }}' | jq -r '.[] | select(.name | endswith(".apk")) | .browser_download_url' | head -n 1)
+          
+          # 3. Ambil Size APK & Konversi ke MB
+          SIZE_BYTES=$(echo '${{ toJson(github.event.release.assets) }}' | jq -r '.[] | select(.name | endswith(".apk")) | .size' | head -n 1)
+          if [ -z "$SIZE_BYTES" ] || [ "$SIZE_BYTES" = "null" ]; then
+            SIZE="Size tidak terbaca"
+          else
+            SIZE=$(echo "scale=2; $SIZE_BYTES / 1048576" | bc)
+            SIZE="$SIZE MB"
+          fi
+
+          # 4. Release Type (Official vs Beta)
+          if [ "${{ github.event.release.prerelease }}" = "true" ]; then
+            TYPE="Beta Release"
+          else
+            TYPE="Official Release"
+          fi
+
+          # 5. Force Update (Cek jika ada teks [FORCE] di deskripsi)
+          if echo "${{ github.event.release.body }}" | grep -iq "\[FORCE\]"; then
+            FORCE=true
+          else
+            FORCE=false
+          fi
+
+          # Simpan semua ke environment variabel
+          echo "VER_NAME=$VN" >> $GITHUB_ENV
+          echo "DL_URL=$URL" >> $GITHUB_ENV
+          echo "FILE_SIZE=$SIZE" >> $GITHUB_ENV
+          echo "REL_TYPE=$TYPE" >> $GITHUB_ENV
+          echo "IS_FORCE=$FORCE" >> $GITHUB_ENV
+
+      - name: Modify update.json
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          # Bersihkan changelog dari tag [FORCE]
+          LOG=$(echo "${{ github.event.release.body }}" | sed 's/\[FORCE\]//gI' | xargs)
+
+          jq --arg vn "$VER_NAME" \
+             --arg url "$DL_URL" \
+             --arg size "$FILE_SIZE" \
+             --arg type "$REL_TYPE" \
+             --argjson force "$IS_FORCE" \
+             --arg date "$(date +'%d-%m-%Y')" \
+             --arg log "$LOG" \
+             '.versionCode += 1 | 
+              .versionName = $vn | 
+              .updateDate = $date | 
+              .downloadUrl = $url | 
+              .fileSize = $size | 
+              .releaseType = $type | 
+              .isForceUpdate = $force | 
+              .changelog = $log' update.json > tmp.json && mv tmp.json update.json
+
+      - name: Push Changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
           git add update.json
-          git commit -m "Update version to ${{ github.event.release.tag_name }}"
+          git commit -m "chore: update update.json to version $VER_NAME" || exit 0
           git push

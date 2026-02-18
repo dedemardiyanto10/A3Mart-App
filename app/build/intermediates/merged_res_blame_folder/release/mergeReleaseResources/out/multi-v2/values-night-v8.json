@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.a3mart.app-mergeReleaseResources-46:/values-night-v8/values-night-v8.xml",
+            "outputFile": "com.a3mart.app-mergeReleaseResources-53:/values-night-v8/values-night-v8.xml",
             "map": [
                 {
                     "source": "/storage/emulated/0/AndroidIDEProjects/A3Mart/app/src/main/res/values-night/themes.xml",

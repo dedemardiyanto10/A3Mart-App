@@ -1,124 +1,159 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-     xmlns:android="http://schemas.android.com/apk/res/android"
-     xmlns:app="http://schemas.android.com/apk/res-auto"
-     android:layout_height="wrap_content"
-     android:layout_width="match_parent"
-     android:padding="24dp"
-     android:orientation="vertical">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <com.google.android.material.card.MaterialCardView
-         android:layout_height="6dp"
-         android:layout_width="50dp"
-         android:layout_marginBottom="24dp"
-         app:cardElevation="1dp"
-         app:cardBackgroundColor="?attr/colorOnSurfaceVariant"
-         style="?attr/materialCardViewFilledStyle"
-         app:cardCornerRadius="24dp"
-         android:layout_gravity="center_horizontal">
-
-    </com.google.android.material.card.MaterialCardView>
+        android:layout_width="32dp"
+        android:layout_height="4dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="12dp"
+        app:cardBackgroundColor="?attr/colorOutlineVariant"
+        app:cardElevation="0dp"
+        app:strokeWidth="0dp" />
 
     <TextView
-         android:layout_height="wrap_content"
-         android:layout_width="wrap_content"
-         android:layout_marginBottom="20dp"
-         android:textSize="20sp"
-         android:id="@+id/tv_judul_sheet"
-         android:text="Tambah Produk Baru"
-         android:textStyle="bold" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tv_judul_sheet"
+        android:text="Tambah Produk Baru"
+        android:textSize="24sp"
+        android:fontFamily="sans-serif-black"
+        android:textColor="?attr/colorOnSurface"
+        android:layout_marginHorizontal="24dp"
+        android:layout_marginVertical="24dp" />
 
-    <com.google.android.material.textfield.TextInputLayout
-         android:layout_height="wrap_content"
-         android:layout_width="match_parent"
-         android:layout_marginBottom="8dp"
-         app:boxCornerRadiusTopEnd="8dp"
-         app:boxCornerRadiusBottomStart="8dp"
-         app:boxCornerRadiusBottomEnd="8dp"
-         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-         app:boxCornerRadiusTopStart="8dp">
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-        <com.google.android.material.textfield.TextInputEditText
-             android:layout_height="wrap_content"
-             android:layout_width="match_parent"
-             android:hint="Nama Produk"
-             android:inputType="textCapWords"
-             android:id="@+id/et_nama_produk" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
 
-    </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="8dp"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                app:boxCornerRadiusTopStart="8dp">
 
-    <com.google.android.material.textfield.TextInputLayout
-         android:layout_height="wrap_content"
-         android:layout_width="match_parent"
-         android:layout_marginBottom="8dp"
-         app:boxCornerRadiusTopEnd="8dp"
-         app:boxCornerRadiusBottomStart="8dp"
-         app:boxCornerRadiusBottomEnd="8dp"
-         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-         app:prefixText="Rp"
-         app:boxCornerRadiusTopStart="8dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:hint="Nama Produk"
+                    android:inputType="textCapWords"
+                    android:id="@+id/et_nama_produk" />
 
-        <com.google.android.material.textfield.TextInputEditText
-             android:layout_height="wrap_content"
-             android:layout_width="match_parent"
-             android:hint="Harga"
-             android:inputType="number"
-             android:id="@+id/et_harga_produk" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-    </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/til_barcode_produk"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="8dp"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                app:boxCornerRadiusTopStart="8dp"
+                app:endIconMode="custom"
+                app:endIconDrawable="@drawable/ic_barcode_scan">
 
-    <com.google.android.material.textfield.TextInputLayout
-         android:layout_height="wrap_content"
-         android:layout_width="match_parent"
-         android:layout_marginBottom="24dp"
-         app:boxCornerRadiusTopEnd="8dp"
-         app:boxCornerRadiusBottomStart="8dp"
-         app:boxCornerRadiusBottomEnd="8dp"
-         style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
-         app:boxCornerRadiusTopStart="8dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/et_barcode_produk"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Barcode Produk (Opsional)"
+                    android:inputType="number" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputEditText
-             android:layout_height="wrap_content"
-             android:layout_width="match_parent"
-             android:hint="Stok"
-             android:inputType="number"
-             android:id="@+id/et_stok_produk" />
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="8dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="8dp"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                app:prefixText="Rp"
+                app:boxCornerRadiusTopStart="8dp">
 
-    </com.google.android.material.textfield.TextInputLayout>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:hint="Harga"
+                    android:inputType="number"
+                    android:id="@+id/et_harga_produk" />
 
-    <LinearLayout
-         android:layout_height="wrap_content"
-         android:layout_width="match_parent"
-         android:gravity="center"
-         android:orientation="horizontal">
+            </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.button.MaterialButton
-             android:layout_height="wrap_content"
-             android:layout_width="0dp"
-             android:visibility="gone"
-             app:icon="@drawable/ic_delete"
-             android:layout_margin="5dp"
-             app:iconTint="#F44336"
-             android:textColor="#F44336"
-             app:strokeColor="#F44336"
-             style="@style/Widget.Material3.Button.OutlinedButton"
-             android:layout_weight="1"
-             android:id="@+id/btn_hapus"
-             android:textStyle="bold"
-             android:text="Hapus" />
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_marginBottom="24dp"
+                app:boxCornerRadiusTopEnd="8dp"
+                app:boxCornerRadiusBottomStart="8dp"
+                app:boxCornerRadiusBottomEnd="8dp"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                app:boxCornerRadiusTopStart="8dp">
 
-        <com.google.android.material.button.MaterialButton
-             android:layout_height="wrap_content"
-             android:layout_width="0dp"
-             app:icon="@drawable/ic_edit"
-             android:layout_margin="5dp"
-             android:textAllCaps="false"
-             style="@style/Widget.Material3.Button.TonalButton"
-             android:layout_weight="1"
-             android:id="@+id/btn_simpan"
-             android:textStyle="bold"
-             android:text="Simpan" />
+                <com.google.android.material.textfield.TextInputEditText
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:hint="Stok"
+                    android:inputType="number"
+                    android:id="@+id/et_stok_produk" />
 
-    </LinearLayout>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <LinearLayout
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    android:visibility="gone"
+                    app:icon="@drawable/ic_delete"
+                    android:layout_margin="5dp"
+                    app:iconTint="#F44336"
+                    android:textColor="#F44336"
+                    app:strokeColor="#F44336"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_weight="1"
+                    android:id="@+id/btn_hapus"
+                    android:textStyle="bold"
+                    app:iconGravity="textStart"
+                    android:text="Hapus" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:layout_height="wrap_content"
+                    android:layout_width="0dp"
+                    app:icon="@drawable/ic_check"
+                    android:layout_margin="5dp"
+                    android:textAllCaps="false"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_weight="1"
+                    app:iconGravity="textStart"
+                    android:id="@+id/btn_simpan"
+                    android:textStyle="bold"
+                    android:text="Simpan" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
 
 </LinearLayout>

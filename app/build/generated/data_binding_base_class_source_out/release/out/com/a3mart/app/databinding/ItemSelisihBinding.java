@@ -32,6 +32,12 @@ public final class ItemSelisihBinding implements ViewBinding {
   public final MaterialButton btnLunasi;
 
   @NonNull
+  public final MaterialButton btnStruk;
+
+  @NonNull
+  public final MaterialCardView cardTransaksi;
+
+  @NonNull
   public final LinearLayout containerProduk;
 
   @NonNull
@@ -41,19 +47,27 @@ public final class ItemSelisihBinding implements ViewBinding {
   public final TextView tvNamaRekap;
 
   @NonNull
+  public final TextView tvTanggalUpdateRekap;
+
+  @NonNull
   public final TextView tvTotalHargaRekap;
 
   private ItemSelisihBinding(@NonNull MaterialCardView rootView, @NonNull MaterialButton btnItemPdf,
       @NonNull MaterialButton btnItemShare, @NonNull MaterialButton btnLunasi,
+      @NonNull MaterialButton btnStruk, @NonNull MaterialCardView cardTransaksi,
       @NonNull LinearLayout containerProduk, @NonNull ImageView ivStatusRekap,
-      @NonNull TextView tvNamaRekap, @NonNull TextView tvTotalHargaRekap) {
+      @NonNull TextView tvNamaRekap, @NonNull TextView tvTanggalUpdateRekap,
+      @NonNull TextView tvTotalHargaRekap) {
     this.rootView = rootView;
     this.btnItemPdf = btnItemPdf;
     this.btnItemShare = btnItemShare;
     this.btnLunasi = btnLunasi;
+    this.btnStruk = btnStruk;
+    this.cardTransaksi = cardTransaksi;
     this.containerProduk = containerProduk;
     this.ivStatusRekap = ivStatusRekap;
     this.tvNamaRekap = tvNamaRekap;
+    this.tvTanggalUpdateRekap = tvTanggalUpdateRekap;
     this.tvTotalHargaRekap = tvTotalHargaRekap;
   }
 
@@ -102,6 +116,14 @@ public final class ItemSelisihBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.btn_struk;
+      MaterialButton btnStruk = ViewBindings.findChildViewById(rootView, id);
+      if (btnStruk == null) {
+        break missingId;
+      }
+
+      MaterialCardView cardTransaksi = (MaterialCardView) rootView;
+
       id = R.id.container_produk;
       LinearLayout containerProduk = ViewBindings.findChildViewById(rootView, id);
       if (containerProduk == null) {
@@ -120,6 +142,12 @@ public final class ItemSelisihBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.tv_tanggal_update_rekap;
+      TextView tvTanggalUpdateRekap = ViewBindings.findChildViewById(rootView, id);
+      if (tvTanggalUpdateRekap == null) {
+        break missingId;
+      }
+
       id = R.id.tv_total_harga_rekap;
       TextView tvTotalHargaRekap = ViewBindings.findChildViewById(rootView, id);
       if (tvTotalHargaRekap == null) {
@@ -127,7 +155,8 @@ public final class ItemSelisihBinding implements ViewBinding {
       }
 
       return new ItemSelisihBinding((MaterialCardView) rootView, btnItemPdf, btnItemShare,
-          btnLunasi, containerProduk, ivStatusRekap, tvNamaRekap, tvTotalHargaRekap);
+          btnLunasi, btnStruk, cardTransaksi, containerProduk, ivStatusRekap, tvNamaRekap,
+          tvTanggalUpdateRekap, tvTotalHargaRekap);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

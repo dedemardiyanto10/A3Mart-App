@@ -7,10 +7,10 @@ public class Selisih {
     private String namaKonsumen;
     private List<Transaksi> listTransaksi;
     private int totalQty;
-    private int totalHarga;
+    private long totalHarga;
 
     public Selisih(
-            String namaKonsumen, List<Transaksi> listTransaksi, int totalQty, int totalHarga) {
+            String namaKonsumen, List<Transaksi> listTransaksi, int totalQty, long totalHarga) {
         this.namaKonsumen = namaKonsumen;
         this.listTransaksi = listTransaksi;
         this.totalQty = totalQty;
@@ -29,7 +29,7 @@ public class Selisih {
         return totalQty;
     }
 
-    public int getTotalHarga() {
+    public long getTotalHarga() {
         return totalHarga;
     }
 }

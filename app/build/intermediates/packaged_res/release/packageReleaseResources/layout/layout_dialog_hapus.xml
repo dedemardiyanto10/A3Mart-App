@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:padding="24dp"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:textSize="20sp"
+        android:textColor="?attr/colorOnSurface"
+        android:text="Manajemen Data"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_marginBottom="24dp"
+        android:alpha="0.7"
+        android:textSize="14sp"
+        android:text="Pilih kategori transaksi yang ingin dibersihkan" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_marginBottom="12dp"
+        app:strokeColor="#F44336"
+        app:strokeWidth="1.5dp"
+        style="?attr/materialCardViewOutlinedStyle"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        android:id="@+id/btn_hapus_semua">
+
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:gravity="center_vertical"
+            android:padding="16dp">
+
+            <ImageView
+                android:layout_height="48dp"
+                android:layout_width="48dp"
+                android:src="@drawable/ic_delete"
+                android:padding="8dp"/>
+
+            <LinearLayout
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:orientation="vertical"
+                android:layout_marginStart="16dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:textColor="#F44336"
+                    android:text="Bersihkan Semua"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:alpha="0.6"
+                    android:textSize="12sp"
+                    android:text="Kosongkan seluruh riwayat database" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_marginBottom="12dp"
+        style="?attr/materialCardViewFilledStyle"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        android:id="@+id/btn_hapus_lunas">
+
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:gravity="center_vertical"
+            android:padding="16dp">
+
+            <ImageView
+                android:layout_height="48dp"
+                android:layout_width="48dp"
+                android:src="@drawable/ic_lunas"
+                android:padding="8dp"
+                app:tint="#4CAF50" />
+
+            <LinearLayout
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:orientation="vertical"
+                android:layout_marginStart="16dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="Data Lunas"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:alpha="0.6"
+                    android:textSize="12sp"
+                    android:text="Hapus transaksi yang sudah selesai" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_marginBottom="12dp"
+        style="?attr/materialCardViewFilledStyle"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        android:id="@+id/btn_hapus_hutang">
+
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:gravity="center_vertical"
+            android:padding="16dp">
+
+            <ImageView
+                android:layout_height="48dp"
+                android:layout_width="48dp"
+                android:src="@drawable/ic_hutang"
+                android:padding="8dp"
+                app:tint="#F44336" />
+
+            <LinearLayout
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:orientation="vertical"
+                android:layout_marginStart="16dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="Data Hutang"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:alpha="0.6"
+                    android:textSize="12sp"
+                    android:text="Bersihkan catatan piutang" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        style="?attr/materialCardViewFilledStyle"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="0dp"
+        android:id="@+id/btn_hapus_deposit">
+
+        <LinearLayout
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:gravity="center_vertical"
+            android:padding="16dp">
+
+            <ImageView
+                android:layout_height="48dp"
+                android:layout_width="48dp"
+                android:src="@drawable/ic_deposit"
+                android:padding="8dp"
+                app:tint="#FF9800" />
+
+            <LinearLayout
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:orientation="vertical"
+                android:layout_marginStart="16dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:text="Data Deposit"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:alpha="0.6"
+                    android:textSize="12sp"
+                    android:text="Hapus saldo titipan konsumen" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+</LinearLayout>

@@ -6,11 +6,13 @@
         android:id="@+id/action_backup"
         android:title="Backup Data"
         android:icon="@drawable/ic_backup"
+        app:iconTint="?attr/colorPrimary"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_restore"
         android:title="Restore Data"
+        app:iconTint="?attr/colorPrimary"
         android:icon="@drawable/ic_restore"
         app:showAsAction="ifRoom" />
 </menu>

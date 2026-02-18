@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
 import com.a3mart.app.R;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.lang.NullPointerException;
 import java.lang.Override;
@@ -21,6 +23,18 @@ import java.lang.String;
 public final class FragmentSelisihBinding implements ViewBinding {
   @NonNull
   private final ConstraintLayout rootView;
+
+  @NonNull
+  public final Chip chipAll;
+
+  @NonNull
+  public final Chip chipDeposit;
+
+  @NonNull
+  public final ChipGroup chipGroupSelisih;
+
+  @NonNull
+  public final Chip chipHutang;
 
   @NonNull
   public final FloatingActionButton fabAddDeposit;
@@ -34,10 +48,15 @@ public final class FragmentSelisihBinding implements ViewBinding {
   @NonNull
   public final TextView tvEmptyRekapMsg;
 
-  private FragmentSelisihBinding(@NonNull ConstraintLayout rootView,
+  private FragmentSelisihBinding(@NonNull ConstraintLayout rootView, @NonNull Chip chipAll,
+      @NonNull Chip chipDeposit, @NonNull ChipGroup chipGroupSelisih, @NonNull Chip chipHutang,
       @NonNull FloatingActionButton fabAddDeposit, @NonNull LinearLayout layoutEmptyRekap,
       @NonNull RecyclerView rvRekapHutang, @NonNull TextView tvEmptyRekapMsg) {
     this.rootView = rootView;
+    this.chipAll = chipAll;
+    this.chipDeposit = chipDeposit;
+    this.chipGroupSelisih = chipGroupSelisih;
+    this.chipHutang = chipHutang;
     this.fabAddDeposit = fabAddDeposit;
     this.layoutEmptyRekap = layoutEmptyRekap;
     this.rvRekapHutang = rvRekapHutang;
@@ -71,6 +90,30 @@ public final class FragmentSelisihBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
+      id = R.id.chip_all;
+      Chip chipAll = ViewBindings.findChildViewById(rootView, id);
+      if (chipAll == null) {
+        break missingId;
+      }
+
+      id = R.id.chip_deposit;
+      Chip chipDeposit = ViewBindings.findChildViewById(rootView, id);
+      if (chipDeposit == null) {
+        break missingId;
+      }
+
+      id = R.id.chip_group_selisih;
+      ChipGroup chipGroupSelisih = ViewBindings.findChildViewById(rootView, id);
+      if (chipGroupSelisih == null) {
+        break missingId;
+      }
+
+      id = R.id.chip_hutang;
+      Chip chipHutang = ViewBindings.findChildViewById(rootView, id);
+      if (chipHutang == null) {
+        break missingId;
+      }
+
       id = R.id.fab_add_deposit;
       FloatingActionButton fabAddDeposit = ViewBindings.findChildViewById(rootView, id);
       if (fabAddDeposit == null) {
@@ -95,8 +138,9 @@ public final class FragmentSelisihBinding implements ViewBinding {
         break missingId;
       }
 
-      return new FragmentSelisihBinding((ConstraintLayout) rootView, fabAddDeposit,
-          layoutEmptyRekap, rvRekapHutang, tvEmptyRekapMsg);
+      return new FragmentSelisihBinding((ConstraintLayout) rootView, chipAll, chipDeposit,
+          chipGroupSelisih, chipHutang, fabAddDeposit, layoutEmptyRekap, rvRekapHutang,
+          tvEmptyRekapMsg);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

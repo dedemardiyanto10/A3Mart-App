@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.a3mart.app-mergeReleaseResources-46:/values-v34/values-v34.xml",
+            "outputFile": "com.a3mart.app-mergeReleaseResources-53:/values-v34/values-v34.xml",
             "map": [
                 {
                     "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/caches/9.0.0/transforms/5b6108ab80b1583d164ee76c83bf365d/transformed/material-1.13.0/res/values-v34/values-v34.xml",

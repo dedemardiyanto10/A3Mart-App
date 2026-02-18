@@ -1,122 +1,147 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView
-     xmlns:android="http://schemas.android.com/apk/res/android"
-     xmlns:app="http://schemas.android.com/apk/res-auto"
-     android:layout_height="wrap_content"
-     android:layout_width="match_parent"
-     android:clickable="true"
-     android:layout_margin="6dp"
-     app:cardElevation="2dp"
-     app:cardCornerRadius="16dp"
-     style="?attr/materialCardViewFilledStyle"
-     android:focusable="true"
-     android:foreground="?android:attr/selectableItemBackground">
+<com.google.android.material.card.MaterialCardView 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="0dp"
+    style="?attr/materialCardViewElevatedStyle">
 
-    <LinearLayout
-         android:layout_height="wrap_content"
-         android:layout_width="match_parent"
-         android:padding="16dp"
-         android:orientation="vertical">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-        <RelativeLayout
-             android:layout_height="wrap_content"
-             android:layout_width="match_parent"
-             android:layout_marginTop="4dp">
-
-            <LinearLayout
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content"
-                 android:layout_toStartOf="@id/iv_status_rekap"
-                 android:layout_marginEnd="8dp"
-                 android:orientation="vertical"
-                 android:layout_alignParentStart="true">
-
-                <TextView
-                     android:layout_height="wrap_content"
-                     android:layout_width="wrap_content"
-                     android:textSize="10sp"
-                     android:text="Nama Konsumen" />
-
-                <TextView
-                     android:layout_height="wrap_content"
-                     android:layout_width="wrap_content"
-                     android:textSize="16sp"
-                     android:textColor="#F44336"
-                     android:id="@+id/tv_nama_rekap"
-                     android:text="Amar"
-                     android:textStyle="bold" />
-
-            </LinearLayout>
-
-            <ImageView
-                 android:layout_height="50dp"
-                 android:layout_width="130dp"
-                 android:src="@drawable/ic_hutang"
-                 android:scaleType="fitCenter"
-                 android:alpha="0.5"
-                 android:layout_centerVertical="true"
-                 android:layout_alignParentEnd="true"
-                 android:paddingStart="40dp"
-                 android:id="@+id/iv_status_rekap" />
-
-        </RelativeLayout>
-
-        <TextView
-             android:layout_height="wrap_content"
-             android:layout_width="match_parent"
-             android:textSize="10sp"
-             android:layout_marginTop="8dp"
-             android:text="Daftar Belanja" />
+        <ImageView
+            android:id="@+id/iv_status_rekap"
+            android:layout_width="140dp"
+            android:layout_height="80dp"
+            android:layout_gravity="top|end"
+            android:layout_marginTop="-10dp"
+            android:layout_marginEnd="-20dp"
+            android:alpha="0.3"
+            android:rotation="-20"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_hutang" />
 
         <LinearLayout
-             android:layout_height="wrap_content"
-             android:layout_width="match_parent"
-             android:orientation="vertical"
-             android:id="@+id/container_produk">
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="KONSUMEN"
+                android:textSize="9sp"
+                android:letterSpacing="0.1"
+                android:alpha="0.6"
+                android:fontFamily="sans-serif-medium" />
+
+            <TextView
+                android:id="@+id/tv_nama_rekap"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Amar"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:text="DAFTAR BELANJA"
+                android:textSize="9sp"
+                android:alpha="0.5"
+                android:fontFamily="sans-serif-medium" />
+
+            <LinearLayout
+                android:id="@+id/container_produk"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginVertical="12dp"
+                android:background="?android:attr/listDivider"
+                android:alpha="0.3" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:text="Total Kewajiban"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_total_harga_rekap"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:text="Rp 0"
+                    android:textColor="#F44336"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_item_pdf"
+                    style="?attr/materialIconButtonFilledTonalStyle"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    app:icon="@drawable/ic_pdf"
+                    app:iconTint="?attr/colorPrimary" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_item_share"
+                    style="?attr/materialIconButtonFilledTonalStyle"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginHorizontal="8dp"
+                    app:icon="@drawable/ic_whatsapp"
+                    app:iconTint="#4CAF50" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_lunasi"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="LUNASI"
+                    android:backgroundTint="#4CAF50"
+                    android:textColor="@android:color/white"
+                    app:icon="@drawable/ic_check"
+                    app:iconTint="@android:color/white" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_tanggal_update_rekap"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginTop="12dp"
+                android:alpha="0.5"
+                android:text="Diupdate: Hari ini, 12:45"
+                android:textSize="9sp" />
 
         </LinearLayout>
-
-        <View
-             android:layout_height="1dp"
-             android:layout_width="match_parent"
-             android:layout_marginBottom="8dp"
-             android:background="?android:attr/listDivider"
-             android:layout_marginTop="12dp" />
-
-        <RelativeLayout
-             android:layout_height="wrap_content"
-             android:layout_width="match_parent">
-
-            <TextView
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content"
-                 android:textSize="16sp"
-                 android:text="Total"
-                 android:textStyle="bold" />
-
-            <TextView
-                 android:layout_height="wrap_content"
-                 android:layout_width="wrap_content"
-                 android:layout_alignParentEnd="true"
-                 android:textSize="16sp"
-                 android:textColor="#F44336"
-                 android:id="@+id/tv_total_harga_rekap"
-                 android:text="Rp 0"
-                 android:textStyle="bold" />
-
-        </RelativeLayout>
-
-        <com.google.android.material.button.MaterialButton
-             android:layout_height="wrap_content"
-             android:layout_width="match_parent"
-             app:icon="@drawable/ic_check"
-             android:textStyle="bold"
-             android:backgroundTint="#4CAF50"
-             style="@style/Widget.Material3.Button.TonalButton"
-             android:layout_marginTop="16dp"
-             android:id="@+id/btn_lunasi"
-             android:text="Lunasi" />
-
-    </LinearLayout>
-
+    </FrameLayout>
 </com.google.android.material.card.MaterialCardView>

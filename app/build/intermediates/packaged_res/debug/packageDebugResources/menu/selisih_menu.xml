@@ -5,10 +5,12 @@
     <item
         android:id="@+id/action_backup"
         android:title="Backup Data"
-        app:showAsAction="never" />
+        android:icon="@drawable/ic_backup"
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/action_restore"
         android:title="Restore Data"
-        app:showAsAction="never" />
+        android:icon="@drawable/ic_restore"
+        app:showAsAction="ifRoom" />
 </menu>

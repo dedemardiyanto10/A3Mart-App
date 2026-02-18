@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,16 +21,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.a3mart.app.R;
 import com.a3mart.app.databinding.DialogTambahDepositBinding;
+import com.a3mart.app.databinding.DialogTambahHutangBinding;
 import com.a3mart.app.databinding.FragmentSelisihBinding;
 import com.a3mart.app.ui.transaksi.Transaksi;
 import com.a3mart.app.ui.transaksi.TransaksiViewModel;
+import com.a3mart.app.utils.DialogUtils;
+import com.a3mart.app.utils.FormatterUtils;
 import com.a3mart.app.utils.NotificationHelper;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import java.io.File;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,6 +40,14 @@ public class SelisihFragment extends Fragment implements SelisihAdapter.OnRekapA
     private SelisihViewModel selisihViewModel;
     private TransaksiViewModel transaksiViewModel;
     private static final String DATABASE_NAME = "a3mart_database";
+
+    private static final String ALGORITHM = "AES";
+    private static final String KEY = "A3Mart_Secure_16";
+
+    private javax.crypto.spec.SecretKeySpec generateKey() {
+        byte[] keyBytes = KEY.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        return new javax.crypto.spec.SecretKeySpec(keyBytes, ALGORITHM);
+    }
 
     private final androidx.activity.result.ActivityResultLauncher<Intent> restoreLauncher =
             registerForActivityResult(
@@ -129,6 +136,79 @@ public class SelisihFragment extends Fragment implements SelisihAdapter.OnRekapA
                 });
 
         binding.fabAddDeposit.setOnClickListener(v -> showBottomSheetDeposit());
+
+        binding.chipGroupSelisih.setOnCheckedStateChangeListener(
+                (group, checkedIds) -> {
+                    if (checkedIds.isEmpty()) return;
+
+                    int id = checkedIds.get(0);
+
+                    List<Transaksi> listTransaksi =
+                            transaksiViewModel.getTransaksiList().getValue();
+                    if (listTransaksi == null) return;
+
+                    List<Selisih> dataAsli = selisihViewModel.prosesRekapHutang(listTransaksi);
+
+                    List<Selisih> filtered = new ArrayList<>();
+
+                    if (id == binding.chipAll.getId()) {
+                        filtered.addAll(dataAsli);
+                    } else if (id == binding.chipDeposit.getId()) {
+                        for (Selisih s : dataAsli) {
+                            if (s.getTotalHarga() < 0) filtered.add(s);
+                        }
+                    } else if (id == binding.chipHutang.getId()) {
+                        for (Selisih s : dataAsli) {
+                            if (s.getTotalHarga() > 0) filtered.add(s);
+                        }
+                    }
+
+                    adapter.updateData(filtered);
+                });
+
+        adapter.setOnLongClickListener(
+                selisih -> {
+                    bukaBottomSheetTambahHutang(selisih.getNamaKonsumen());
+                });
+
+        getParentFragmentManager()
+                .setFragmentResultListener(
+                        "request_key_setting",
+                        getViewLifecycleOwner(),
+                        (requestKey, bundle) -> {
+                            if (adapter != null) {
+                                adapter.notifyDataSetChanged();
+                            }
+                        });
+    }
+
+    private void bukaBottomSheetTambahHutang(String nama) {
+        com.google.android.material.bottomsheet.BottomSheetDialog bottomSheetDialog =
+                new com.google.android.material.bottomsheet.BottomSheetDialog(requireContext());
+
+        DialogTambahHutangBinding dialogBinding =
+                DialogTambahHutangBinding.inflate(getLayoutInflater());
+        bottomSheetDialog.setContentView(dialogBinding.getRoot());
+
+        dialogBinding.tvHeader.setText("Tambah Hutang " + nama);
+
+        dialogBinding.btnSimpan.setOnClickListener(
+                v -> {
+                    String nominalStr = dialogBinding.etHargaHutang.getText().toString();
+                    if (!nominalStr.isEmpty()) {
+                        long nominal = Long.parseLong(nominalStr);
+
+                        transaksiViewModel.tambahTransaksi(
+                                "Hutang Tambahan", nama, 1, nominal, "Hutang");
+
+                        bottomSheetDialog.dismiss();
+                        smartToast("Hutang " + nama + " dicatat");
+                    } else {
+                        dialogBinding.etHargaHutang.setError("Masukkan nominal!");
+                    }
+                });
+
+        bottomSheetDialog.show();
     }
 
     private void prosesDanTampilkan(List<Transaksi> list) {
@@ -149,41 +229,45 @@ public class SelisihFragment extends Fragment implements SelisihAdapter.OnRekapA
 
     @Override
     public void onLunasi(Selisih selisih) {
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
-                .setIcon(R.drawable.logo)
-                .setTitle("Konfirmasi Pelunasan")
-                .setMessage(
-                        "Semua transaksi hutang atas nama "
-                                + selisih.getNamaKonsumen()
-                                + " akan ditandai sebagai LUNAS. Lanjutkan?")
-                .setPositiveButton(
-                        "Ya, Lunasi",
-                        (dialog, which) -> {
-                            transaksiViewModel.lunasiSemuaHutang(selisih.getNamaKonsumen());
+        com.google.android.material.dialog.MaterialAlertDialogBuilder builder =
+                new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                        .setIcon(R.drawable.logo)
+                        .setTitle("Konfirmasi Pelunasan")
+                        .setMessage(
+                                "Semua transaksi hutang atas nama "
+                                        + selisih.getNamaKonsumen()
+                                        + " akan ditandai sebagai LUNAS. Lanjutkan?")
+                        .setPositiveButton(
+                                "Ya, Lunasi",
+                                (dialogInterface, which) -> {
+                                    transaksiViewModel.lunasiSemuaHutang(selisih.getNamaKonsumen());
 
-                            android.content.SharedPreferences pref =
-                                    requireActivity()
-                                            .getSharedPreferences(
-                                                    "Settings",
-                                                    android.content.Context.MODE_PRIVATE);
-                            if (pref.getBoolean("notif_lunas", true)) {
-                                NotificationHelper.kirimNotifikasiLunas(
-                                        requireContext(),
-                                        selisih.getNamaKonsumen(),
-                                        selisih.getTotalHarga());
-                            }
+                                    android.content.SharedPreferences pref =
+                                            requireActivity()
+                                                    .getSharedPreferences(
+                                                            "Settings",
+                                                            android.content.Context.MODE_PRIVATE);
 
-                            smartToast(
-                                    "Status hutang "
-                                            + selisih.getNamaKonsumen()
-                                            + " berhasil diubah ke Lunas");
-                        })
-                .setNegativeButton(
-                        "Batal",
-                        (dialog, which) -> {
-                            dialog.dismiss();
-                        })
-                .show();
+                                    if (pref.getBoolean("notif_lunas", true)) {
+                                        NotificationHelper.kirimNotifikasiLunas(
+                                                requireContext(),
+                                                selisih.getNamaKonsumen(),
+                                                selisih.getTotalHarga());
+                                    }
+
+                                    smartToast(
+                                            "Status hutang "
+                                                    + selisih.getNamaKonsumen()
+                                                    + " berhasil diubah ke Lunas");
+                                })
+                        .setNegativeButton(
+                                "Batal", (dialogInterface, which) -> dialogInterface.dismiss());
+
+        androidx.appcompat.app.AlertDialog dialog = builder.create();
+
+        DialogUtils.terapkanEfekMewah(dialog);
+
+        dialog.show();
     }
 
     @Override
@@ -193,7 +277,12 @@ public class SelisihFragment extends Fragment implements SelisihAdapter.OnRekapA
 
     @Override
     public void onShareClick(Selisih selisih) {
-        buatDanSimpanPdf(selisih, true);
+        shareTagihanViaTeks(selisih);
+    }
+
+    @Override
+    public void onStrukClick(Selisih selisih) {
+        buatStrukThermal(selisih);
     }
 
     @Override
@@ -214,14 +303,198 @@ public class SelisihFragment extends Fragment implements SelisihAdapter.OnRekapA
         }
     }
 
-    private void buatDanSimpanPdf(Selisih selisih, boolean isShare) {
+    private void buatStrukThermal(Selisih selisih) {
+        android.print.PrintManager printManager =
+                (android.print.PrintManager)
+                        requireContext().getSystemService(android.content.Context.PRINT_SERVICE);
 
+        printManager.print(
+                "Struk_A3Mart_" + selisih.getNamaKonsumen(),
+                new android.print.PrintDocumentAdapter() {
+                    @Override
+                    public void onLayout(
+                            android.print.PrintAttributes oldAttributes,
+                            android.print.PrintAttributes newAttributes,
+                            android.os.CancellationSignal cancellationSignal,
+                            LayoutResultCallback callback,
+                            Bundle extras) {
+                        callback.onLayoutFinished(
+                                new android.print.PrintDocumentInfo.Builder("struk.pdf")
+                                        .setContentType(
+                                                android.print.PrintDocumentInfo
+                                                        .CONTENT_TYPE_DOCUMENT)
+                                        .build(),
+                                true);
+                    }
+
+                    @Override
+                    public void onWrite(
+                            android.print.PageRange[] pages,
+                            android.os.ParcelFileDescriptor destination,
+                            android.os.CancellationSignal cancellationSignal,
+                            WriteResultCallback callback) {
+                        android.graphics.pdf.PdfDocument document =
+                                new android.graphics.pdf.PdfDocument();
+
+                        android.content.SharedPreferences pref =
+                                requireContext()
+                                        .getSharedPreferences(
+                                                "Settings", android.content.Context.MODE_PRIVATE);
+                        String namaToko = pref.getString("nama_toko", "A3 Mart");
+                        String alamatToko = pref.getString("alamat_toko", "Alamat belum diatur");
+                        String telpToko = pref.getString("telepon_toko", "No.Telp belum diatur");
+
+                        int lebarCanvas = 500;
+                        int tinggiCanvas = 850 + (selisih.getListTransaksi().size() * 100);
+
+                        android.graphics.pdf.PdfDocument.PageInfo pageInfo =
+                                new android.graphics.pdf.PdfDocument.PageInfo.Builder(
+                                                lebarCanvas, tinggiCanvas, 1)
+                                        .create();
+                        android.graphics.pdf.PdfDocument.Page page = document.startPage(pageInfo);
+                        android.graphics.Canvas canvas = page.getCanvas();
+
+                        android.graphics.Paint paint = new android.graphics.Paint();
+                        paint.setAntiAlias(true);
+
+                        int marginKiri = 40;
+                        int posisiTeksX = 145;
+
+                        try {
+                            String logoPath = pref.getString("logo_path", null);
+                            android.graphics.Bitmap b;
+                            if (logoPath != null) {
+                                b =
+                                        android.graphics.BitmapFactory.decodeStream(
+                                                requireContext()
+                                                        .getContentResolver()
+                                                        .openInputStream(
+                                                                android.net.Uri.parse(logoPath)));
+                            } else {
+                                b =
+                                        android.graphics.BitmapFactory.decodeResource(
+                                                getResources(), R.drawable.logo);
+                            }
+                            if (b != null) {
+                                int size = 85;
+                                android.graphics.Bitmap scaled =
+                                        android.graphics.Bitmap.createScaledBitmap(
+                                                b, size, size, true);
+                                canvas.drawBitmap(scaled, marginKiri, 40, paint);
+                            }
+                        } catch (Exception e) {
+                        }
+
+                        paint.setTextAlign(android.graphics.Paint.Align.LEFT);
+
+                        paint.setTypeface(
+                                android.graphics.Typeface.create(
+                                        android.graphics.Typeface.DEFAULT,
+                                        android.graphics.Typeface.BOLD));
+                        paint.setTextSize(26f);
+                        canvas.drawText(namaToko.toUpperCase(), posisiTeksX, 70, paint);
+
+                        paint.setTypeface(android.graphics.Typeface.MONOSPACE);
+                        paint.setTextSize(14f);
+                        paint.setFakeBoldText(false);
+                        paint.setColor(android.graphics.Color.DKGRAY);
+                        canvas.drawText(alamatToko, posisiTeksX, 95, paint);
+                        canvas.drawText("Telp: " + telpToko, posisiTeksX, 115, paint);
+
+                        paint.setColor(android.graphics.Color.parseColor("#1976D2"));
+                        paint.setStrokeWidth(3f);
+                        canvas.drawLine(marginKiri, 145, lebarCanvas - marginKiri, 145, paint);
+
+                        paint.setColor(android.graphics.Color.BLACK);
+                        paint.setTextSize(16f);
+                        canvas.drawText(
+                                "PELANGGAN : " + selisih.getNamaKonsumen().toUpperCase(),
+                                marginKiri,
+                                185,
+                                paint);
+                        canvas.drawText(
+                                "TANGGAL   : "
+                                        + new java.text.SimpleDateFormat("dd/MM/yy HH:mm")
+                                                .format(new java.util.Date()),
+                                marginKiri,
+                                210,
+                                paint);
+                        canvas.drawText(
+                                "------------------------------------------",
+                                marginKiri,
+                                240,
+                                paint);
+
+                        int y = 280;
+                        int marginKanan = lebarCanvas - 40;
+
+                        for (com.a3mart.app.ui.transaksi.Transaksi t : selisih.getListTransaksi()) {
+                            paint.setFakeBoldText(true);
+                            canvas.drawText(t.getNamaProduk(), marginKiri, y, paint);
+
+                            y += 30;
+                            paint.setFakeBoldText(false);
+                            canvas.drawText(t.getJumlah() + " x ", marginKiri, y, paint);
+
+                            paint.setTextAlign(android.graphics.Paint.Align.RIGHT);
+                            canvas.drawText(
+                                    FormatterUtils.formatRupiah(t.getTotalHarga()),
+                                    marginKanan,
+                                    y,
+                                    paint);
+
+                            paint.setTextAlign(android.graphics.Paint.Align.LEFT);
+                            y += 55;
+                        }
+
+                        y += 20;
+                        canvas.drawText(
+                                "------------------------------------------", marginKiri, y, paint);
+                        y += 45;
+                        paint.setFakeBoldText(true);
+                        paint.setTextSize(20f);
+                        long total = selisih.getTotalHarga();
+                        canvas.drawText(
+                                total > 0 ? "TOTAL HUTANG" : "SISA DEPOSIT", marginKiri, y, paint);
+
+                        paint.setTextAlign(android.graphics.Paint.Align.RIGHT);
+                        canvas.drawText(
+                                FormatterUtils.formatRupiah(Math.abs(total)),
+                                marginKanan,
+                                y,
+                                paint);
+
+                        paint.setTextAlign(android.graphics.Paint.Align.CENTER);
+                        paint.setFakeBoldText(false);
+                        paint.setTextSize(16f);
+                        y += 90;
+                        canvas.drawText("TERIMA KASIH", lebarCanvas / 2, y, paint);
+                        canvas.drawText("STRUK SAH A3 MART", lebarCanvas / 2, y + 25, paint);
+
+                        document.finishPage(page);
+                        try {
+                            document.writeTo(
+                                    new java.io.FileOutputStream(destination.getFileDescriptor()));
+                        } catch (java.io.IOException e) {
+                            callback.onWriteFailed(e.getMessage());
+                        } finally {
+                            document.close();
+                        }
+                        callback.onWriteFinished(
+                                new android.print.PageRange[] {android.print.PageRange.ALL_PAGES});
+                    }
+                },
+                null);
+    }
+
+    private void buatDanSimpanPdf(Selisih selisih, boolean isShare) {
         androidx.appcompat.app.AlertDialog progressDialog =
                 new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
                         .setView(R.layout.layout_progress)
                         .setCancelable(false)
                         .create();
 
+        DialogUtils.terapkanEfekMewah(progressDialog);
         progressDialog.show();
 
         new android.os.Handler(android.os.Looper.getMainLooper())
@@ -230,6 +503,18 @@ public class SelisihFragment extends Fragment implements SelisihAdapter.OnRekapA
                             android.graphics.pdf.PdfDocument document =
                                     new android.graphics.pdf.PdfDocument();
                             try {
+                                android.content.SharedPreferences pref =
+                                        requireContext()
+                                                .getSharedPreferences(
+                                                        "Settings",
+                                                        android.content.Context.MODE_PRIVATE);
+                                String namaTokoProfil = pref.getString("nama_toko", "A3 Mart");
+                                String alamatTokoProfil =
+                                        pref.getString("alamat_toko", "Alamat belum diatur");
+                                String telpTokoProfil =
+                                        pref.getString("telepon_toko", "No.Telp belum diatur");
+                                String logoPath = pref.getString("logo_path", null);
+
                                 android.graphics.pdf.PdfDocument.PageInfo pageInfo =
                                         new android.graphics.pdf.PdfDocument.PageInfo.Builder(
                                                         595, 842, 1)
@@ -240,25 +525,43 @@ public class SelisihFragment extends Fragment implements SelisihAdapter.OnRekapA
                                 android.graphics.Canvas canvas = page.getCanvas();
                                 android.graphics.Paint paint = new android.graphics.Paint();
                                 android.graphics.Paint linePaint = new android.graphics.Paint();
+                                paint.setAntiAlias(true);
 
-                                android.graphics.Bitmap bitmap =
-                                        android.graphics.BitmapFactory.decodeResource(
-                                                getResources(), R.drawable.logo);
-                                android.graphics.Bitmap scaledLogo =
-                                        android.graphics.Bitmap.createScaledBitmap(
-                                                bitmap, 60, 60, false);
-                                canvas.drawBitmap(scaledLogo, 50, 50, paint);
+                                try {
+                                    android.graphics.Bitmap bitmap;
+                                    if (logoPath != null && !logoPath.isEmpty()) {
+                                        bitmap =
+                                                android.graphics.BitmapFactory.decodeStream(
+                                                        requireContext()
+                                                                .getContentResolver()
+                                                                .openInputStream(
+                                                                        android.net.Uri.parse(
+                                                                                logoPath)));
+                                    } else {
+                                        bitmap =
+                                                android.graphics.BitmapFactory.decodeResource(
+                                                        getResources(), R.drawable.logo);
+                                    }
+                                    if (bitmap != null) {
+                                        float targetSize = 60f;
+                                        android.graphics.RectF rect =
+                                                new android.graphics.RectF(
+                                                        50, 50, 50 + targetSize, 50 + targetSize);
+                                        canvas.drawBitmap(bitmap, null, rect, paint);
+                                    }
+                                } catch (Exception e) {
+                                }
 
                                 paint.setColor(android.graphics.Color.BLACK);
                                 paint.setFakeBoldText(true);
                                 paint.setTextSize(22f);
-                                canvas.drawText("A3 MART", 125, 75, paint);
+                                canvas.drawText(namaTokoProfil.toUpperCase(), 125, 75, paint);
 
-                                paint.setTextSize(11f);
+                                paint.setTextSize(10f);
                                 paint.setFakeBoldText(false);
-                                paint.setColor(android.graphics.Color.GRAY);
-                                canvas.drawText(
-                                        "Laporan Saldo & Rincian Transaksi", 125, 95, paint);
+                                paint.setColor(android.graphics.Color.DKGRAY);
+                                canvas.drawText(alamatTokoProfil, 125, 92, paint);
+                                canvas.drawText("Telp: " + telpTokoProfil, 125, 107, paint);
 
                                 linePaint.setColor(android.graphics.Color.parseColor("#1976D2"));
                                 linePaint.setStrokeWidth(3f);
@@ -267,20 +570,20 @@ public class SelisihFragment extends Fragment implements SelisihAdapter.OnRekapA
                                 paint.setColor(android.graphics.Color.BLACK);
                                 paint.setTextSize(12f);
                                 paint.setFakeBoldText(true);
-                                canvas.drawText("PENERIMA:", 50, 150, paint);
+                                canvas.drawText("PENERIMA:", 50, 155, paint);
                                 paint.setFakeBoldText(false);
                                 canvas.drawText(
-                                        selisih.getNamaKonsumen().toUpperCase(), 50, 170, paint);
+                                        selisih.getNamaKonsumen().toUpperCase(), 50, 175, paint);
 
                                 paint.setTextAlign(android.graphics.Paint.Align.RIGHT);
                                 String tgl =
                                         new java.text.SimpleDateFormat(
                                                         "dd/MM/yyyy", java.util.Locale.getDefault())
                                                 .format(new java.util.Date());
-                                canvas.drawText("Tanggal: " + tgl, 545, 150, paint);
+                                canvas.drawText("Tanggal: " + tgl, 545, 155, paint);
                                 paint.setTextAlign(android.graphics.Paint.Align.LEFT);
 
-                                int yTable = 210;
+                                int yTable = 215;
                                 paint.setColor(android.graphics.Color.parseColor("#EEEEEE"));
                                 canvas.drawRect(50, yTable - 20, 545, yTable + 10, paint);
                                 paint.setColor(android.graphics.Color.BLACK);
@@ -291,23 +594,16 @@ public class SelisihFragment extends Fragment implements SelisihAdapter.OnRekapA
 
                                 yTable += 35;
                                 paint.setFakeBoldText(false);
-                                java.text.NumberFormat nf =
-                                        java.text.NumberFormat.getInstance(
-                                                new java.util.Locale("in", "ID"));
-                                for (Transaksi t : selisih.getListTransaksi()) {
-                                    if (yTable > 750) break;
+                                for (com.a3mart.app.ui.transaksi.Transaksi t :
+                                        selisih.getListTransaksi()) {
                                     canvas.drawText(t.getNamaProduk(), 60, yTable, paint);
                                     canvas.drawText(
                                             String.valueOf(t.getJumlah()), 350, yTable, paint);
                                     canvas.drawText(
-                                            "Rp " + nf.format(t.getTotalHarga()),
+                                            FormatterUtils.formatRupiah(t.getTotalHarga()),
                                             460,
                                             yTable,
                                             paint);
-
-                                    linePaint.setStrokeWidth(0.5f);
-                                    linePaint.setColor(android.graphics.Color.LTGRAY);
-                                    canvas.drawLine(50, yTable + 10, 545, yTable + 10, linePaint);
                                     yTable += 30;
                                 }
 
@@ -315,22 +611,19 @@ public class SelisihFragment extends Fragment implements SelisihAdapter.OnRekapA
                                 paint.setFakeBoldText(true);
                                 paint.setTextSize(14f);
                                 long total = selisih.getTotalHarga();
-                                String label = (total < 0) ? "SISA DEPOSIT" : "TOTAL HUTANG";
-                                canvas.drawText(label, 300, yTable, paint);
+                                canvas.drawText(
+                                        total < 0 ? "SISA DEPOSIT" : "TOTAL HUTANG",
+                                        300,
+                                        yTable,
+                                        paint);
                                 paint.setColor(
                                         total < 0
                                                 ? android.graphics.Color.parseColor("#2E7D32")
                                                 : android.graphics.Color.RED);
                                 canvas.drawText(
-                                        "Rp " + nf.format(Math.abs(total)), 460, yTable, paint);
-
-                                paint.setColor(android.graphics.Color.GRAY);
-                                paint.setTextSize(10f);
-                                paint.setFakeBoldText(false);
-                                canvas.drawText(
-                                        "*Dokumen ini adalah bukti sah transaksi di A3 Mart.",
-                                        50,
-                                        800,
+                                        FormatterUtils.formatRupiah(Math.abs(total)),
+                                        460,
+                                        yTable,
                                         paint);
 
                                 document.finishPage(page);
@@ -357,37 +650,88 @@ public class SelisihFragment extends Fragment implements SelisihAdapter.OnRekapA
 
                                 progressDialog.dismiss();
 
-                                if (isShare) {
-                                    shareViaWhatsApp(file, selisih);
-                                } else {
-                                    smartToast("PDF Berhasil Disimpan!");
-                                    new com.google.android.material.dialog
-                                                    .MaterialAlertDialogBuilder(requireContext())
-                                            .setIcon(R.drawable.ic_pdf)
-                                            .setTitle("Berhasil Disimpan")
-                                            .setMessage(
-                                                    "File: "
-                                                            + file.getName()
-                                                            + "\nLokasi: Documents/A3Mart")
-                                            .setPositiveButton(
-                                                    "Lihat File",
-                                                    (d, w) -> {
-                                                        bukaFolderPenyimpanan();
-                                                    })
-                                            .setNegativeButton("Tutup", null)
-                                            .show();
-                                }
+                                androidx.appcompat.app.AlertDialog successDialog =
+                                        new com.google.android.material.dialog
+                                                        .MaterialAlertDialogBuilder(
+                                                        requireContext())
+                                                .setIcon(R.drawable.ic_pdf)
+                                                .setTitle("Invoice Berhasil Disimpan")
+                                                .setMessage(
+                                                        "File: "
+                                                                + file.getName()
+                                                                + "\nLokasi: Documents/A3Mart")
+                                                .setPositiveButton(
+                                                        "Lihat File",
+                                                        (d, w) -> bukaFolderPenyimpanan())
+                                                .setNegativeButton("Tutup", null)
+                                                .create();
 
-                            } catch (java.io.IOException e) {
-                                document.close();
-                                progressDialog.dismiss();
-                                smartToast("Gagal simpan file: " + e.getMessage());
+                                DialogUtils.terapkanEfekMewah(successDialog);
+                                successDialog.show();
+
                             } catch (Exception e) {
+                                if (document != null) document.close();
                                 progressDialog.dismiss();
                                 smartToast("Error: " + e.getMessage());
                             }
                         },
                         1000);
+    }
+
+    private void shareTagihanViaTeks(Selisih selisih) {
+        android.content.SharedPreferences pref =
+                requireContext()
+                        .getSharedPreferences("Settings", android.content.Context.MODE_PRIVATE);
+        String namaToko = pref.getString("nama_toko", "A3 MART");
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("      *").append(namaToko.toUpperCase()).append("*\n");
+        sb.append("------------------------------------------\n");
+        sb.append("*RINCIAN TAGIHAN*\n\n");
+        sb.append("Kepada: *").append(selisih.getNamaKonsumen().toUpperCase()).append("*\n");
+        sb.append("Tanggal: ")
+                .append(
+                        new java.text.SimpleDateFormat(
+                                        "dd/MM/yyyy HH:mm", java.util.Locale.getDefault())
+                                .format(new java.util.Date()))
+                .append("\n\n");
+
+        sb.append("*Daftar Transaksi:*\n");
+
+        for (com.a3mart.app.ui.transaksi.Transaksi t : selisih.getListTransaksi()) {
+            sb.append("- ")
+                    .append(t.getNamaProduk())
+                    .append(" (")
+                    .append(t.getJumlah())
+                    .append("x) ")
+                    .append("= Rp ")
+                    .append(FormatterUtils.formatRupiah(t.getTotalHarga()))
+                    .append("\n");
+        }
+
+        long total = selisih.getTotalHarga();
+        sb.append("\n------------------------------------------\n");
+        if (total > 0) {
+            sb.append("*TOTAL HUTANG: Rp ").append(FormatterUtils.formatRupiah(total)).append("*");
+        } else {
+            sb.append("*SISA DEPOSIT: Rp ")
+                    .append(FormatterUtils.formatRupiah(Math.abs(total)))
+                    .append("*");
+        }
+        sb.append("\n------------------------------------------\n");
+        sb.append("_Mohon segera melakukan pelunasan._\n");
+        sb.append("_Terima kasih telah berbelanja!_");
+
+        android.content.Intent intent =
+                new android.content.Intent(android.content.Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(android.content.Intent.EXTRA_TEXT, sb.toString());
+
+        try {
+            startActivity(android.content.Intent.createChooser(intent, "Kirim Tagihan via..."));
+        } catch (Exception e) {
+            smartToast("Gagal membagikan tagihan!");
+        }
     }
 
     private void bukaFolderPenyimpanan() {
@@ -432,57 +776,227 @@ public class SelisihFragment extends Fragment implements SelisihAdapter.OnRekapA
 
     private void backupDatabase() {
         try {
-            List<Transaksi> dataList = transaksiViewModel.getTransaksiList().getValue();
 
+            List<Transaksi> dataList = transaksiViewModel.getTransaksiList().getValue();
             if (dataList == null || dataList.isEmpty()) {
-                smartToast("Gagal: Tidak ada data untuk dibackup!");
+                smartToast("Tidak ada data transaksi untuk di-backup");
                 return;
             }
 
-            com.google.gson.Gson gson = new com.google.gson.Gson();
-            String jsonString = gson.toJson(dataList);
+            android.content.SharedPreferences sp =
+                    requireActivity()
+                            .getSharedPreferences(
+                                    "A3Mart_Prefs", android.content.Context.MODE_PRIVATE);
+            String jsonP = sp.getString("list_produk", null);
+
+            List<com.a3mart.app.ui.produk.Produk> listP = new ArrayList<>();
+            if (jsonP != null) {
+                java.lang.reflect.Type typeP =
+                        new com.google.gson.reflect.TypeToken<
+                                ArrayList<com.a3mart.app.ui.produk.Produk>>() {}.getType();
+                listP = new com.google.gson.Gson().fromJson(jsonP, typeP);
+            }
+
+            com.a3mart.app.utils.A3MartBackupModel paketLengkap =
+                    new com.a3mart.app.utils.A3MartBackupModel(dataList, listP);
+
+            String jsonString = new com.google.gson.Gson().toJson(paketLengkap);
+
+            String encryptedJson = encrypt(jsonString);
+
+            String hariIni =
+                    new java.text.SimpleDateFormat("EEEE", new java.util.Locale("id", "ID"))
+                            .format(new java.util.Date());
 
             File backupDir =
                     new File(
-                            android.os.Environment.getExternalStoragePublicDirectory(
-                                    android.os.Environment.DIRECTORY_DOCUMENTS),
+                            Environment.getExternalStoragePublicDirectory(
+                                    Environment.DIRECTORY_DOCUMENTS),
                             "A3Mart/Backup");
-
             if (!backupDir.exists()) backupDir.mkdirs();
 
-            String timeStamp =
-                    new java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.getDefault())
-                            .format(new java.util.Date());
-            File file = new File(backupDir, "A3Mart_Backup_" + timeStamp + ".json");
+            File file = new File(backupDir, "A3Mart_MB_" + hariIni + ".bak");
 
-            java.io.FileWriter writer = new java.io.FileWriter(file);
-            writer.write(jsonString);
-            writer.close();
+            try (java.io.FileWriter writer = new java.io.FileWriter(file)) {
+                writer.write(encryptedJson);
+            }
 
-            new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("Backup Berhasil")
-                    .setMessage("File disimpan sebagai:\n" + file.getName())
-                    .setPositiveButton("Oke", null)
-                    .show();
+            smartToast("Backup Manual (" + hariIni + ") Berhasil!");
 
         } catch (Exception e) {
             smartToast("Gagal Backup: " + e.getMessage());
+            android.util.Log.e("BACKUP_MANUAL", "Error: ", e);
         }
     }
 
     private void showBackupDialog() {
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
-                .setIcon(R.drawable.ic_backup)
-                .setTitle("Backup Data")
-                .setMessage(
-                        "Data transaksi akan disimpan ke folder:\n\nDocuments/A3Mart/Backup\n\nFile ini bisa digunakan untuk memulihkan data jika aplikasi terhapus. Lanjutkan?")
-                .setPositiveButton(
-                        "Backup Sekarang",
-                        (d, w) -> {
-                            backupDatabase();
-                        })
-                .setNegativeButton("Batal", null)
-                .show();
+        com.google.android.material.dialog.MaterialAlertDialogBuilder builder =
+                new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                        .setIcon(R.drawable.ic_backup)
+                        .setTitle("Backup Data")
+                        .setMessage(
+                                "Data transaksi akan disimpan ke folder:\n\nDocuments/A3Mart/Backup\n\nFile ini bisa digunakan untuk memulihkan data jika aplikasi terhapus. Lanjutkan?")
+                        .setPositiveButton(
+                                "Backup Sekarang",
+                                (d, w) -> {
+                                    backupDatabase();
+                                })
+                        .setNegativeButton("Batal", null);
+
+        androidx.appcompat.app.AlertDialog dialog = builder.create();
+
+        DialogUtils.terapkanEfekMewah(dialog);
+
+        dialog.show();
+    }
+
+    private void showRestoreDialog() {
+        File backupDir =
+                new File(
+                        Environment.getExternalStoragePublicDirectory(
+                                Environment.DIRECTORY_DOCUMENTS),
+                        "A3Mart/Backup");
+
+        if (!backupDir.exists() || backupDir.listFiles() == null) {
+            smartToast("Folder backup belum dibuat.");
+            return;
+        }
+
+        File[] files = backupDir.listFiles((dir, name) -> name.endsWith(".bak"));
+        if (files == null || files.length == 0) {
+            smartToast("Tidak ditemukan file backup.");
+            return;
+        }
+
+        java.util.Arrays.sort(files, (a, b) -> Long.compare(b.lastModified(), a.lastModified()));
+
+        View dialogView =
+                LayoutInflater.from(requireContext()).inflate(R.layout.dialog_restore_list, null);
+        androidx.recyclerview.widget.RecyclerView rv = dialogView.findViewById(R.id.rvBackupList);
+
+        androidx.appcompat.app.AlertDialog dialog =
+                new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                        .setView(dialogView)
+                        .setPositiveButton(
+                                "Cari File Lain",
+                                (d, w) -> {
+                                    Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                                    intent.setType("*/*");
+                                    restoreLauncher.launch(intent);
+                                })
+                        .setNegativeButton("Batal", null)
+                        .create();
+
+        rv.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(requireContext()));
+        rv.setAdapter(
+                new androidx.recyclerview.widget.RecyclerView.Adapter<BackupViewHolder>() {
+                    @NonNull
+                    @Override
+                    public BackupViewHolder onCreateViewHolder(
+                            @NonNull ViewGroup parent, int viewType) {
+                        View v =
+                                LayoutInflater.from(parent.getContext())
+                                        .inflate(R.layout.item_file_backup, parent, false);
+                        return new BackupViewHolder(v);
+                    }
+
+                    @Override
+                    public void onBindViewHolder(@NonNull BackupViewHolder holder, int position) {
+                        File file = files[position];
+                        holder.tvName.setText(file.getName());
+
+                        java.text.SimpleDateFormat sdfDate =
+                                new java.text.SimpleDateFormat(
+                                        "dd MMM yyyy", java.util.Locale.getDefault());
+                        holder.tvInfo.setText(
+                                sdfDate.format(new java.util.Date(file.lastModified())));
+
+                        java.text.SimpleDateFormat sdfTime =
+                                new java.text.SimpleDateFormat(
+                                        "HH:mm", java.util.Locale.getDefault());
+                        holder.tvTime.setText(
+                                sdfTime.format(new java.util.Date(file.lastModified())));
+
+                        holder.card.setOnClickListener(
+                                v -> {
+                                    dialog.dismiss();
+                                    confirmRestoreExecution(file);
+                                });
+                    }
+
+                    @Override
+                    public int getItemCount() {
+                        return files.length;
+                    }
+                });
+
+        DialogUtils.terapkanEfekMewah(dialog);
+        dialog.show();
+    }
+
+    static class BackupViewHolder extends androidx.recyclerview.widget.RecyclerView.ViewHolder {
+        android.widget.TextView tvName, tvInfo, tvTime;
+        com.google.android.material.card.MaterialCardView card;
+
+        BackupViewHolder(View v) {
+            super(v);
+            card = v.findViewById(R.id.cardItem);
+            tvName = v.findViewById(R.id.tvFileName);
+            tvInfo = v.findViewById(R.id.tvFileInfo);
+            tvTime = v.findViewById(R.id.tvTimeInfo);
+        }
+    }
+
+    private void confirmRestoreExecution(File file) {
+        androidx.appcompat.app.AlertDialog dialog =
+                new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Peringatan!")
+                        .setIcon(R.drawable.ic_warning)
+                        .setMessage(
+                                "Anda akan memulihkan data dari: "
+                                        + file.getName()
+                                        + "\n\nData transaksi saat ini akan hilang. Lanjutkan?")
+                        .setPositiveButton(
+                                "Ya, Pulihkan",
+                                (d, w) -> {
+                                    prosesFileKeViewModel(file);
+                                })
+                        .setNegativeButton("Batal", null)
+                        .create();
+
+        DialogUtils.terapkanEfekMewah(dialog);
+
+        dialog.show();
+    }
+
+    private void eksekusiRestoreData(String encryptedContent) {
+        try {
+            String decryptedJson = decrypt(encryptedContent.trim());
+
+            if (decryptedJson != null && !decryptedJson.isEmpty()) {
+                transaksiViewModel.importData(decryptedJson);
+
+                smartToast("Restore Berhasil! Data transaksi & stok dipulihkan.");
+            } else {
+                smartToast("File kosong atau tidak valid.");
+            }
+        } catch (Exception e) {
+            smartToast("Gagal: Dekripsi gagal atau format salah!");
+            android.util.Log.e("RESTORE_ERROR", "Error: ", e);
+        }
+    }
+
+    private void prosesFileKeViewModel(File file) {
+        try {
+            java.io.FileInputStream fis = new java.io.FileInputStream(file);
+            java.util.Scanner s = new java.util.Scanner(fis).useDelimiter("\\A");
+            String content = s.hasNext() ? s.next() : "";
+            s.close();
+
+            eksekusiRestoreData(content);
+        } catch (Exception e) {
+            smartToast("Gagal membaca file backup.");
+        }
     }
 
     private void handleRestoreUri(android.net.Uri uri) {
@@ -493,33 +1007,29 @@ public class SelisihFragment extends Fragment implements SelisihAdapter.OnRekapA
             String content = scanner.hasNext() ? scanner.next() : "";
             scanner.close();
 
-            Gson gson = new Gson();
-            Type type = new TypeToken<ArrayList<Transaksi>>() {}.getType();
-            List<Transaksi> dataBaru = gson.fromJson(content, type);
-
-            if (dataBaru != null) {
-                transaksiViewModel.importData(dataBaru);
-                smartToast("Restore berhasil!");
-            }
+            eksekusiRestoreData(content);
         } catch (Exception e) {
-            smartToast("Gagal membaca file backup!");
+            smartToast("Gagal membaca file: " + e.getMessage());
         }
     }
 
-    private void showRestoreDialog() {
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
-                .setIcon(R.drawable.ic_restore)
-                .setTitle("Restore Data")
-                .setMessage("Pilih file backup .json untuk mengembalikan data.")
-                .setPositiveButton(
-                        "Pilih File",
-                        (d, w) -> {
-                            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                            intent.setType("application/json");
-                            restoreLauncher.launch(intent);
-                        })
-                .setNegativeButton("Batal", null)
-                .show();
+    private String encrypt(String data) throws Exception {
+        javax.crypto.Cipher cipher = javax.crypto.Cipher.getInstance(ALGORITHM);
+        cipher.init(javax.crypto.Cipher.ENCRYPT_MODE, generateKey());
+        byte[] encryptedBytes =
+                cipher.doFinal(data.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        return android.util.Base64.encodeToString(encryptedBytes, android.util.Base64.DEFAULT);
+    }
+
+    private String decrypt(String encryptedData) throws Exception {
+        javax.crypto.Cipher cipher = javax.crypto.Cipher.getInstance(ALGORITHM);
+        cipher.init(javax.crypto.Cipher.DECRYPT_MODE, generateKey());
+
+        byte[] decodedBytes =
+                android.util.Base64.decode(encryptedData, android.util.Base64.NO_WRAP);
+
+        byte[] decryptedBytes = cipher.doFinal(decodedBytes);
+        return new String(decryptedBytes, java.nio.charset.StandardCharsets.UTF_8);
     }
 
     private void showBottomSheetDeposit() {
@@ -596,7 +1106,7 @@ public class SelisihFragment extends Fragment implements SelisihAdapter.OnRekapA
                         if (selected.equalsIgnoreCase("Umum")) {
                             sBinding.tilNamaManual.setVisibility(View.VISIBLE);
                             sBinding.layoutInfoSaldo.setVisibility(View.GONE);
-                            sBinding.etNamaManual.setText("Umum ");
+                            sBinding.etNamaManual.setText("");
                             sBinding.etNamaManual.setSelection(
                                     sBinding.etNamaManual.getText().length());
                             currentHutang[0] = 0;

@@ -23,6 +23,12 @@ public final class ItemSelisihBinding implements ViewBinding {
   private final MaterialCardView rootView;
 
   @NonNull
+  public final MaterialButton btnItemPdf;
+
+  @NonNull
+  public final MaterialButton btnItemShare;
+
+  @NonNull
   public final MaterialButton btnLunasi;
 
   @NonNull
@@ -35,16 +41,24 @@ public final class ItemSelisihBinding implements ViewBinding {
   public final TextView tvNamaRekap;
 
   @NonNull
+  public final TextView tvTanggalUpdateRekap;
+
+  @NonNull
   public final TextView tvTotalHargaRekap;
 
-  private ItemSelisihBinding(@NonNull MaterialCardView rootView, @NonNull MaterialButton btnLunasi,
+  private ItemSelisihBinding(@NonNull MaterialCardView rootView, @NonNull MaterialButton btnItemPdf,
+      @NonNull MaterialButton btnItemShare, @NonNull MaterialButton btnLunasi,
       @NonNull LinearLayout containerProduk, @NonNull ImageView ivStatusRekap,
-      @NonNull TextView tvNamaRekap, @NonNull TextView tvTotalHargaRekap) {
+      @NonNull TextView tvNamaRekap, @NonNull TextView tvTanggalUpdateRekap,
+      @NonNull TextView tvTotalHargaRekap) {
     this.rootView = rootView;
+    this.btnItemPdf = btnItemPdf;
+    this.btnItemShare = btnItemShare;
     this.btnLunasi = btnLunasi;
     this.containerProduk = containerProduk;
     this.ivStatusRekap = ivStatusRekap;
     this.tvNamaRekap = tvNamaRekap;
+    this.tvTanggalUpdateRekap = tvTanggalUpdateRekap;
     this.tvTotalHargaRekap = tvTotalHargaRekap;
   }
 
@@ -75,6 +89,18 @@ public final class ItemSelisihBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
+      id = R.id.btn_item_pdf;
+      MaterialButton btnItemPdf = ViewBindings.findChildViewById(rootView, id);
+      if (btnItemPdf == null) {
+        break missingId;
+      }
+
+      id = R.id.btn_item_share;
+      MaterialButton btnItemShare = ViewBindings.findChildViewById(rootView, id);
+      if (btnItemShare == null) {
+        break missingId;
+      }
+
       id = R.id.btn_lunasi;
       MaterialButton btnLunasi = ViewBindings.findChildViewById(rootView, id);
       if (btnLunasi == null) {
@@ -99,14 +125,21 @@ public final class ItemSelisihBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.tv_tanggal_update_rekap;
+      TextView tvTanggalUpdateRekap = ViewBindings.findChildViewById(rootView, id);
+      if (tvTanggalUpdateRekap == null) {
+        break missingId;
+      }
+
       id = R.id.tv_total_harga_rekap;
       TextView tvTotalHargaRekap = ViewBindings.findChildViewById(rootView, id);
       if (tvTotalHargaRekap == null) {
         break missingId;
       }
 
-      return new ItemSelisihBinding((MaterialCardView) rootView, btnLunasi, containerProduk,
-          ivStatusRekap, tvNamaRekap, tvTotalHargaRekap);
+      return new ItemSelisihBinding((MaterialCardView) rootView, btnItemPdf, btnItemShare,
+          btnLunasi, containerProduk, ivStatusRekap, tvNamaRekap, tvTanggalUpdateRekap,
+          tvTotalHargaRekap);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

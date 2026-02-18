@@ -20,9 +20,21 @@ public class ProdukViewModel extends AndroidViewModel {
     private final Gson gson = new Gson();
     private final String KEY_PRODUK = "list_produk";
 
+    private final SharedPreferences.OnSharedPreferenceChangeListener mListener;
+
     public ProdukViewModel(@NonNull Application application) {
         super(application);
         sharedPreferences = application.getSharedPreferences("A3Mart_Prefs", Context.MODE_PRIVATE);
+
+        mListener =
+                (prefs, key) -> {
+                    if (KEY_PRODUK.equals(key)) {
+                        loadData();
+                    }
+                };
+
+        sharedPreferences.registerOnSharedPreferenceChangeListener(mListener);
+
         loadData();
     }
 
@@ -30,19 +42,33 @@ public class ProdukViewModel extends AndroidViewModel {
         return mProdukList;
     }
 
-    public void tambahProduk(String nama, int harga, int stok) {
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        sharedPreferences.unregisterOnSharedPreferenceChangeListener(mListener);
+    }
+
+    public void tambahProduk(String barcode, String nama, int harga, int stok) {
         List<Produk> currentList = mProdukList.getValue();
         if (currentList == null) currentList = new ArrayList<>();
 
-        currentList.add(new Produk(nama, harga, stok));
+        if (barcode != null && !barcode.isEmpty()) {
+            for (Produk p : currentList) {
+                if (barcode.equals(p.getBarcode())) {
+                    return;
+                }
+            }
+        }
+
+        currentList.add(new Produk(barcode, nama, harga, stok));
         mProdukList.setValue(currentList);
         saveData(currentList);
     }
 
-    public void updateProduk(int position, String nama, int harga, int stok) {
+    public void updateProduk(int position, String barcode, String nama, int harga, int stok) {
         List<Produk> currentList = mProdukList.getValue();
-        if (currentList != null) {
-            currentList.set(position, new Produk(nama, harga, stok));
+        if (currentList != null && position >= 0 && position < currentList.size()) {
+            currentList.set(position, new Produk(barcode, nama, harga, stok));
             mProdukList.setValue(currentList);
             saveData(currentList);
         }
@@ -50,25 +76,34 @@ public class ProdukViewModel extends AndroidViewModel {
 
     public void hapusProduk(int position) {
         List<Produk> currentList = mProdukList.getValue();
-        if (currentList != null) {
+        if (currentList != null && position >= 0 && position < currentList.size()) {
             currentList.remove(position);
             mProdukList.setValue(currentList);
             saveData(currentList);
         }
     }
 
-    public void kurangiStok(String namaProduk, int jumlahDibel) {
+    public void updateStok(String namaProduk, int nilai, boolean isAbsolute) {
         List<Produk> currentList = mProdukList.getValue();
-        if (currentList != null) {
-            for (Produk p : currentList) {
-                if (p.getNama().equals(namaProduk)) {
-                    p.setStok(p.getStok() - jumlahDibel);
-                    break;
+        if (currentList == null) return;
+
+        List<Produk> newList = new ArrayList<>();
+        for (Produk p : currentList) {
+            Produk newP = new Produk(p.getBarcode(), p.getNama(), p.getHarga(), p.getStok());
+            newP.setId(p.getId());
+
+            if (newP.getNama().equals(namaProduk)) {
+                if (isAbsolute) {
+                    newP.setStok(nilai);
+                } else {
+                    newP.setStok(newP.getStok() + nilai);
                 }
             }
-            mProdukList.setValue(currentList);
-            saveData(currentList);
+            newList.add(newP);
         }
+
+        mProdukList.setValue(newList);
+        saveData(newList);
     }
 
     private void saveData(List<Produk> list) {
@@ -84,11 +119,11 @@ public class ProdukViewModel extends AndroidViewModel {
             mProdukList.setValue(list);
         } else {
             List<Produk> dummy = new ArrayList<>();
-            dummy.add(new Produk("Camel", 25000, 10));
-            dummy.add(new Produk("Evo", 27000, 10));
-            dummy.add(new Produk("Dji Sam Soe Refill", 25000, 10));
-            dummy.add(new Produk("Ziga", 19000, 10));
-            dummy.add(new Produk("Surya 16", 38000, 10));
+            dummy.add(new Produk("", "Camel", 25000, 10));
+            dummy.add(new Produk("", "Evo", 27000, 10));
+            dummy.add(new Produk("", "Dji Sam Soe Refill", 25000, 10));
+            dummy.add(new Produk("", "Ziga", 19000, 10));
+            dummy.add(new Produk("", "Surya 16", 38000, 10));
             mProdukList.setValue(dummy);
             saveData(dummy);
         }

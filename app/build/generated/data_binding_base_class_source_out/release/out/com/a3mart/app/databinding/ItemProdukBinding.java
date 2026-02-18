@@ -4,12 +4,14 @@ package com.a3mart.app.databinding;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.viewbinding.ViewBinding;
 import androidx.viewbinding.ViewBindings;
 import com.a3mart.app.R;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import java.lang.NullPointerException;
 import java.lang.Override;
@@ -20,6 +22,21 @@ public final class ItemProdukBinding implements ViewBinding {
   private final MaterialCardView rootView;
 
   @NonNull
+  public final MaterialButton btnKurangStok;
+
+  @NonNull
+  public final MaterialButton btnTambahStok;
+
+  @NonNull
+  public final MaterialCardView cardTransaksi;
+
+  @NonNull
+  public final LinearLayout layoutQuickEdit;
+
+  @NonNull
+  public final TextView tvBarcodeProduk;
+
+  @NonNull
   public final TextView tvHargaProduk;
 
   @NonNull
@@ -28,9 +45,17 @@ public final class ItemProdukBinding implements ViewBinding {
   @NonNull
   public final TextView tvStokProduk;
 
-  private ItemProdukBinding(@NonNull MaterialCardView rootView, @NonNull TextView tvHargaProduk,
+  private ItemProdukBinding(@NonNull MaterialCardView rootView,
+      @NonNull MaterialButton btnKurangStok, @NonNull MaterialButton btnTambahStok,
+      @NonNull MaterialCardView cardTransaksi, @NonNull LinearLayout layoutQuickEdit,
+      @NonNull TextView tvBarcodeProduk, @NonNull TextView tvHargaProduk,
       @NonNull TextView tvNamaProduk, @NonNull TextView tvStokProduk) {
     this.rootView = rootView;
+    this.btnKurangStok = btnKurangStok;
+    this.btnTambahStok = btnTambahStok;
+    this.cardTransaksi = cardTransaksi;
+    this.layoutQuickEdit = layoutQuickEdit;
+    this.tvBarcodeProduk = tvBarcodeProduk;
     this.tvHargaProduk = tvHargaProduk;
     this.tvNamaProduk = tvNamaProduk;
     this.tvStokProduk = tvStokProduk;
@@ -63,6 +88,32 @@ public final class ItemProdukBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
+      id = R.id.btn_kurang_stok;
+      MaterialButton btnKurangStok = ViewBindings.findChildViewById(rootView, id);
+      if (btnKurangStok == null) {
+        break missingId;
+      }
+
+      id = R.id.btn_tambah_stok;
+      MaterialButton btnTambahStok = ViewBindings.findChildViewById(rootView, id);
+      if (btnTambahStok == null) {
+        break missingId;
+      }
+
+      MaterialCardView cardTransaksi = (MaterialCardView) rootView;
+
+      id = R.id.layout_quick_edit;
+      LinearLayout layoutQuickEdit = ViewBindings.findChildViewById(rootView, id);
+      if (layoutQuickEdit == null) {
+        break missingId;
+      }
+
+      id = R.id.tv_barcode_produk;
+      TextView tvBarcodeProduk = ViewBindings.findChildViewById(rootView, id);
+      if (tvBarcodeProduk == null) {
+        break missingId;
+      }
+
       id = R.id.tv_harga_produk;
       TextView tvHargaProduk = ViewBindings.findChildViewById(rootView, id);
       if (tvHargaProduk == null) {
@@ -81,7 +132,8 @@ public final class ItemProdukBinding implements ViewBinding {
         break missingId;
       }
 
-      return new ItemProdukBinding((MaterialCardView) rootView, tvHargaProduk, tvNamaProduk,
+      return new ItemProdukBinding((MaterialCardView) rootView, btnKurangStok, btnTambahStok,
+          cardTransaksi, layoutQuickEdit, tvBarcodeProduk, tvHargaProduk, tvNamaProduk,
           tvStokProduk);
     }
     String missingId = rootView.getResources().getResourceName(id);

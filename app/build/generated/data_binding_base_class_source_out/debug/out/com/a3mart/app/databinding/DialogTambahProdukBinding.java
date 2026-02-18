@@ -13,6 +13,7 @@ import androidx.viewbinding.ViewBindings;
 import com.a3mart.app.R;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import java.lang.NullPointerException;
 import java.lang.Override;
 import java.lang.String;
@@ -28,6 +29,9 @@ public final class DialogTambahProdukBinding implements ViewBinding {
   public final MaterialButton btnSimpan;
 
   @NonNull
+  public final TextInputEditText etBarcodeProduk;
+
+  @NonNull
   public final TextInputEditText etHargaProduk;
 
   @NonNull
@@ -37,18 +41,24 @@ public final class DialogTambahProdukBinding implements ViewBinding {
   public final TextInputEditText etStokProduk;
 
   @NonNull
+  public final TextInputLayout tilBarcodeProduk;
+
+  @NonNull
   public final TextView tvJudulSheet;
 
   private DialogTambahProdukBinding(@NonNull LinearLayout rootView,
       @NonNull MaterialButton btnHapus, @NonNull MaterialButton btnSimpan,
-      @NonNull TextInputEditText etHargaProduk, @NonNull TextInputEditText etNamaProduk,
-      @NonNull TextInputEditText etStokProduk, @NonNull TextView tvJudulSheet) {
+      @NonNull TextInputEditText etBarcodeProduk, @NonNull TextInputEditText etHargaProduk,
+      @NonNull TextInputEditText etNamaProduk, @NonNull TextInputEditText etStokProduk,
+      @NonNull TextInputLayout tilBarcodeProduk, @NonNull TextView tvJudulSheet) {
     this.rootView = rootView;
     this.btnHapus = btnHapus;
     this.btnSimpan = btnSimpan;
+    this.etBarcodeProduk = etBarcodeProduk;
     this.etHargaProduk = etHargaProduk;
     this.etNamaProduk = etNamaProduk;
     this.etStokProduk = etStokProduk;
+    this.tilBarcodeProduk = tilBarcodeProduk;
     this.tvJudulSheet = tvJudulSheet;
   }
 
@@ -91,6 +101,12 @@ public final class DialogTambahProdukBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.et_barcode_produk;
+      TextInputEditText etBarcodeProduk = ViewBindings.findChildViewById(rootView, id);
+      if (etBarcodeProduk == null) {
+        break missingId;
+      }
+
       id = R.id.et_harga_produk;
       TextInputEditText etHargaProduk = ViewBindings.findChildViewById(rootView, id);
       if (etHargaProduk == null) {
@@ -109,6 +125,12 @@ public final class DialogTambahProdukBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.til_barcode_produk;
+      TextInputLayout tilBarcodeProduk = ViewBindings.findChildViewById(rootView, id);
+      if (tilBarcodeProduk == null) {
+        break missingId;
+      }
+
       id = R.id.tv_judul_sheet;
       TextView tvJudulSheet = ViewBindings.findChildViewById(rootView, id);
       if (tvJudulSheet == null) {
@@ -116,7 +138,8 @@ public final class DialogTambahProdukBinding implements ViewBinding {
       }
 
       return new DialogTambahProdukBinding((LinearLayout) rootView, btnHapus, btnSimpan,
-          etHargaProduk, etNamaProduk, etStokProduk, tvJudulSheet);
+          etBarcodeProduk, etHargaProduk, etNamaProduk, etStokProduk, tilBarcodeProduk,
+          tvJudulSheet);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

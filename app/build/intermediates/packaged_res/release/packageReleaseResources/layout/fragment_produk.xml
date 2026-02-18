@@ -5,8 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:padding="8dp"
-    tools:context=".ui.produk.ProdukFragment">
+    android:padding="8dp">
 
     <androidx.recyclerview.widget.RecyclerView
         android:layout_height="match_parent"
@@ -14,16 +13,46 @@
         tools:listitem="@layout/item_produk"
         android:id="@+id/rv_produk" />
 
+    <View
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true"
+        android:id="@+id/fab_overlay_produk" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="@+id/fab_main_produk"
+        app:layout_constraintEnd_toEndOf="@+id/fab_main_produk"
+        app:layout_constraintBottom_toTopOf="@+id/fab_main_produk"
+        app:fabSize="mini"
+        app:srcCompat="@drawable/ic_shopping_bag"
+        android:id="@+id/fab_add_item" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="@+id/fab_add_item"
+        app:layout_constraintEnd_toEndOf="@+id/fab_add_item"
+        app:layout_constraintBottom_toTopOf="@+id/fab_add_item"
+        app:fabSize="mini"
+        app:srcCompat="@drawable/ic_barcode_scan"
+        android:id="@+id/fab_add_barcode" />
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:layout_height="wrap_content"
         android:layout_width="wrap_content"
         android:layout_marginBottom="24dp"
         android:layout_marginEnd="24dp"
-        android:contentDescription="Tambah Produk"
-        app:backgroundTint="?attr/colorOnPrimary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:srcCompat="@drawable/ic_add"
-        android:id="@+id/fab_add_produk" />
+        android:id="@+id/fab_main_produk" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

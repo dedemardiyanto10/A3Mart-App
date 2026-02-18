@@ -1,48 +1,58 @@
 package com.a3mart.app.ui.transaksi;
 
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
+import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.*;
 import android.widget.*;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.*;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.a3mart.app.BuildConfig;
 import com.a3mart.app.R;
+import com.a3mart.app.ScannerActivity;
 import com.a3mart.app.databinding.DialogSettingsBinding;
 import com.a3mart.app.databinding.DialogTambahTransaksiBinding;
 import com.a3mart.app.databinding.FragmentTransaksiBinding;
+import com.a3mart.app.databinding.LayoutDialogHapusBinding;
+import com.a3mart.app.databinding.LayoutDialogInfoBinding;
 import com.a3mart.app.ui.produk.Produk;
 import com.a3mart.app.ui.produk.ProdukViewModel;
+import com.a3mart.app.utils.DialogUtils;
+import com.a3mart.app.utils.FormatterUtils;
 import com.a3mart.app.utils.NotificationHelper;
+import com.a3mart.app.utils.SwipeActionHelper;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
-import com.github.mikephil.charting.data.PieData;
-import com.github.mikephil.charting.data.PieDataSet;
-import com.github.mikephil.charting.data.PieEntry;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 
 public class TransaksiFragment extends Fragment {
     private FragmentTransaksiBinding binding;
     private TransaksiViewModel viewModel;
     private TransaksiAdapter adapter;
+    private ProdukViewModel produkViewModel;
     private int jumlahTemp = 1;
     private int lastListSize = 0;
     private int currentCheckedId = R.id.chip_all;
+    private boolean isFabOpen = false;
+    private boolean isUpdateAvailable = false;
+    private ActivityResultLauncher<Intent> scannerLauncher;
+    private ActivityResultLauncher<Intent> logoPickerLauncher;
+    private DialogSettingsBinding currentSettingsBinding;
 
     @Override
     public View onCreateView(
@@ -55,40 +65,88 @@ public class TransaksiFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        scannerLauncher =
+                registerForActivityResult(
+                        new ActivityResultContracts.StartActivityForResult(),
+                        result -> {
+                            if (result.getResultCode() == android.app.Activity.RESULT_OK
+                                    && result.getData() != null) {
+                                String code = result.getData().getStringExtra("result");
+                                if (code != null) onBarcodeScanned(code);
+                            }
+                        });
+
+        logoPickerLauncher =
+                registerForActivityResult(
+                        new ActivityResultContracts.StartActivityForResult(),
+                        result -> {
+                            if (result.getResultCode() == android.app.Activity.RESULT_OK
+                                    && result.getData() != null) {
+                                android.net.Uri selectedImage = result.getData().getData();
+                                if (selectedImage != null) {
+                                    requireContext()
+                                            .getContentResolver()
+                                            .takePersistableUriPermission(
+                                                    selectedImage,
+                                                    Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                                    SharedPreferences pref =
+                                            requireActivity()
+                                                    .getSharedPreferences(
+                                                            "Settings", Context.MODE_PRIVATE);
+                                    pref.edit()
+                                            .putString("logo_path", selectedImage.toString())
+                                            .apply();
+
+                                    String savedLogo = pref.getString("logo_path", null);
+                                    if (savedLogo != null) {
+                                        com.bumptech.glide.Glide.with(requireContext())
+                                                .load(android.net.Uri.parse(savedLogo))
+                                                .centerCrop()
+                                                .placeholder(R.drawable.logo)
+                                                .error(R.drawable.logo)
+                                                .into(currentSettingsBinding.ivPreviewLogo);
+                                    }
+
+                                    smartToast("Logo diperbarui!");
+                                }
+                            }
+                        });
+
+        produkViewModel = new ViewModelProvider(requireActivity()).get(ProdukViewModel.class);
         viewModel = new ViewModelProvider(requireActivity()).get(TransaksiViewModel.class);
         binding.rvTransaksi.setLayoutManager(new LinearLayoutManager(getContext()));
 
         adapter = new TransaksiAdapter(new ArrayList<>());
         binding.rvTransaksi.setAdapter(adapter);
 
-        binding.rvTransaksi.addOnScrollListener(
-                new RecyclerView.OnScrollListener() {
+        ItemTouchHelper.SimpleCallback simpleCallback =
+                new SwipeActionHelper() {
                     @Override
-                    public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                        if (dy > 0 && binding.fabAddTransaksi.isShown()) {
-                            binding.fabAddTransaksi.hide();
-                        } else if (dy < 0 && !binding.fabAddTransaksi.isShown()) {
-                            binding.fabAddTransaksi.show();
-                        }
-                    }
+                    public void onSwiped(
+                            @NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                        int position = viewHolder.getBindingAdapterPosition();
 
-                    @Override
-                    public void onScrollStateChanged(
-                            @NonNull RecyclerView recyclerView, int newState) {
-                        super.onScrollStateChanged(recyclerView, newState);
+                        Transaksi item = adapter.getTransaksiAt(position);
 
-                        if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                            if (!recyclerView.canScrollVertically(-1)
-                                    || !recyclerView.canScrollVertically(1)) {
-                                binding.fabAddTransaksi.show();
+                        if (direction == ItemTouchHelper.LEFT) {
+                            tampilkanDialogHapus(item, position);
+                        } else if (direction == ItemTouchHelper.RIGHT) {
+                            if (item.getStatus().equalsIgnoreCase("Hutang")) {
+                                eksekusiLunasSwipe(item, position);
+                            } else {
+                                adapter.notifyItemChanged(position);
+                                smartToast("Sudah lunas, Cok!");
                             }
                         }
                     }
-                });
+                };
+
+        new ItemTouchHelper(simpleCallback).attachToRecyclerView(binding.rvTransaksi);
 
         setupToolbarMenu();
 
-        adapter.setOnItemLongClickListener((t, position) -> showEditTransaksiSheet(t));
+        adapter.setOnItemLongClickListener((t, position) -> showEditTransaksiSheet(t, position));
 
         viewModel
                 .getTransaksiList()
@@ -96,20 +154,45 @@ public class TransaksiFragment extends Fragment {
                         getViewLifecycleOwner(),
                         list -> {
                             if (list != null) {
-                                hitungRingkasan(list);
                                 applyFilter(list);
+                                adapter.notifyDataSetChanged();
 
                                 if (list.size() > lastListSize) {
                                     binding.rvTransaksi.post(
                                             () -> {
-                                                if (list.size() > 0) {
+                                                if (list.size() > 0)
                                                     binding.rvTransaksi.smoothScrollToPosition(0);
-                                                }
                                             });
                                 }
-
                                 lastListSize = list.size();
                             }
+                        });
+
+        viewModel
+                .getTotalLunas()
+                .observe(
+                        getViewLifecycleOwner(),
+                        total -> {
+                            binding.tvTotalLunas.setText(FormatterUtils.formatRupiah(total));
+                            updateChart();
+                        });
+
+        viewModel
+                .getTotalHutang()
+                .observe(
+                        getViewLifecycleOwner(),
+                        total -> {
+                            binding.tvTotalHutang.setText(FormatterUtils.formatRupiah(total));
+                            updateChart();
+                        });
+
+        viewModel
+                .getTotalDeposit()
+                .observe(
+                        getViewLifecycleOwner(),
+                        total -> {
+                            binding.tvTotalDeposit.setText(FormatterUtils.formatRupiah(total));
+                            updateChart();
                         });
 
         binding.chipGroupFilter.setOnCheckedStateChangeListener(
@@ -126,11 +209,6 @@ public class TransaksiFragment extends Fragment {
                     }
                 });
 
-        binding.fabAddTransaksi.setOnClickListener(
-                v -> {
-                    showTambahTransaksiSheet();
-                });
-
         binding.cardSummary.setOnClickListener(
                 v -> {
                     boolean isVisible = binding.barChart.getVisibility() == View.VISIBLE;
@@ -139,80 +217,233 @@ public class TransaksiFragment extends Fragment {
                             new android.transition.TransitionSet()
                                     .addTransition(new android.transition.ChangeBounds())
                                     .addTransition(new android.transition.Fade())
-                                    .setDuration(400)
+                                    .setDuration(350)
                                     .setInterpolator(
                                             new android.view.animation.DecelerateInterpolator());
 
                     android.transition.TransitionManager.beginDelayedTransition(
-                            binding.cardSummary, set);
+                            (ViewGroup) binding.getRoot(), set);
 
                     if (isVisible) {
                         binding.barChart.setVisibility(View.GONE);
                     } else {
                         binding.barChart.setVisibility(View.VISIBLE);
                         binding.barChart.animateY(
-                                1200, com.github.mikephil.charting.animation.Easing.EaseInOutQuart);
+                                1000, com.github.mikephil.charting.animation.Easing.EaseOutQuart);
+                    }
+                });
+
+        setupSpeedDial();
+
+        binding.rvTransaksi.addOnScrollListener(
+                new RecyclerView.OnScrollListener() {
+                    @Override
+                    public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                        if (isFabOpen) return;
+
+                        if (dy > 0 && binding.fabMainTransaksi.isShown()) {
+                            binding.fabMainTransaksi.hide();
+                        } else if (dy < 0 && !binding.fabMainTransaksi.isShown()) {
+                            binding.fabMainTransaksi.show();
+                        }
+                    }
+
+                    @Override
+                    public void onScrollStateChanged(
+                            @NonNull RecyclerView recyclerView, int newState) {
+                        super.onScrollStateChanged(recyclerView, newState);
+
+                        if (newState == RecyclerView.SCROLL_STATE_DRAGGING && isFabOpen) {
+                            closeFabMenu();
+                        }
+
+                        if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                            if (!recyclerView.canScrollVertically(-1)
+                                    || !recyclerView.canScrollVertically(1)) {
+                                binding.fabMainTransaksi.show();
+                            }
+                        }
                     }
                 });
     }
 
-    private void hitungRingkasan(List<Transaksi> list) {
-        if (list == null) return;
+    private void eksekusiLunasSwipe(Transaksi transaksi, int position) {
+        SharedPreferences pref =
+                requireActivity().getSharedPreferences("Settings", Context.MODE_PRIVATE);
 
-        long totalHutangAktif = 0;
-        long totalDepositAktif = 0;
-        long totalLunasSah = 0;
+        com.google.android.material.dialog.MaterialAlertDialogBuilder builder =
+                new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Konfirmasi Pelunasan")
+                        .setIcon(R.drawable.ic_check)
+                        .setMessage(
+                                "Yakin ingin menandai transaksi "
+                                        + transaksi.getNamaKonsumen()
+                                        + " sebesar "
+                                        + FormatterUtils.formatRupiah(transaksi.getTotalHarga())
+                                        + " sebagai LUNAS?")
+                        .setCancelable(false)
+                        .setNegativeButton(
+                                "Batal",
+                                (d, which) -> {
+                                    adapter.notifyItemChanged(position);
+                                })
+                        .setPositiveButton(
+                                "Ya, Lunas",
+                                (d, which) -> {
+                                    viewModel.updateTransaksi(
+                                            transaksi,
+                                            transaksi.getNamaProduk(),
+                                            transaksi.getNamaKonsumen(),
+                                            transaksi.getJumlah(),
+                                            transaksi.getTotalHarga(),
+                                            "Lunas");
 
-        HashMap<String, Long> mapHutangMurni = new HashMap<>();
-        HashMap<String, Long> mapSaldoPotongDeposit = new HashMap<>();
+                                    if (pref.getBoolean("notif_lunas", true)) {
+                                        NotificationHelper.kirimNotifikasiLunas(
+                                                requireContext(),
+                                                transaksi.getNamaKonsumen(),
+                                                transaksi.getTotalHarga());
+                                    }
+                                    smartToast("Transaksi Lunas");
+                                });
 
-        for (Transaksi t : list) {
-            long nominal = t.getTotalHarga();
-            String status = t.getStatus();
-            String nama = t.getNamaKonsumen().trim().toLowerCase();
+        androidx.appcompat.app.AlertDialog dialog = builder.create();
 
-            if ((status.equalsIgnoreCase("Lunas") || status.equalsIgnoreCase("Lunas_Hutang"))
-                    && nominal > 0) {
-                totalLunasSah += nominal;
-            }
+        DialogUtils.terapkanEfekMewah(dialog);
 
-            if (status.equalsIgnoreCase("Hutang")) {
-                mapHutangMurni.put(nama, mapHutangMurni.getOrDefault(nama, 0L) + nominal);
-            }
+        dialog.show();
+    }
 
-            if (status.equalsIgnoreCase("Hutang")
-                    || status.equalsIgnoreCase("Lunas_Hutang")
-                    || nominal < 0) {
-                mapSaldoPotongDeposit.put(
-                        nama, mapSaldoPotongDeposit.getOrDefault(nama, 0L) + nominal);
+    private void tampilkanDialogHapus(Transaksi transaksi, int position) {
+
+        ProdukViewModel pVM = new ViewModelProvider(requireActivity()).get(ProdukViewModel.class);
+
+        androidx.appcompat.app.AlertDialog dialog =
+                new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                        .setTitle("Hapus Transaksi")
+                        .setIcon(R.drawable.ic_delete)
+                        .setMessage(
+                                "Yakin ingin menghapus transaksi "
+                                        + transaksi.getNamaProduk()
+                                        + " oleh "
+                                        + transaksi.getNamaKonsumen()
+                                        + "?")
+                        .setCancelable(false)
+                        .setNegativeButton(
+                                "Batal",
+                                (d, which) -> {
+                                    adapter.notifyItemChanged(position);
+                                })
+                        .setPositiveButton(
+                                "Hapus",
+                                (d, which) -> {
+                                    pVM.updateStok(
+                                            transaksi.getNamaProduk(),
+                                            transaksi.getJumlah(),
+                                            false);
+
+                                    viewModel.hapusTransaksi(transaksi);
+
+                                    smartToast("Transaksi berhasil dihapus & stok dikembalikan!");
+                                })
+                        .create();
+
+        DialogUtils.terapkanEfekMewah(dialog);
+
+        dialog.show();
+    }
+
+    private void onBarcodeScanned(String barcode) {
+        List<Produk> masterProduk = produkViewModel.getProdukList().getValue();
+        Produk ditemukan = null;
+
+        if (masterProduk != null) {
+            for (Produk p : masterProduk) {
+                if (barcode.equals(p.getBarcode())) {
+                    ditemukan = p;
+                    break;
+                }
             }
         }
 
-        for (long saldo : mapHutangMurni.values()) {
-            if (saldo > 0) totalHutangAktif += saldo;
+        if (ditemukan != null) {
+            showTambahTransaksiSheet(ditemukan);
+        } else {
+            smartToast("Barcode tidak dikenal!");
         }
+    }
 
-        for (long saldo : mapSaldoPotongDeposit.values()) {
-            if (saldo < 0) totalDepositAktif += saldo;
-        }
+    private void setupSpeedDial() {
+        binding.fabMainTransaksi.setOnClickListener(
+                v -> {
+                    if (!isFabOpen) showFabMenu();
+                    else closeFabMenu();
+                });
 
-        java.text.DecimalFormat df =
-                new java.text.DecimalFormat(
-                        "Rp#,##0.00;-Rp#,##0.00",
-                        new java.text.DecimalFormatSymbols(new Locale("in", "ID")));
+        binding.fabTambahManual.setOnClickListener(
+                v -> {
+                    closeFabMenu();
+                    showTambahTransaksiSheet(null);
+                });
 
-        binding.tvTotalLunas.setText(df.format(totalLunasSah));
-        binding.tvTotalHutang.setText(df.format(totalHutangAktif));
-        binding.tvTotalDeposit.setText(df.format(totalDepositAktif));
+        binding.fabScanBarcode.setOnClickListener(
+                v -> {
+                    closeFabMenu();
+
+                    if (androidx.core.content.ContextCompat.checkSelfPermission(
+                                    requireContext(), android.Manifest.permission.CAMERA)
+                            == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+
+                        scannerLauncher.launch(new Intent(requireContext(), ScannerActivity.class));
+                    } else {
+                        smartToast("Izin kamera belum diaktifkan. Silakan cek pengaturan HP.");
+                    }
+                });
+    }
+
+    private void showFabMenu() {
+        isFabOpen = true;
+
+        binding.fabTambahManual.show();
+        binding.fabScanBarcode.show();
+        binding.fabMainTransaksi.animate().rotation(45f).setDuration(200).start();
+    }
+
+    private void closeFabMenu() {
+        isFabOpen = false;
+
+        binding.fabTambahManual.hide();
+        binding.fabScanBarcode.hide();
+
+        binding.fabMainTransaksi.show();
+        binding.fabMainTransaksi.animate().rotation(0f).setDuration(200).start();
+    }
+
+    private void updateChart() {
+        if (binding.barChart == null) return;
+
+        long lunas =
+                viewModel.getTotalLunas().getValue() != null
+                        ? viewModel.getTotalLunas().getValue()
+                        : 0L;
+        long hutangAktif =
+                viewModel.getTotalHutang().getValue() != null
+                        ? viewModel.getTotalHutang().getValue()
+                        : 0L;
+
+        long depositAktif =
+                viewModel.getTotalDeposit().getValue() != null
+                        ? Math.abs(viewModel.getTotalDeposit().getValue())
+                        : 0L;
 
         int colorOnSurface =
                 com.google.android.material.color.MaterialColors.getColor(
                         binding.barChart, com.google.android.material.R.attr.colorOnSurface);
 
         List<BarEntry> entries = new ArrayList<>();
-        entries.add(new BarEntry(0f, (float) totalLunasSah));
-        entries.add(new BarEntry(1f, (float) totalHutangAktif));
-        entries.add(new BarEntry(2f, (float) Math.abs(totalDepositAktif)));
+        entries.add(new BarEntry(0f, (float) lunas));
+        entries.add(new BarEntry(1f, (float) hutangAktif));
+        entries.add(new BarEntry(2f, (float) depositAktif));
 
         BarDataSet dataSet = new BarDataSet(entries, "Ringkasan Kas");
 
@@ -222,18 +453,20 @@ public class TransaksiFragment extends Fragment {
                     Color.parseColor("#F44336"),
                     Color.parseColor("#FF9800")
                 });
+
         dataSet.setValueTextColor(colorOnSurface);
-        dataSet.setValueTextSize(10f);
+        dataSet.setValueTextSize(11f);
+
+        dataSet.setValueFormatter(
+                new com.github.mikephil.charting.formatter.ValueFormatter() {
+                    @Override
+                    public String getFormattedValue(float value) {
+                        return FormatterUtils.formatRupiah((long) value);
+                    }
+                });
 
         BarData barData = new BarData(dataSet);
-        barData.setBarWidth(0.6f);
-
-        binding.barChart.setData(barData);
-
-        binding.barChart.getDescription().setEnabled(false);
-        binding.barChart.getLegend().setEnabled(false);
-        binding.barChart.setDrawGridBackground(false);
-        binding.barChart.setDrawBarShadow(false);
+        barData.setBarWidth(0.5f);
 
         com.github.mikephil.charting.components.XAxis xAxis = binding.barChart.getXAxis();
         xAxis.setPosition(com.github.mikephil.charting.components.XAxis.XAxisPosition.BOTTOM);
@@ -242,21 +475,23 @@ public class TransaksiFragment extends Fragment {
         xAxis.setGranularity(1f);
         xAxis.setValueFormatter(
                 new com.github.mikephil.charting.formatter.IndexAxisValueFormatter(
-                        new String[] {"Lunas", "Hutang", "Deposit"}));
+                        new String[] {"Lunas", "Hutang", "Deposit Aktif"}));
 
         binding.barChart.getAxisLeft().setTextColor(colorOnSurface);
-        binding.barChart.getAxisLeft().setDrawGridLines(false);
+        binding.barChart.getAxisLeft().setDrawGridLines(true);
         binding.barChart.getAxisRight().setEnabled(false);
 
-        binding.barChart.animateY(1000);
+        binding.barChart.setData(barData);
+        binding.barChart.getDescription().setEnabled(false);
+        binding.barChart.getLegend().setEnabled(false);
+        binding.barChart.setFitBars(true);
+        binding.barChart.animateY(800);
         binding.barChart.invalidate();
     }
 
     private void applyFilter(List<Transaksi> fullList) {
         List<Transaksi> filtered = new ArrayList<>();
         long totalFilter = 0;
-
-        // 1. Tentukan statusFilter di awal berdasarkan Chip yang aktif
         String statusFilter;
         if (currentCheckedId == R.id.chip_deposit) {
             statusFilter = "Deposit";
@@ -309,7 +544,6 @@ public class TransaksiFragment extends Fragment {
         }
 
         adapter.updateData(filtered);
-        updateToolbarSubtitle(filtered.size(), totalFilter, statusFilter);
     }
 
     private void setupToolbarMenu() {
@@ -320,6 +554,48 @@ public class TransaksiFragment extends Fragment {
                     public void onCreateMenu(
                             @NonNull Menu menu, @NonNull MenuInflater menuInflater) {
                         menuInflater.inflate(R.menu.transaksi_menu, menu);
+
+                        MenuItem searchItem = menu.findItem(R.id.action_search);
+                        if (searchItem != null) {
+                            androidx.appcompat.widget.SearchView searchView =
+                                    (androidx.appcompat.widget.SearchView)
+                                            searchItem.getActionView();
+
+                            searchView.setQueryHint("Cari nama konsumen...");
+
+                            searchView.setOnQueryTextListener(
+                                    new androidx.appcompat.widget.SearchView.OnQueryTextListener() {
+                                        @Override
+                                        public boolean onQueryTextSubmit(String query) {
+                                            return false;
+                                        }
+
+                                        @Override
+                                        public boolean onQueryTextChange(String newText) {
+                                            if (adapter != null) {
+                                                adapter.filter(newText);
+                                            }
+                                            return true;
+                                        }
+                                    });
+
+                            searchItem.setOnActionExpandListener(
+                                    new MenuItem.OnActionExpandListener() {
+                                        @Override
+                                        public boolean onMenuItemActionExpand(MenuItem item) {
+                                            return true;
+                                        }
+
+                                        @Override
+                                        public boolean onMenuItemActionCollapse(MenuItem item) {
+                                            if (viewModel.getTransaksiList().getValue() != null) {
+                                                applyFilter(
+                                                        viewModel.getTransaksiList().getValue());
+                                            }
+                                            return true;
+                                        }
+                                    });
+                        }
                     }
 
                     @Override
@@ -340,61 +616,71 @@ public class TransaksiFragment extends Fragment {
     }
 
     private void showDialogPilihanHapus() {
-        String[] opsi = {
-            "Hapus Semua", "Hapus Lunas Saja", "Hapus Hutang Saja", "Hapus Deposit Saja"
-        };
 
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
-                .setIcon(R.drawable.ic_delete)
-                .setTitle("Pilih Mode Hapus")
-                .setItems(
-                        opsi,
-                        (dialog, which) -> {
-                            String tipe;
-                            if (which == 0) tipe = "SEMUA";
-                            else if (which == 1) tipe = "Lunas";
-                            else if (which == 2) tipe = "Hutang";
-                            else tipe = "Deposit";
+        LayoutDialogHapusBinding dBinding = LayoutDialogHapusBinding.inflate(getLayoutInflater());
 
-                            tampilkanKonfirmasiHapus(
-                                    tipe, "Data " + tipe + " akan dihapus permanen.");
-                        })
-                .show();
+        androidx.appcompat.app.AlertDialog dialog =
+                new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                        .setView(dBinding.getRoot())
+                        .setNegativeButton("Batal", null)
+                        .create();
+
+        DialogUtils.terapkanEfekMewah(dialog);
+
+        dBinding.btnHapusSemua.setOnClickListener(
+                v -> {
+                    tampilkanKonfirmasiHapus(
+                            "SEMUA", "Semua riwayat transaksi akan dihapus permanen.");
+                    dialog.dismiss();
+                });
+
+        dBinding.btnHapusLunas.setOnClickListener(
+                v -> {
+                    tampilkanKonfirmasiHapus("Lunas", "Hanya data lunas yang akan dibersihkan.");
+                    dialog.dismiss();
+                });
+
+        dBinding.btnHapusHutang.setOnClickListener(
+                v -> {
+                    tampilkanKonfirmasiHapus("Hutang", "Hanya data hutang yang akan dibersihkan.");
+                    dialog.dismiss();
+                });
+
+        dBinding.btnHapusDeposit.setOnClickListener(
+                v -> {
+                    tampilkanKonfirmasiHapus(
+                            "Deposit", "Hanya data deposit yang akan dibersihkan.");
+                    dialog.dismiss();
+                });
+
+        dialog.show();
     }
 
     private void tampilkanKonfirmasiHapus(String tipe, String pesan) {
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
-                .setIcon(R.drawable.ic_delete)
-                .setTitle("Yakin Hapus?")
-                .setMessage(pesan)
-                .setPositiveButton(
-                        "Hapus",
-                        (d, w) -> {
-                            if (tipe.equals("SEMUA")) viewModel.hapusSemuaTransaksi();
-                            else viewModel.hapusTransaksiTerfilter(tipe);
-                            smartToast("Berhasil dihapus!");
-                        })
-                .setNegativeButton("Batal", null)
-                .show();
+        androidx.appcompat.app.AlertDialog dialog =
+                new com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                        .setIcon(R.drawable.ic_delete)
+                        .setTitle("Yakin Hapus?")
+                        .setMessage(pesan)
+                        .setPositiveButton(
+                                "Hapus",
+                                (d, w) -> {
+                                    if (tipe.equals("SEMUA")) {
+                                        viewModel.hapusSemuaTransaksi();
+                                    } else {
+                                        viewModel.hapusTransaksiTerfilter(tipe);
+                                    }
+                                    smartToast("Berhasil dihapus!");
+                                })
+                        .setNegativeButton("Batal", null)
+                        .create();
+
+        DialogUtils.terapkanEfekMewah(dialog);
+
+        dialog.show();
     }
 
-    private void updateToolbarSubtitle(int jumlah, long nominal, String tipe) {
-        if (getActivity() instanceof AppCompatActivity) {
-            androidx.appcompat.app.ActionBar ab =
-                    ((AppCompatActivity) getActivity()).getSupportActionBar();
-            if (ab != null) {
-                java.text.DecimalFormatSymbols symbols =
-                        new java.text.DecimalFormatSymbols(new Locale("in", "ID"));
-                symbols.setCurrencySymbol("Rp");
-                java.text.DecimalFormat df =
-                        new java.text.DecimalFormat("Rp#,##0.00;-Rp#,##0.00", symbols);
-                String rincian = tipe + ": " + jumlah + " | " + df.format(nominal);
-                ab.setSubtitle(rincian);
-            }
-        }
-    }
-
-    private void showEditTransaksiSheet(Transaksi transaksi) {
+    private void showEditTransaksiSheet(Transaksi transaksi, int position) {
         DialogTambahTransaksiBinding sBinding =
                 DialogTambahTransaksiBinding.inflate(getLayoutInflater());
         BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
@@ -537,8 +823,8 @@ public class TransaksiFragment extends Fragment {
                         String statusBaru = sBinding.cbStatusBayar.isChecked() ? "Lunas" : "Hutang";
                         long totalBaru = (long) (p.getHarga() * jumlahBaru);
 
-                        pVM.kurangiStok(produkLama, -jumlahLama);
-                        pVM.kurangiStok(p.getNama(), jumlahBaru);
+                        pVM.updateStok(produkLama, jumlahLama, false);
+                        pVM.updateStok(p.getNama(), -jumlahBaru, false);
 
                         if (pref.getBoolean("low_stock_alert", true) && sisaStokFinal <= 2) {
                             String pesan =
@@ -593,40 +879,24 @@ public class TransaksiFragment extends Fragment {
 
         sBinding.btnHapusTransaksi.setOnClickListener(
                 v -> {
-                    new com.google.android.material.dialog.MaterialAlertDialogBuilder(
-                                    requireContext())
-                            .setIcon(R.drawable.logo)
-                            .setTitle("Hapus Transaksi")
-                            .setMessage("Hapus transaksi ini dan kembalikan stok?")
-                            .setPositiveButton(
-                                    "Hapus",
-                                    (d, w) -> {
-                                        pVM.kurangiStok(
-                                                transaksi.getNamaProduk(), -transaksi.getJumlah());
-                                        viewModel.hapusTransaksi(transaksi);
-                                        dialog.dismiss();
-                                    })
-                            .setNegativeButton("Batal", null)
-                            .show();
+                    dialog.dismiss();
+                    tampilkanDialogHapus(transaksi, position);
                 });
 
         dialog.show();
     }
 
-    private void showTambahTransaksiSheet() {
+    private void showTambahTransaksiSheet(@Nullable Produk scanResult) {
         DialogTambahTransaksiBinding sBinding =
                 DialogTambahTransaksiBinding.inflate(getLayoutInflater());
         BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
         dialog.setContentView(sBinding.getRoot());
 
-        ProdukViewModel pVM = new ViewModelProvider(requireActivity()).get(ProdukViewModel.class);
-
         jumlahTemp = 1;
         sBinding.tvJumlahBeli.setText("1");
 
         List<String> listNama = new ArrayList<>();
-        String[] konsumenTetap = viewModel.getDaftarKonsumenTetap();
-        listNama.addAll(java.util.Arrays.asList(konsumenTetap));
+        listNama.addAll(java.util.Arrays.asList(viewModel.getDaftarKonsumenTetap()));
 
         List<Transaksi> allTransaksi = viewModel.getTransaksiList().getValue();
         if (allTransaksi != null) {
@@ -651,15 +921,8 @@ public class TransaksiFragment extends Fragment {
                     public void onItemSelected(
                             AdapterView<?> parent, View view, int position, long id) {
                         String selected = listNama.get(position);
-
                         if (selected.equalsIgnoreCase("Umum")) {
                             sBinding.tilNamaManual.setVisibility(View.VISIBLE);
-
-                            if (sBinding.etNamaManual.getText().toString().isEmpty()) {
-                                sBinding.etNamaManual.setText("Umum ");
-                                sBinding.etNamaManual.setSelection(
-                                        sBinding.etNamaManual.getText().length());
-                            }
                         } else {
                             sBinding.tilNamaManual.setVisibility(View.GONE);
                             sBinding.etNamaManual.setText("");
@@ -670,25 +933,35 @@ public class TransaksiFragment extends Fragment {
                     public void onNothingSelected(AdapterView<?> parent) {}
                 });
 
-        pVM.getProdukList()
+        produkViewModel
+                .getProdukList()
                 .observe(
                         getViewLifecycleOwner(),
                         list -> {
                             if (list != null) {
-                                sBinding.spinnerProduk.setAdapter(
-                                        new ProdukSpinnerAdapter(requireContext(), list));
+                                ProdukSpinnerAdapter pAdapter =
+                                        new ProdukSpinnerAdapter(requireContext(), list);
+                                sBinding.spinnerProduk.setAdapter(pAdapter);
+
+                                if (scanResult != null) {
+                                    for (int i = 0; i < list.size(); i++) {
+                                        if (list.get(i).getNama().equals(scanResult.getNama())) {
+                                            sBinding.spinnerProduk.setSelection(i);
+                                            break;
+                                        }
+                                    }
+                                }
                             }
                         });
 
         sBinding.btnSimpanTransaksi.setOnClickListener(
                 v -> {
                     Produk p = (Produk) sBinding.spinnerProduk.getSelectedItem();
-
                     if (p == null) return;
 
                     int stokAwal = p.getStok();
                     int jumlahBeli = jumlahTemp;
-                    int sisaStokFinal = stokAwal - jumlahBeli;
+                    int sisaSetelahTransaksi = stokAwal - jumlahBeli;
 
                     String selected = sBinding.spinnerKonsumen.getSelectedItem().toString();
                     String kFinal =
@@ -707,11 +980,29 @@ public class TransaksiFragment extends Fragment {
 
                         viewModel.tambahTransaksi(
                                 p.getNama(), kFinal, jumlahBeli, totalHarga, status);
+                        produkViewModel.updateStok(p.getNama(), -jumlahBeli, false);
 
                         SharedPreferences pref =
                                 requireActivity()
-                                        .getSharedPreferences(
-                                                "Settings", android.content.Context.MODE_PRIVATE);
+                                        .getSharedPreferences("Settings", Context.MODE_PRIVATE);
+
+                        if (pref.getBoolean("low_stock_alert", true)) {
+                            if (sisaSetelahTransaksi <= 0) {
+                                NotificationHelper.kirimNotifikasiStokTipis(
+                                        requireContext(),
+                                        p.getNama(),
+                                        "Stok " + p.getNama() + " sudah HABIS!");
+                            } else if (sisaSetelahTransaksi <= 2) {
+                                NotificationHelper.kirimNotifikasiStokTipis(
+                                        requireContext(),
+                                        p.getNama(),
+                                        "Stok "
+                                                + p.getNama()
+                                                + " sisa "
+                                                + sisaSetelahTransaksi
+                                                + ". Segera restok!");
+                            }
+                        }
 
                         if (status.equalsIgnoreCase("Lunas")
                                 && pref.getBoolean("notif_lunas", true)) {
@@ -719,28 +1010,10 @@ public class TransaksiFragment extends Fragment {
                                     requireContext(), kFinal, totalHarga);
                         }
 
-                        pVM.kurangiStok(p.getNama(), jumlahBeli);
-
-                        if (pref.getBoolean("low_stock_alert", true) && sisaStokFinal <= 2) {
-                            String pesan;
-                            if (sisaStokFinal <= 0) {
-                                pesan = "Stok " + p.getNama() + " sudah HABIS!";
-                            } else {
-                                pesan =
-                                        "Stok "
-                                                + p.getNama()
-                                                + " sisa "
-                                                + sisaStokFinal
-                                                + ". Segera restok!";
-                            }
-                            NotificationHelper.kirimNotifikasiStokTipis(
-                                    requireContext(), p.getNama(), pesan);
-                        }
-
                         dialog.dismiss();
-                        smartToast("Transaksi berhasil!");
+                        smartToast("Transaksi Berhasil!");
                     } else {
-                        smartToast("Stok tidak mencukupi! (Sisa: " + stokAwal + ")");
+                        smartToast("Stok tidak mencukupi!");
                     }
                 });
 
@@ -752,7 +1025,6 @@ public class TransaksiFragment extends Fragment {
                         sBinding.tvJumlahBeli.setText(String.valueOf(jumlahTemp));
                     }
                 });
-
         sBinding.btnKurang.setOnClickListener(
                 v -> {
                     if (jumlahTemp > 1) {
@@ -791,9 +1063,7 @@ public class TransaksiFragment extends Fragment {
             if (p != null) {
                 String label =
                         p.getNama()
-                                + (p.getStok() <= 0
-                                        ? " (Habis/Kosong)"
-                                        : " (Stok: " + p.getStok() + ")");
+                                + (p.getStok() <= 0 ? " (Habis)" : " (Stok: " + p.getStok() + ")");
                 view.setText(label);
                 view.setPadding(20, 20, 20, 20);
                 if (p.getStok() <= 0) {
@@ -810,24 +1080,70 @@ public class TransaksiFragment extends Fragment {
         if (getContext() == null) return;
 
         BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(requireContext());
-        DialogSettingsBinding dialogBinding = DialogSettingsBinding.inflate(getLayoutInflater());
-        bottomSheetDialog.setContentView(dialogBinding.getRoot());
+
+        currentSettingsBinding = DialogSettingsBinding.inflate(getLayoutInflater());
+        bottomSheetDialog.setContentView(currentSettingsBinding.getRoot());
 
         SharedPreferences pref =
                 requireActivity()
                         .getSharedPreferences("Settings", android.content.Context.MODE_PRIVATE);
+
+        currentSettingsBinding.btnToggleProfil.setOnClickListener(
+                v -> {
+                    boolean isVisible =
+                            currentSettingsBinding.layoutProfilContent.getVisibility()
+                                    == View.VISIBLE;
+
+                    android.transition.TransitionManager.beginDelayedTransition(
+                            (ViewGroup) currentSettingsBinding.getRoot(),
+                            new android.transition.AutoTransition());
+
+                    if (isVisible) {
+                        currentSettingsBinding.layoutProfilContent.setVisibility(View.GONE);
+                        currentSettingsBinding.ivArrowProfil.animate().rotation(0).start();
+                    } else {
+                        currentSettingsBinding.layoutProfilContent.setVisibility(View.VISIBLE);
+                        currentSettingsBinding.ivArrowProfil.animate().rotation(180).start();
+                    }
+                });
+
+        String savedLogo = pref.getString("logo_path", null);
+        if (savedLogo != null) {
+            com.bumptech.glide.Glide.with(requireContext())
+                    .load(android.net.Uri.parse(savedLogo))
+                    .centerCrop()
+                    .placeholder(R.drawable.logo)
+                    .error(R.drawable.logo)
+                    .into(currentSettingsBinding.ivPreviewLogo);
+        }
+
+        currentSettingsBinding.etNamaToko.setText(pref.getString("nama_toko", "A3 Mart"));
+        currentSettingsBinding.etAlamatToko.setText(
+                pref.getString("alamat_toko", "Bekasi, Indonesia"));
+        currentSettingsBinding.etTeleponToko.setText(
+                pref.getString("telepon_toko", "+6282333058981"));
+                
+        currentSettingsBinding.btnPilihLogo.setOnClickListener(
+                v -> {
+                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+                    intent.setType("image/*");
+                    logoPickerLauncher.launch(intent);
+                });
+
+        currentSettingsBinding.tvAppVersion.setText("Versi " + BuildConfig.VERSION_NAME);
 
         int savedMode =
                 pref.getInt(
                         "theme_mode",
                         androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
         if (savedMode == androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES)
-            dialogBinding.rbMalam.setChecked(true);
+            currentSettingsBinding.rbMalam.setChecked(true);
         else if (savedMode == androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO)
-            dialogBinding.rbSiang.setChecked(true);
-        else dialogBinding.rbSistem.setChecked(true);
+            currentSettingsBinding.rbSiang.setChecked(true);
+        else currentSettingsBinding.rbSistem.setChecked(true);
 
-        dialogBinding.rgTheme.setOnCheckedChangeListener(
+        currentSettingsBinding.rgTheme.setOnCheckedChangeListener(
                 (group, checkedId) -> {
                     int mode;
                     if (checkedId == R.id.rb_malam)
@@ -841,8 +1157,8 @@ public class TransaksiFragment extends Fragment {
                     bottomSheetDialog.dismiss();
                 });
 
-        dialogBinding.switchOntime.setChecked(pref.getBoolean("keep_screen_on", false));
-        dialogBinding.switchOntime.setOnCheckedChangeListener(
+        currentSettingsBinding.switchOntime.setChecked(pref.getBoolean("keep_screen_on", false));
+        currentSettingsBinding.switchOntime.setOnCheckedChangeListener(
                 (v, isChecked) -> {
                     pref.edit().putBoolean("keep_screen_on", isChecked).apply();
 
@@ -857,115 +1173,174 @@ public class TransaksiFragment extends Fragment {
                     }
                 });
 
-        dialogBinding.switchLowStokAlert.setChecked(pref.getBoolean("low_stock_alert", true));
-        dialogBinding.switchLowStokAlert.setOnCheckedChangeListener(
+        currentSettingsBinding.switchTampilkanStruk.setChecked(
+                pref.getBoolean("show_struk_btn", false));
+        currentSettingsBinding.switchTampilkanStruk.setOnCheckedChangeListener(
+                (v, isChecked) -> {
+                    pref.edit().putBoolean("show_struk_btn", isChecked).apply();
+                    Bundle result = new Bundle();
+                    result.putBoolean("status_struk", isChecked);
+                    getParentFragmentManager().setFragmentResult("request_key_setting", result);
+
+                    if (adapter != null) adapter.notifyDataSetChanged();
+                });
+
+        currentSettingsBinding.switchLowStokAlert.setChecked(
+                pref.getBoolean("low_stock_alert", true));
+        currentSettingsBinding.switchLowStokAlert.setOnCheckedChangeListener(
                 (v, isChecked) -> {
                     pref.edit().putBoolean("low_stock_alert", isChecked).apply();
                 });
 
-        dialogBinding.switchFingerprint.setChecked(pref.getBoolean("use_finger", false));
-        dialogBinding.switchFingerprint.setOnCheckedChangeListener(
+        currentSettingsBinding.switchFingerprint.setChecked(pref.getBoolean("use_finger", false));
+        currentSettingsBinding.switchFingerprint.setOnCheckedChangeListener(
                 (v, isChecked) -> {
                     pref.edit().putBoolean("use_finger", isChecked).apply();
                     smartToast(isChecked ? "Keamanan Aktif" : "Keamanan Nonaktif");
                 });
 
-        dialogBinding.switchLunas.setChecked(pref.getBoolean("notif_lunas", true));
-        dialogBinding.switchLunas.setOnCheckedChangeListener(
+        currentSettingsBinding.switchAutoBackup.setChecked(
+                pref.getBoolean("auto_backup_enabled", false));
+
+        currentSettingsBinding.switchAutoBackup.setOnCheckedChangeListener(
+                (v, isChecked) -> {
+                    pref.edit().putBoolean("auto_backup_enabled", isChecked).apply();
+
+                    if (isChecked) {
+                        smartToast("Auto Backup Aktif (Folder Documents/A3Mart)");
+                        List<Transaksi> current = viewModel.getTransaksiList().getValue();
+                        if (current != null) viewModel.importData(current);
+                    } else {
+                        smartToast("Auto Backup Nonaktif");
+                    }
+                });
+
+        currentSettingsBinding.switchLunas.setChecked(pref.getBoolean("notif_lunas", true));
+        currentSettingsBinding.switchLunas.setOnCheckedChangeListener(
                 (v, isChecked) -> {
                     pref.edit().putBoolean("notif_lunas", isChecked).apply();
                 });
 
-        dialogBinding.switchToast.setChecked(pref.getBoolean("show_toast", true));
-        dialogBinding.switchToast.setOnCheckedChangeListener(
+        currentSettingsBinding.switchToast.setChecked(pref.getBoolean("show_toast", true));
+        currentSettingsBinding.switchToast.setOnCheckedChangeListener(
                 (v, isChecked) -> {
                     pref.edit().putBoolean("show_toast", isChecked).apply();
                 });
 
-        dialogBinding.btnInfoApp.setOnClickListener(
+        currentSettingsBinding.btnInfoApp.setOnClickListener(
                 v -> {
                     try {
+                        Context context = v.getContext();
+                        LayoutDialogInfoBinding infoBinding =
+                                LayoutDialogInfoBinding.inflate(LayoutInflater.from(context));
 
                         android.content.pm.PackageInfo pInfo =
-                                requireActivity()
-                                        .getPackageManager()
-                                        .getPackageInfo(requireActivity().getPackageName(), 0);
+                                context.getPackageManager()
+                                        .getPackageInfo(context.getPackageName(), 0);
 
-                        String version = pInfo.versionName;
-                        long buildVersion = android.os.Build.VERSION.SDK_INT;
-                        String device = android.os.Build.MODEL;
+                        String githubUsername = "dedemardiyanto10";
+                        String profileUrl = "https://github.com/" + githubUsername + ".png";
 
-                        StringBuilder info = new StringBuilder();
-                        info.append("**A3Mart - Kasir Pintar**\n");
-                        info.append("Sistem manajemen toko simpel & cepat.\n\n");
-                        info.append("━━━━━━━━━━━━━━━\n");
-                        info.append("**Informasi Aplikasi**\n");
-                        info.append("• Versi: ").append(version).append("\n");
+                        com.bumptech.glide.Glide.with(context)
+                                .load(profileUrl)
+                                .circleCrop()
+                                .placeholder(R.drawable.ic_github)
+                                .error(R.drawable.ic_github)
+                                .into(infoBinding.imgDevProfile);
 
-                        boolean isDebug =
-                                ((requireActivity().getApplicationInfo().flags
-                                                & android.content.pm.ApplicationInfo
-                                                        .FLAG_DEBUGGABLE)
-                                        != 0);
-                        String buildType = isDebug ? "DEBUG" : "RELEASE";
+                        infoBinding.tvBuildTime.setText("Build Time: " + BuildConfig.BUILD_TIME);
 
-                        info.append("• Build: ").append(buildType).append("\n");
+                        if (BuildConfig.DEBUG) {
+                            infoBinding.tvBuildType.setText("DEBUG");
+                            infoBinding.tvBuildType.setTextColor(android.graphics.Color.RED);
+                        } else {
+                            infoBinding.tvBuildType.setText("RELEASE");
+                        }
 
-                        info.append("• Package: ")
-                                .append(requireActivity().getPackageName())
-                                .append("\n\n");
+                        infoBinding.infoVersion.setText("Versi: " + BuildConfig.VERSION_NAME);
+                        infoBinding.infoPackage.setText(context.getPackageName());
 
-                        info.append("**Informasi Sistem**\n");
-                        info.append("• Perangkat: ").append(device).append("\n");
-                        info.append("• Android API: ").append(buildVersion).append("\n\n");
+                        infoBinding.infoDevice.setText(
+                                android.os.Build.MODEL
+                                        + " | "
+                                        + "Android "
+                                        + android.os.Build.VERSION.RELEASE);
+                        infoBinding.infoApi.setText(
+                                "API Level: " + android.os.Build.VERSION.SDK_INT);
+                        String repoText = "GitHub Repository (" + BuildConfig.GIT_HASH + ")";
+                        infoBinding.tvRepoHash.setText(repoText);
 
-                        info.append("**Pengembang**\n");
-                        info.append("A3Mart Team © 2026\n");
-                        info.append("━━━━━━━━━━━━━━━");
+                        infoBinding.infoGithub.setText("github.com/dedemardiyanto10");
 
-                        new com.google.android.material.dialog.MaterialAlertDialogBuilder(
-                                        requireContext())
-                                .setIcon(R.drawable.logo)
-                                .setTitle("Tentang Aplikasi")
-                                .setMessage(info.toString())
-                                .setPositiveButton("Tutup", null)
-                                .setNeutralButton(
-                                        "Salin Info",
-                                        (d, w) -> {
-                                            android.content.ClipboardManager clipboard =
-                                                    (android.content.ClipboardManager)
-                                                            requireContext()
-                                                                    .getSystemService(
-                                                                            android.content.Context
-                                                                                    .CLIPBOARD_SERVICE);
-                                            android.content.ClipData clip =
-                                                    android.content.ClipData.newPlainText(
-                                                            "App Info", info.toString());
-                                            clipboard.setPrimaryClip(clip);
-                                            smartToast("Info disalin ke clipboard");
-                                        })
-                                .show();
+                        infoBinding.infoRepoContainer.setOnClickListener(
+                                vRepo -> {
+                                    String url = "https://github.com/dedemardiyanto10/A3Mart-App";
+                                    context.startActivity(
+                                            new Intent(
+                                                    Intent.ACTION_VIEW,
+                                                    android.net.Uri.parse(url)));
+                                });
+
+                        infoBinding.infoGithubContainer.setOnClickListener(
+                                vGit -> {
+                                    String url = "https://github.com/dedemardiyanto10";
+                                    context.startActivity(
+                                            new Intent(
+                                                    Intent.ACTION_VIEW,
+                                                    android.net.Uri.parse(url)));
+                                });
+
+                        com.google.android.material.dialog.MaterialAlertDialogBuilder builder =
+                                new com.google.android.material.dialog.MaterialAlertDialogBuilder(
+                                                context)
+                                        .setView(infoBinding.getRoot())
+                                        .setPositiveButton("Tutup", null);
+
+                        androidx.appcompat.app.AlertDialog dialog = builder.create();
+
+                        DialogUtils.terapkanEfekMewah(dialog);
+
+                        dialog.show();
 
                     } catch (Exception e) {
-                        smartToast("Gagal memuat informasi");
+                        smartToast("Gagal memuat info aplikasi");
                     }
                 });
 
-        dialogBinding.btnResetApp.setOnClickListener(
+        currentSettingsBinding.btnResetApp.setOnClickListener(
                 v -> {
-                    new com.google.android.material.dialog.MaterialAlertDialogBuilder(
-                                    requireContext())
-                            .setTitle("Reset Aplikasi?")
-                            .setIcon(R.drawable.ic_warning)
-                            .setMessage(
-                                    "Semua data transaksi, produk, dan pengaturan akan dihapus permanen. Aplikasi akan ditutup otomatis.")
-                            .setPositiveButton(
-                                    "RESET TOTAL",
-                                    (d, w) -> {
-                                        resetAplikasiTotal();
-                                    })
-                            .setNegativeButton("Batal", null)
-                            .show();
+                    androidx.appcompat.app.AlertDialog dialog =
+                            new com.google.android.material.dialog.MaterialAlertDialogBuilder(
+                                            requireContext())
+                                    .setTitle("Reset Aplikasi?")
+                                    .setIcon(R.drawable.ic_warning)
+                                    .setMessage(
+                                            "Semua data transaksi, produk, dan pengaturan akan dihapus permanen.")
+                                    .setPositiveButton(
+                                            "LANJUTKAN",
+                                            (d, w) -> {
+                                                verifyBiometricBeforeReset();
+                                            })
+                                    .setNegativeButton("Batal", null)
+                                    .create();
+
+                    DialogUtils.terapkanEfekMewah(dialog);
+
+                    dialog.show();
+                });
+
+        bottomSheetDialog.setOnDismissListener(
+                dialog -> {
+                    String nama = currentSettingsBinding.etNamaToko.getText().toString();
+                    String alamat = currentSettingsBinding.etAlamatToko.getText().toString();
+                    String telepon = currentSettingsBinding.etTeleponToko.getText().toString();
+                    pref.edit()
+                            .putString("nama_toko", nama)
+                            .putString("alamat_toko", alamat)
+                            .putString("telepon_toko", telepon)
+                            .apply();
+
+                    currentSettingsBinding = null;
                 });
 
         bottomSheetDialog.show();
@@ -979,7 +1354,7 @@ public class TransaksiFragment extends Fragment {
         boolean isToastEnabled = pref.getBoolean("show_toast", true);
 
         if (isToastEnabled) {
-            Toast.makeText(getContext(), pesan, Toast.LENGTH_SHORT).show();
+            android.widget.Toast.makeText(getContext(), pesan, Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -1013,6 +1388,64 @@ public class TransaksiFragment extends Fragment {
             }
         } catch (Exception e) {
             smartToast("Gagal reset otomatis: " + e.getMessage());
+        }
+    }
+
+    private void verifyBiometricBeforeReset() {
+
+        androidx.biometric.BiometricPrompt.PromptInfo promptInfo =
+                new androidx.biometric.BiometricPrompt.PromptInfo.Builder()
+                        .setTitle("Otorisasi Super Admin")
+                        .setSubtitle("Verifikasi diperlukan untuk menghapus seluruh data aplikasi")
+                        .setAllowedAuthenticators(
+                                androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
+                                        | androidx.biometric.BiometricManager.Authenticators
+                                                .DEVICE_CREDENTIAL)
+                        .build();
+
+        androidx.biometric.BiometricPrompt biometricPrompt =
+                new androidx.biometric.BiometricPrompt(
+                        this,
+                        androidx.core.content.ContextCompat.getMainExecutor(requireContext()),
+                        new androidx.biometric.BiometricPrompt.AuthenticationCallback() {
+                            @Override
+                            public void onAuthenticationSucceeded(
+                                    @NonNull
+                                            androidx.biometric.BiometricPrompt.AuthenticationResult
+                                                    result) {
+                                super.onAuthenticationSucceeded(result);
+                                executeResetTotal();
+                            }
+
+                            @Override
+                            public void onAuthenticationError(
+                                    int errorCode, @NonNull CharSequence errString) {
+                                super.onAuthenticationError(errorCode, errString);
+                                android.util.Log.e("BIOMETRIC_ERROR", errString.toString());
+                            }
+                        });
+
+        biometricPrompt.authenticate(promptInfo);
+    }
+
+    private void executeResetTotal() {
+        try {
+            Context context = requireContext().getApplicationContext();
+
+            smartToast("Data berhasil dihapus. Silakan buka kembali aplikasi.");
+
+            android.app.ActivityManager am =
+                    (android.app.ActivityManager)
+                            context.getSystemService(android.content.Context.ACTIVITY_SERVICE);
+
+            if (am != null) {
+                am.clearApplicationUserData();
+            } else {
+                System.exit(0);
+            }
+
+        } catch (Exception e) {
+            android.util.Log.e("RESET_APP", "Gagal reset: " + e.getMessage());
         }
     }
 

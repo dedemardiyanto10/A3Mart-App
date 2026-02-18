@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:app="http://schemas.android.com/apk/res-auto"
+     android:layout_height="wrap_content"
+     android:layout_width="match_parent">
+
+    <LinearLayout
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:padding="24dp"
+         android:orientation="vertical">
+
+        <ImageView
+             android:layout_height="80dp"
+             android:layout_width="80dp"
+             android:src="@drawable/logo"
+             android:id="@+id/imgLogo"
+             android:layout_gravity="center" />
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:textAlignment="center"
+             android:textSize="22sp"
+             android:textColor="?attr/colorPrimary"
+             android:layout_marginTop="16dp"
+             android:text="A3Mart"
+             android:textStyle="bold" />
+
+        <TextView
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:alpha="0.7"
+             android:textAlignment="center"
+             android:textSize="14sp"
+             android:text="Kasir Pintar &amp; Manajemen Toko" />
+
+        <com.google.android.material.card.MaterialCardView
+             android:layout_height="wrap_content"
+             android:layout_width="wrap_content"
+             app:strokeWidth="0dp"
+             app:cardBackgroundColor="?attr/colorContainer"
+             android:layout_marginTop="12dp"
+             app:cardCornerRadius="16dp"
+             android:layout_gravity="center">
+
+            <TextView
+                 android:layout_height="wrap_content"
+                 android:layout_width="wrap_content"
+                 android:paddingVertical="4dp"
+                 android:textSize="11sp"
+                 android:textColor="?attr/colorOnContainer"
+                 android:paddingHorizontal="12dp"
+                 android:id="@+id/tvBuildType"
+                 android:text="RELEASE"
+                 android:textStyle="bold" />
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <View
+             android:layout_height="1dp"
+             android:layout_width="match_parent"
+             android:layout_marginVertical="24dp"
+             android:background="?attr/colorOnSurface"
+             android:alpha="0.1" />
+
+        <LinearLayout
+             android:layout_height="wrap_content"
+             android:layout_width="match_parent"
+             android:orientation="vertical">
+
+            <TextView
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:drawablePadding="16dp"
+                 android:gravity="center_vertical"
+                 android:textSize="14sp"
+                 android:drawableStart="@drawable/ic_info"
+                 android:id="@+id/infoVersion"
+                 android:text="Versi: 1.0.0" />
+
+            <TextView
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:drawablePadding="16dp"
+                 android:gravity="center_vertical"
+                 android:textSize="14sp"
+                 android:drawableStart="@drawable/ic_android"
+                 android:layout_marginTop="16dp"
+                 android:id="@+id/infoPackage"
+                 android:text="Package: com.a3mart.app" />
+
+            <TextView
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:drawablePadding="16dp"
+                 android:gravity="center_vertical"
+                 android:textSize="14sp"
+                 android:drawableStart="@drawable/ic_smartphone"
+                 android:layout_marginTop="16dp"
+                 android:id="@+id/infoDevice"
+                 android:text="Device: Samsung S24" />
+
+            <TextView
+                 android:layout_height="wrap_content"
+                 android:layout_width="match_parent"
+                 android:drawablePadding="16dp"
+                 android:gravity="center_vertical"
+                 android:textSize="14sp"
+                 android:drawableStart="@drawable/ic_person"
+                 android:layout_marginTop="16dp"
+                 android:id="@+id/infoDev"
+                 android:text="Developer: A3Mart Team © 2026" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.core.widget.NestedScrollView>

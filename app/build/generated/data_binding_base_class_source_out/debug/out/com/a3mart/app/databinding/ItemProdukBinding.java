@@ -4,6 +4,7 @@ package com.a3mart.app.databinding;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,6 +21,12 @@ public final class ItemProdukBinding implements ViewBinding {
   private final MaterialCardView rootView;
 
   @NonNull
+  public final LinearLayout containerStok;
+
+  @NonNull
+  public final TextView tvBarcodeProduk;
+
+  @NonNull
   public final TextView tvHargaProduk;
 
   @NonNull
@@ -28,9 +35,12 @@ public final class ItemProdukBinding implements ViewBinding {
   @NonNull
   public final TextView tvStokProduk;
 
-  private ItemProdukBinding(@NonNull MaterialCardView rootView, @NonNull TextView tvHargaProduk,
+  private ItemProdukBinding(@NonNull MaterialCardView rootView, @NonNull LinearLayout containerStok,
+      @NonNull TextView tvBarcodeProduk, @NonNull TextView tvHargaProduk,
       @NonNull TextView tvNamaProduk, @NonNull TextView tvStokProduk) {
     this.rootView = rootView;
+    this.containerStok = containerStok;
+    this.tvBarcodeProduk = tvBarcodeProduk;
     this.tvHargaProduk = tvHargaProduk;
     this.tvNamaProduk = tvNamaProduk;
     this.tvStokProduk = tvStokProduk;
@@ -63,6 +73,18 @@ public final class ItemProdukBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
+      id = R.id.container_stok;
+      LinearLayout containerStok = ViewBindings.findChildViewById(rootView, id);
+      if (containerStok == null) {
+        break missingId;
+      }
+
+      id = R.id.tv_barcode_produk;
+      TextView tvBarcodeProduk = ViewBindings.findChildViewById(rootView, id);
+      if (tvBarcodeProduk == null) {
+        break missingId;
+      }
+
       id = R.id.tv_harga_produk;
       TextView tvHargaProduk = ViewBindings.findChildViewById(rootView, id);
       if (tvHargaProduk == null) {
@@ -81,8 +103,8 @@ public final class ItemProdukBinding implements ViewBinding {
         break missingId;
       }
 
-      return new ItemProdukBinding((MaterialCardView) rootView, tvHargaProduk, tvNamaProduk,
-          tvStokProduk);
+      return new ItemProdukBinding((MaterialCardView) rootView, containerStok, tvBarcodeProduk,
+          tvHargaProduk, tvNamaProduk, tvStokProduk);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

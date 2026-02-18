@@ -3,15 +3,11 @@ package com.a3mart.app.ui.transaksi;
 import android.view.*;
 import android.view.animation.DecelerateInterpolator;
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.RecyclerView;
 import com.a3mart.app.databinding.ItemTransaksiBinding;
 import com.a3mart.app.R;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.NumberFormat;
-import java.util.Locale;
+import com.a3mart.app.utils.FormatterUtils;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -19,6 +15,7 @@ import java.util.Set;
 
 public class TransaksiAdapter extends RecyclerView.Adapter<TransaksiAdapter.ViewHolder> {
     private List<Transaksi> list;
+    private List<Transaksi> listFull;
     private OnItemLongClickListener listener;
     private final Set<String> animatedIds = new HashSet<>();
 
@@ -32,6 +29,7 @@ public class TransaksiAdapter extends RecyclerView.Adapter<TransaksiAdapter.View
 
     public TransaksiAdapter(List<Transaksi> list) {
         this.list = list;
+        this.listFull = new ArrayList<>(list);
     }
 
     public void updateData(List<Transaksi> newList) {
@@ -39,7 +37,29 @@ public class TransaksiAdapter extends RecyclerView.Adapter<TransaksiAdapter.View
                 DiffUtil.calculateDiff(new TransaksiDiffCallback(this.list, newList));
         this.list.clear();
         this.list.addAll(newList);
+
+        this.listFull = new ArrayList<>(newList);
+
         diffResult.dispatchUpdatesTo(this);
+    }
+
+    public void filter(String query) {
+        list.clear();
+        if (query.isEmpty()) {
+            list.addAll(listFull);
+        } else {
+            String filterPattern = query.toLowerCase().trim();
+            for (Transaksi item : listFull) {
+                if (item.getNamaKonsumen().toLowerCase().contains(filterPattern)) {
+                    list.add(item);
+                }
+            }
+        }
+        notifyDataSetChanged();
+    }
+
+    public Transaksi getTransaksiAt(int position) {
+        return list.get(position);
     }
 
     @NonNull
@@ -54,10 +74,6 @@ public class TransaksiAdapter extends RecyclerView.Adapter<TransaksiAdapter.View
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Transaksi t = list.get(position);
 
-        DecimalFormatSymbols symbols = new DecimalFormatSymbols(new Locale("in", "ID"));
-        symbols.setCurrencySymbol("Rp");
-        DecimalFormat df = new DecimalFormat("Rp#,##0.00;-Rp#,##0.00", symbols);
-
         String hexColor;
         if (t.getTotalHarga() < 0) {
             hexColor = "#FF9800";
@@ -70,8 +86,8 @@ public class TransaksiAdapter extends RecyclerView.Adapter<TransaksiAdapter.View
             hexColor = "#BDBDBD";
         }
 
-       // holder.binding.cardTransaksi.setStrokeColor(android.graphics.Color.parseColor(hexColor));
-       // holder.binding.cardTransaksi.setStrokeWidth(2);
+        // holder.binding.cardTransaksi.setStrokeColor(android.graphics.Color.parseColor(hexColor));
+        // holder.binding.cardTransaksi.setStrokeWidth(2);
 
         holder.binding.ivStatusTransaksi.animate().cancel();
 
@@ -94,7 +110,7 @@ public class TransaksiAdapter extends RecyclerView.Adapter<TransaksiAdapter.View
 
         holder.binding.tvNamaTransaksi.setText(t.getNamaProduk());
         holder.binding.tvQtyTransaksi.setText(t.getJumlah() + " pcs");
-        holder.binding.tvTotalTransaksi.setText(df.format(t.getTotalHarga()));
+        holder.binding.tvTotalTransaksi.setText(FormatterUtils.formatRupiah(t.getTotalHarga()));
         holder.binding.tvTanggalTransaksi.setText(t.getTanggal());
         holder.binding.tvKonsumenTransaksi.setText(t.getNamaKonsumen());
 

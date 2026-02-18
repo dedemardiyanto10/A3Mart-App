@@ -21,15 +21,29 @@ public final class FragmentProdukBinding implements ViewBinding {
   private final ConstraintLayout rootView;
 
   @NonNull
-  public final FloatingActionButton fabAddProduk;
+  public final FloatingActionButton fabAddBarcode;
+
+  @NonNull
+  public final FloatingActionButton fabAddItem;
+
+  @NonNull
+  public final FloatingActionButton fabMainProduk;
+
+  @NonNull
+  public final View fabOverlayProduk;
 
   @NonNull
   public final RecyclerView rvProduk;
 
   private FragmentProdukBinding(@NonNull ConstraintLayout rootView,
-      @NonNull FloatingActionButton fabAddProduk, @NonNull RecyclerView rvProduk) {
+      @NonNull FloatingActionButton fabAddBarcode, @NonNull FloatingActionButton fabAddItem,
+      @NonNull FloatingActionButton fabMainProduk, @NonNull View fabOverlayProduk,
+      @NonNull RecyclerView rvProduk) {
     this.rootView = rootView;
-    this.fabAddProduk = fabAddProduk;
+    this.fabAddBarcode = fabAddBarcode;
+    this.fabAddItem = fabAddItem;
+    this.fabMainProduk = fabMainProduk;
+    this.fabOverlayProduk = fabOverlayProduk;
     this.rvProduk = rvProduk;
   }
 
@@ -60,9 +74,27 @@ public final class FragmentProdukBinding implements ViewBinding {
     // This is done to optimize the compiled bytecode for size and performance.
     int id;
     missingId: {
-      id = R.id.fab_add_produk;
-      FloatingActionButton fabAddProduk = ViewBindings.findChildViewById(rootView, id);
-      if (fabAddProduk == null) {
+      id = R.id.fab_add_barcode;
+      FloatingActionButton fabAddBarcode = ViewBindings.findChildViewById(rootView, id);
+      if (fabAddBarcode == null) {
+        break missingId;
+      }
+
+      id = R.id.fab_add_item;
+      FloatingActionButton fabAddItem = ViewBindings.findChildViewById(rootView, id);
+      if (fabAddItem == null) {
+        break missingId;
+      }
+
+      id = R.id.fab_main_produk;
+      FloatingActionButton fabMainProduk = ViewBindings.findChildViewById(rootView, id);
+      if (fabMainProduk == null) {
+        break missingId;
+      }
+
+      id = R.id.fab_overlay_produk;
+      View fabOverlayProduk = ViewBindings.findChildViewById(rootView, id);
+      if (fabOverlayProduk == null) {
         break missingId;
       }
 
@@ -72,7 +104,8 @@ public final class FragmentProdukBinding implements ViewBinding {
         break missingId;
       }
 
-      return new FragmentProdukBinding((ConstraintLayout) rootView, fabAddProduk, rvProduk);
+      return new FragmentProdukBinding((ConstraintLayout) rootView, fabAddBarcode, fabAddItem,
+          fabMainProduk, fabOverlayProduk, rvProduk);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

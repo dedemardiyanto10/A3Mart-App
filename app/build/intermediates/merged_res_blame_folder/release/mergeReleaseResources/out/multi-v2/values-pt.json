@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.a3mart.app-mergeReleaseResources-46:/values-pt/values-pt.xml",
+            "outputFile": "com.a3mart.app-mergeReleaseResources-53:/values-pt/values-pt.xml",
             "map": [
                 {
                     "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/caches/9.0.0/transforms/cfb0facbb054c5bbce911d95d2f6e2da/transformed/navigation-ui-2.9.5/res/values-pt/values-pt.xml",

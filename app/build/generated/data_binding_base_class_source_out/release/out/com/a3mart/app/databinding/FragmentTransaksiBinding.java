@@ -48,7 +48,16 @@ public final class FragmentTransaksiBinding implements ViewBinding {
   public final Chip chipLunas;
 
   @NonNull
-  public final FloatingActionButton fabAddTransaksi;
+  public final FloatingActionButton fabMainTransaksi;
+
+  @NonNull
+  public final View fabOverlayTransaksi;
+
+  @NonNull
+  public final FloatingActionButton fabScanBarcode;
+
+  @NonNull
+  public final FloatingActionButton fabTambahManual;
 
   @NonNull
   public final LinearLayout layoutEmpty;
@@ -71,10 +80,11 @@ public final class FragmentTransaksiBinding implements ViewBinding {
   private FragmentTransaksiBinding(@NonNull ConstraintLayout rootView, @NonNull BarChart barChart,
       @NonNull MaterialCardView cardSummary, @NonNull Chip chipAll, @NonNull Chip chipDeposit,
       @NonNull ChipGroup chipGroupFilter, @NonNull Chip chipHutang, @NonNull Chip chipLunas,
-      @NonNull FloatingActionButton fabAddTransaksi, @NonNull LinearLayout layoutEmpty,
-      @NonNull RecyclerView rvTransaksi, @NonNull TextView tvEmptyMsg,
-      @NonNull TextView tvTotalDeposit, @NonNull TextView tvTotalHutang,
-      @NonNull TextView tvTotalLunas) {
+      @NonNull FloatingActionButton fabMainTransaksi, @NonNull View fabOverlayTransaksi,
+      @NonNull FloatingActionButton fabScanBarcode, @NonNull FloatingActionButton fabTambahManual,
+      @NonNull LinearLayout layoutEmpty, @NonNull RecyclerView rvTransaksi,
+      @NonNull TextView tvEmptyMsg, @NonNull TextView tvTotalDeposit,
+      @NonNull TextView tvTotalHutang, @NonNull TextView tvTotalLunas) {
     this.rootView = rootView;
     this.barChart = barChart;
     this.cardSummary = cardSummary;
@@ -83,7 +93,10 @@ public final class FragmentTransaksiBinding implements ViewBinding {
     this.chipGroupFilter = chipGroupFilter;
     this.chipHutang = chipHutang;
     this.chipLunas = chipLunas;
-    this.fabAddTransaksi = fabAddTransaksi;
+    this.fabMainTransaksi = fabMainTransaksi;
+    this.fabOverlayTransaksi = fabOverlayTransaksi;
+    this.fabScanBarcode = fabScanBarcode;
+    this.fabTambahManual = fabTambahManual;
     this.layoutEmpty = layoutEmpty;
     this.rvTransaksi = rvTransaksi;
     this.tvEmptyMsg = tvEmptyMsg;
@@ -161,9 +174,27 @@ public final class FragmentTransaksiBinding implements ViewBinding {
         break missingId;
       }
 
-      id = R.id.fab_add_transaksi;
-      FloatingActionButton fabAddTransaksi = ViewBindings.findChildViewById(rootView, id);
-      if (fabAddTransaksi == null) {
+      id = R.id.fab_main_transaksi;
+      FloatingActionButton fabMainTransaksi = ViewBindings.findChildViewById(rootView, id);
+      if (fabMainTransaksi == null) {
+        break missingId;
+      }
+
+      id = R.id.fab_overlay_transaksi;
+      View fabOverlayTransaksi = ViewBindings.findChildViewById(rootView, id);
+      if (fabOverlayTransaksi == null) {
+        break missingId;
+      }
+
+      id = R.id.fab_scan_barcode;
+      FloatingActionButton fabScanBarcode = ViewBindings.findChildViewById(rootView, id);
+      if (fabScanBarcode == null) {
+        break missingId;
+      }
+
+      id = R.id.fab_tambah_manual;
+      FloatingActionButton fabTambahManual = ViewBindings.findChildViewById(rootView, id);
+      if (fabTambahManual == null) {
         break missingId;
       }
 
@@ -204,8 +235,9 @@ public final class FragmentTransaksiBinding implements ViewBinding {
       }
 
       return new FragmentTransaksiBinding((ConstraintLayout) rootView, barChart, cardSummary,
-          chipAll, chipDeposit, chipGroupFilter, chipHutang, chipLunas, fabAddTransaksi,
-          layoutEmpty, rvTransaksi, tvEmptyMsg, tvTotalDeposit, tvTotalHutang, tvTotalLunas);
+          chipAll, chipDeposit, chipGroupFilter, chipHutang, chipLunas, fabMainTransaksi,
+          fabOverlayTransaksi, fabScanBarcode, fabTambahManual, layoutEmpty, rvTransaksi,
+          tvEmptyMsg, tvTotalDeposit, tvTotalHutang, tvTotalLunas);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

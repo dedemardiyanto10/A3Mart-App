@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.a3mart.app-mergeReleaseResources-46:/values-en-rXC/values-en-rXC.xml",
+            "outputFile": "com.a3mart.app-mergeReleaseResources-53:/values-en-rXC/values-en-rXC.xml",
             "map": [
                 {
                     "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/caches/9.0.0/transforms/369f67721f6b24fc33f71f294db1534a/transformed/core-1.17.0/res/values-en-rXC/values-en-rXC.xml",

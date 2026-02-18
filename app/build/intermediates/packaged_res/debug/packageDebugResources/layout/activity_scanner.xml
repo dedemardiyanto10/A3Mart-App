@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:app="http://schemas.android.com/apk/res-auto"
+     android:layout_height="match_parent"
+     android:layout_width="match_parent">
+
+    <androidx.camera.view.PreviewView
+         android:layout_height="match_parent"
+         android:layout_width="match_parent"
+         android:id="@+id/previewView" />
+
+    <com.a3mart.app.ScannerOverlayView
+         android:layout_height="match_parent"
+         android:layout_width="match_parent"
+         android:id="@+id/overlayView" />
+
+    <com.google.android.material.button.MaterialButton
+         android:layout_height="wrap_content"
+         android:layout_width="wrap_content"
+         app:icon="@drawable/ic_back"
+         app:iconTint="?attr/colorPrimary"
+         android:layout_margin="16dp"
+         style="?attr/materialIconButtonStyle"
+         android:layout_marginTop="32dp"
+         android:id="@+id/btnBack"
+         android:layout_gravity="top|start" />
+
+    <com.google.android.material.button.MaterialButton
+         android:layout_height="wrap_content"
+         android:layout_width="wrap_content"
+         app:icon="@drawable/ic_flash_off"
+         app:iconTint="?attr/colorPrimary"
+         android:layout_margin="16dp"
+         style="?attr/materialIconButtonStyle"
+         android:id="@+id/btnFlash"
+         android:layout_gravity="bottom|end" />
+
+    <com.google.android.material.button.MaterialButton
+         android:layout_height="wrap_content"
+         android:layout_width="wrap_content"
+         app:icon="@drawable/ic_switch_camera"
+         app:iconTint="?attr/colorPrimary"
+         android:layout_margin="16dp"
+         style="?attr/materialIconButtonStyle"
+         android:id="@+id/btnSwitch"
+         android:layout_gravity="bottom|start" />
+
+</FrameLayout>

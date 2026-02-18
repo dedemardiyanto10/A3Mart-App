@@ -1,238 +1,394 @@
 [
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/drawable_ic_lunas.png.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/drawable/ic_lunas.png"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_flash_off.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_flash_off.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/mipmap-xhdpi_ic_launcher_round.webp.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/mipmap-xhdpi/ic_launcher_round.webp"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_balance.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_balance.xml"
     },
     {
-        "merged": "com.a3mart.app-release-48:/layout_layout_download_progress.xml.flat",
-        "source": "com.a3mart.app-main-49:/layout/layout_download_progress.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_delete.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_delete.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/layout_fragment_transaksi.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/layout/fragment_transaksi.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/mipmap-xhdpi_ic_launcher_round.webp.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/mipmap-xhdpi/ic_launcher_round.webp"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/mipmap-hdpi_ic_launcher.webp.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/mipmap-hdpi/ic_launcher.webp"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_logo.png.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/logo.png"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/layout_activity_main.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/layout/activity_main.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable-anydpi-v24_ic_launcher_foreground.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-pngs-51:/drawable-anydpi-v24/ic_launcher_foreground.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/drawable_ic_hutang.png.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/drawable/ic_hutang.png"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/mipmap-anydpi-v26/ic_launcher_round.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/mipmap-hdpi_ic_launcher_round.webp.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/mipmap-hdpi/ic_launcher_round.webp"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_flash_on.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_flash_on.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/drawable_ic_minus.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/drawable/ic_minus.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/layout_dialog_restore_list.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/layout/dialog_restore_list.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/drawable_ic_settings.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/drawable/ic_settings.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_minus.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_minus.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/drawable_ic_backup.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/drawable/ic_backup.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/layout_activity_main.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/layout/activity_main.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/drawable_ic_notifications.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/drawable/ic_notifications.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_arrow_right.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_arrow_right.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/layout_layout_download_progress.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/layout/layout_download_progress.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_back.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_back.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/mipmap-xxxhdpi_ic_launcher_round.webp.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/mipmap-xxxhdpi/ic_launcher_round.webp"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_playlist_add.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_playlist_add.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/mipmap-mdpi_ic_launcher.webp.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/mipmap-mdpi/ic_launcher.webp"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/layout_dialog_tambah_transaksi.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/layout/dialog_tambah_transaksi.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/xml_backup_rules.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/xml/backup_rules.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/mipmap-xxhdpi_ic_launcher_round.webp.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/mipmap-xxhdpi/ic_launcher_round.webp"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/raw_suara_lunas.mp3.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/raw/suara_lunas.mp3"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/layout_dialog_tambah_produk.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/layout/dialog_tambah_produk.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/drawable_ic_whatsapp.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/drawable/ic_whatsapp.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_restore.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_restore.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/xml_data_extraction_rules.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/xml/data_extraction_rules.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/mipmap-xxhdpi_ic_launcher.webp.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/mipmap-xxhdpi/ic_launcher.webp"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/drawable_logo.png.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/drawable/logo.png"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/layout_layout_progress.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/layout/layout_progress.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/layout_item_transaksi.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/layout/item_transaksi.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/mipmap-hdpi_ic_launcher.webp.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/mipmap-hdpi/ic_launcher.webp"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/drawable_ic_delete.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/drawable/ic_delete.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_expand.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_expand.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/mipmap-xhdpi_ic_launcher.webp.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/mipmap-xhdpi/ic_launcher.webp"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_shape_changelog_bg.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/shape_changelog_bg.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/drawable_ic_chart.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/drawable/ic_chart.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_switch_camera.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_switch_camera.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/drawable-anydpi-v24_ic_launcher_foreground.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-pngs-44:/drawable-anydpi-v24/ic_launcher_foreground.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_fingerprint.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_fingerprint.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/mipmap-anydpi-v26_ic_launcher_round.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/mipmap-anydpi-v26/ic_launcher_round.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/layout_item_produk.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/layout/item_produk.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/layout_dialog_sheet_rekap_action.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/layout/dialog_sheet_rekap_action.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_info.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_info.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/mipmap-xxxhdpi_ic_launcher.webp.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/mipmap-xxxhdpi/ic_launcher.webp"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_pdf.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_pdf.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/drawable_ic_pdf.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/drawable/ic_pdf.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/mipmap-xhdpi_ic_launcher.webp.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/mipmap-xhdpi/ic_launcher.webp"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/menu_transaksi_menu.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/menu/transaksi_menu.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_launcher_background.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_launcher_background.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/drawable_ic_fingerprint.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/drawable/ic_fingerprint.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_clock.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_clock.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/layout_dialog_tambah_transaksi.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/layout/dialog_tambah_transaksi.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_bg_date_badge.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/bg_date_badge.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/drawable_ic_plus.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/drawable/ic_plus.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_add_photo.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_add_photo.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/drawable_ic_restore.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/drawable/ic_restore.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_deposit.png.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_deposit.png"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/layout_layout_progress.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/layout/layout_progress.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/layout_layout_dialog_hapus.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/layout/layout_dialog_hapus.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/layout_dialog_tambah_deposit.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/layout/dialog_tambah_deposit.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/mipmap-anydpi-v26/ic_launcher.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/mipmap-anydpi-v26_ic_launcher.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/mipmap-anydpi-v26/ic_launcher.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/layout_dialog_settings.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/layout/dialog_settings.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/mipmap-xxhdpi_ic_launcher.webp.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/mipmap-xxhdpi/ic_launcher.webp"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/layout_layout_dialog_info.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/layout/layout_dialog_info.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/layout_dialog_settings.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/layout/dialog_settings.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_backup.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_backup.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/drawable_ic_empty_box.png.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/drawable/ic_empty_box.png"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_smartphone.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_smartphone.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/drawable_ic_launcher_background.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/drawable/ic_launcher_background.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_android.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_android.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/layout_item_produk_rekap.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/layout/item_produk_rekap.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/xml_paths.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/xml/paths.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/drawable_ic_add.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/drawable/ic_add.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_plus.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_plus.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/layout_fragment_produk.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/layout/fragment_produk.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_close.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_close.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/layout_item_produk.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/layout/item_produk.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_notifications.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_notifications.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/menu_selisih_menu.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/menu/selisih_menu.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/raw_suara_lunas.mp3.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/raw/suara_lunas.mp3"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/drawable_ic_balance.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/drawable/ic_balance.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_shopping_bag.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_shopping_bag.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/layout_fragment_selisih.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/layout/fragment_selisih.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/layout_dialog_tambah_deposit.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/layout/dialog_tambah_deposit.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/xml_paths.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/xml/paths.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/layout_layout_download_progress.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/layout/layout_download_progress.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/mipmap-mdpi_ic_launcher_round.webp.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/mipmap-mdpi/ic_launcher_round.webp"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/menu_produk_menu.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/menu/produk_menu.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/drawable_ic_deposit.png.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/drawable/ic_deposit.png"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/mipmap-hdpi_ic_launcher_round.webp.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/mipmap-hdpi/ic_launcher_round.webp"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/drawable_ic_add_chart.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/drawable/ic_add_chart.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/layout_item_selisih.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/layout/item_selisih.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/layout_dialog_tambah_produk.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/layout/dialog_tambah_produk.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/layout_item_file_backup.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/layout/item_file_backup.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/drawable_ic_warning.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/drawable/ic_warning.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/layout_item_produk_rekap.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/layout/item_produk_rekap.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/drawable_ic_edit.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/drawable/ic_edit.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_settings.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_settings.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/layout_item_selisih.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/layout/item_selisih.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/layout_dialog_tambah_hutang.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/layout/dialog_tambah_hutang.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/menu_bottom_nav_menu.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/menu/bottom_nav_menu.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/color_chip_tint_hutang.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/color/chip_tint_hutang.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/mipmap-xxhdpi_ic_launcher_round.webp.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/mipmap-xxhdpi/ic_launcher_round.webp"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_update.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_update.xml"
     },
     {
-        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-48:/drawable_ic_check.xml.flat",
-        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-49:/drawable/ic_check.xml"
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_lunas.png.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_lunas.png"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/mipmap-mdpi_ic_launcher.webp.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/mipmap-mdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/menu_transaksi_menu.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/menu/transaksi_menu.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/layout_item_transaksi.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/layout/item_transaksi.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_person.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_person.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/menu_selisih_menu.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/menu/selisih_menu.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_empty_box.png.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_empty_box.png"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_api.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_api.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/menu_bottom_nav_menu.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/menu/bottom_nav_menu.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_barcode_scan.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_barcode_scan.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_github.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_github.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/color_chip_tint_lunas.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/color/chip_tint_lunas.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_warning.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_warning.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/xml_data_extraction_rules.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/xml/data_extraction_rules.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_check.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_check.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/layout_fragment_produk.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/layout/fragment_produk.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/mipmap-xxxhdpi_ic_launcher_round.webp.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/mipmap-xxxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_print.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_print.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_add_chart.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_add_chart.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/layout_fragment_selisih.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/layout/fragment_selisih.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/layout_fragment_transaksi.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/layout/fragment_transaksi.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_edit.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_edit.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/mipmap-mdpi_ic_launcher_round.webp.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/mipmap-mdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_lightbulb.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_lightbulb.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_git.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_git.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/layout_layout_dialog_update.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/layout/layout_dialog_update.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/color_chip_tint_deposit.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/color/chip_tint_deposit.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_search.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_search.xml"
+    },
+    {
+        "merged": "com.a3mart.app-release-55:/layout_dialog_settings.xml.flat",
+        "source": "com.a3mart.app-main-56:/layout/dialog_settings.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/mipmap-xxxhdpi_ic_launcher.webp.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/mipmap-xxxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_add.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_add.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/color_chip_tint_semua.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/color/chip_tint_semua.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_delete_sweep.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_delete_sweep.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_whatsapp.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_whatsapp.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_hutang.png.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_hutang.png"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/layout_activity_scanner.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/layout/activity_scanner.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_dot_separator.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/dot_separator.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_barcode.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_barcode.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/drawable_ic_chart.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/drawable/ic_chart.xml"
+    },
+    {
+        "merged": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-release-55:/xml_backup_rules.xml.flat",
+        "source": "/data/user/0/com.tom.rv2ide/files/home/.gradle/daemon/9.0.0/com.a3mart.app-main-56:/xml/backup_rules.xml"
     }
 ]

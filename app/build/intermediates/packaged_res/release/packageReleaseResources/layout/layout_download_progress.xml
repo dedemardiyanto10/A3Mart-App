@@ -1,28 +1,75 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="24dp">
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+     xmlns:android="http://schemas.android.com/apk/res/android"
+     xmlns:app="http://schemas.android.com/apk/res-auto"
+     android:layout_height="wrap_content"
+     android:layout_width="match_parent"
+     android:padding="24dp"
+     android:orientation="vertical">
+
+    <ImageView
+         android:layout_height="64dp"
+         android:layout_width="64dp"
+         android:layout_marginBottom="20dp"
+         android:src="@drawable/ic_update"
+         app:tint="?attr/colorPrimary"
+         android:layout_gravity="start" />
 
     <TextView
-        android:id="@+id/tv_status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Mengunduh update..."
-        android:textSize="16sp" />
+         android:layout_height="wrap_content"
+         android:layout_width="wrap_content"
+         android:alpha="0.6"
+         android:textSize="14sp"
+         android:id="@+id/tv_version_info"
+         android:text="Memperbarui ke Versi --" />
+
+    <TextView
+         android:layout_height="wrap_content"
+         android:layout_width="wrap_content"
+         android:textSize="22sp"
+         android:textColor="?attr/colorOnSurface"
+         android:layout_marginTop="4dp"
+         android:id="@+id/tvStatus"
+         android:text="Mengunduh..."
+         android:textStyle="bold" />
 
     <com.google.android.material.progressindicator.LinearProgressIndicator
-        android:id="@+id/progress_horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:indeterminate="false" />
-        
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:layout_marginBottom="8dp"
+         app:trackColor="?attr/colorSurfaceVariant"
+         app:trackCornerRadius="10dp"
+         android:layout_marginTop="24dp"
+         app:trackThickness="10dp"
+         android:id="@+id/progress_horizontal"
+         app:indicatorColor="?attr/colorPrimary" />
+
     <TextView
-        android:id="@+id/tv_percentage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:layout_marginTop="8dp"
-        android:text="0%" />
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:textAlignment="viewEnd"
+         android:textSize="13sp"
+         android:textColor="?attr/colorPrimary"
+         android:id="@+id/tv_size_progress"
+         android:text="0.00 MB / 0.00 MB"
+         android:textStyle="bold" />
+
+    <TextView
+         android:layout_height="wrap_content"
+         android:layout_width="match_parent"
+         android:alpha="0.5"
+         android:textSize="12sp"
+         android:layout_marginTop="24dp"
+         android:text="Harap tunggu, jangan tutup aplikasi agar pembaruan tidak terputus." />
+
+    <com.google.android.material.button.MaterialButton
+         android:layout_height="wrap_content"
+         android:layout_width="wrap_content"
+         android:textColor="?attr/colorError"
+         style="@style/Widget.Material3.Button.TextButton"
+         android:layout_marginTop="16dp"
+         android:id="@+id/btnCancel"
+         android:layout_gravity="end"
+         android:text="Batalkan" />
+
 </LinearLayout>

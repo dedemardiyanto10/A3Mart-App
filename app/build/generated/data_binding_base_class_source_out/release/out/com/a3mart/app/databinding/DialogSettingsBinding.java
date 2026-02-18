@@ -4,8 +4,10 @@ package com.a3mart.app.databinding;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.viewbinding.ViewBinding;
@@ -14,6 +16,7 @@ import com.a3mart.app.R;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.materialswitch.MaterialSwitch;
 import com.google.android.material.radiobutton.MaterialRadioButton;
+import com.google.android.material.textfield.TextInputEditText;
 import java.lang.NullPointerException;
 import java.lang.Override;
 import java.lang.String;
@@ -26,7 +29,31 @@ public final class DialogSettingsBinding implements ViewBinding {
   public final MaterialButton btnInfoApp;
 
   @NonNull
+  public final MaterialButton btnPilihLogo;
+
+  @NonNull
   public final MaterialButton btnResetApp;
+
+  @NonNull
+  public final LinearLayout btnToggleProfil;
+
+  @NonNull
+  public final TextInputEditText etAlamatToko;
+
+  @NonNull
+  public final TextInputEditText etNamaToko;
+
+  @NonNull
+  public final TextInputEditText etTeleponToko;
+
+  @NonNull
+  public final ImageView ivArrowProfil;
+
+  @NonNull
+  public final ImageView ivPreviewLogo;
+
+  @NonNull
+  public final LinearLayout layoutProfilContent;
 
   @NonNull
   public final MaterialRadioButton rbMalam;
@@ -41,6 +68,9 @@ public final class DialogSettingsBinding implements ViewBinding {
   public final RadioGroup rgTheme;
 
   @NonNull
+  public final MaterialSwitch switchAutoBackup;
+
+  @NonNull
   public final MaterialSwitch switchFingerprint;
 
   @NonNull
@@ -53,26 +83,49 @@ public final class DialogSettingsBinding implements ViewBinding {
   public final MaterialSwitch switchOntime;
 
   @NonNull
+  public final MaterialSwitch switchTampilkanStruk;
+
+  @NonNull
   public final MaterialSwitch switchToast;
 
+  @NonNull
+  public final TextView tvAppVersion;
+
   private DialogSettingsBinding(@NonNull LinearLayout rootView, @NonNull MaterialButton btnInfoApp,
-      @NonNull MaterialButton btnResetApp, @NonNull MaterialRadioButton rbMalam,
+      @NonNull MaterialButton btnPilihLogo, @NonNull MaterialButton btnResetApp,
+      @NonNull LinearLayout btnToggleProfil, @NonNull TextInputEditText etAlamatToko,
+      @NonNull TextInputEditText etNamaToko, @NonNull TextInputEditText etTeleponToko,
+      @NonNull ImageView ivArrowProfil, @NonNull ImageView ivPreviewLogo,
+      @NonNull LinearLayout layoutProfilContent, @NonNull MaterialRadioButton rbMalam,
       @NonNull MaterialRadioButton rbSiang, @NonNull MaterialRadioButton rbSistem,
-      @NonNull RadioGroup rgTheme, @NonNull MaterialSwitch switchFingerprint,
-      @NonNull MaterialSwitch switchLowStokAlert, @NonNull MaterialSwitch switchLunas,
-      @NonNull MaterialSwitch switchOntime, @NonNull MaterialSwitch switchToast) {
+      @NonNull RadioGroup rgTheme, @NonNull MaterialSwitch switchAutoBackup,
+      @NonNull MaterialSwitch switchFingerprint, @NonNull MaterialSwitch switchLowStokAlert,
+      @NonNull MaterialSwitch switchLunas, @NonNull MaterialSwitch switchOntime,
+      @NonNull MaterialSwitch switchTampilkanStruk, @NonNull MaterialSwitch switchToast,
+      @NonNull TextView tvAppVersion) {
     this.rootView = rootView;
     this.btnInfoApp = btnInfoApp;
+    this.btnPilihLogo = btnPilihLogo;
     this.btnResetApp = btnResetApp;
+    this.btnToggleProfil = btnToggleProfil;
+    this.etAlamatToko = etAlamatToko;
+    this.etNamaToko = etNamaToko;
+    this.etTeleponToko = etTeleponToko;
+    this.ivArrowProfil = ivArrowProfil;
+    this.ivPreviewLogo = ivPreviewLogo;
+    this.layoutProfilContent = layoutProfilContent;
     this.rbMalam = rbMalam;
     this.rbSiang = rbSiang;
     this.rbSistem = rbSistem;
     this.rgTheme = rgTheme;
+    this.switchAutoBackup = switchAutoBackup;
     this.switchFingerprint = switchFingerprint;
     this.switchLowStokAlert = switchLowStokAlert;
     this.switchLunas = switchLunas;
     this.switchOntime = switchOntime;
+    this.switchTampilkanStruk = switchTampilkanStruk;
     this.switchToast = switchToast;
+    this.tvAppVersion = tvAppVersion;
   }
 
   @Override
@@ -108,9 +161,57 @@ public final class DialogSettingsBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.btn_pilih_logo;
+      MaterialButton btnPilihLogo = ViewBindings.findChildViewById(rootView, id);
+      if (btnPilihLogo == null) {
+        break missingId;
+      }
+
       id = R.id.btn_reset_app;
       MaterialButton btnResetApp = ViewBindings.findChildViewById(rootView, id);
       if (btnResetApp == null) {
+        break missingId;
+      }
+
+      id = R.id.btnToggleProfil;
+      LinearLayout btnToggleProfil = ViewBindings.findChildViewById(rootView, id);
+      if (btnToggleProfil == null) {
+        break missingId;
+      }
+
+      id = R.id.et_alamat_toko;
+      TextInputEditText etAlamatToko = ViewBindings.findChildViewById(rootView, id);
+      if (etAlamatToko == null) {
+        break missingId;
+      }
+
+      id = R.id.et_nama_toko;
+      TextInputEditText etNamaToko = ViewBindings.findChildViewById(rootView, id);
+      if (etNamaToko == null) {
+        break missingId;
+      }
+
+      id = R.id.et_telepon_toko;
+      TextInputEditText etTeleponToko = ViewBindings.findChildViewById(rootView, id);
+      if (etTeleponToko == null) {
+        break missingId;
+      }
+
+      id = R.id.ivArrowProfil;
+      ImageView ivArrowProfil = ViewBindings.findChildViewById(rootView, id);
+      if (ivArrowProfil == null) {
+        break missingId;
+      }
+
+      id = R.id.iv_preview_logo;
+      ImageView ivPreviewLogo = ViewBindings.findChildViewById(rootView, id);
+      if (ivPreviewLogo == null) {
+        break missingId;
+      }
+
+      id = R.id.layoutProfilContent;
+      LinearLayout layoutProfilContent = ViewBindings.findChildViewById(rootView, id);
+      if (layoutProfilContent == null) {
         break missingId;
       }
 
@@ -138,13 +239,19 @@ public final class DialogSettingsBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.switch_auto_backup;
+      MaterialSwitch switchAutoBackup = ViewBindings.findChildViewById(rootView, id);
+      if (switchAutoBackup == null) {
+        break missingId;
+      }
+
       id = R.id.switch_fingerprint;
       MaterialSwitch switchFingerprint = ViewBindings.findChildViewById(rootView, id);
       if (switchFingerprint == null) {
         break missingId;
       }
 
-      id = R.id.switch_lowStokAlert;
+      id = R.id.switch_low_stok_alert;
       MaterialSwitch switchLowStokAlert = ViewBindings.findChildViewById(rootView, id);
       if (switchLowStokAlert == null) {
         break missingId;
@@ -162,15 +269,29 @@ public final class DialogSettingsBinding implements ViewBinding {
         break missingId;
       }
 
+      id = R.id.switch_tampilkan_struk;
+      MaterialSwitch switchTampilkanStruk = ViewBindings.findChildViewById(rootView, id);
+      if (switchTampilkanStruk == null) {
+        break missingId;
+      }
+
       id = R.id.switch_toast;
       MaterialSwitch switchToast = ViewBindings.findChildViewById(rootView, id);
       if (switchToast == null) {
         break missingId;
       }
 
-      return new DialogSettingsBinding((LinearLayout) rootView, btnInfoApp, btnResetApp, rbMalam,
-          rbSiang, rbSistem, rgTheme, switchFingerprint, switchLowStokAlert, switchLunas,
-          switchOntime, switchToast);
+      id = R.id.tv_app_version;
+      TextView tvAppVersion = ViewBindings.findChildViewById(rootView, id);
+      if (tvAppVersion == null) {
+        break missingId;
+      }
+
+      return new DialogSettingsBinding((LinearLayout) rootView, btnInfoApp, btnPilihLogo,
+          btnResetApp, btnToggleProfil, etAlamatToko, etNamaToko, etTeleponToko, ivArrowProfil,
+          ivPreviewLogo, layoutProfilContent, rbMalam, rbSiang, rbSistem, rgTheme, switchAutoBackup,
+          switchFingerprint, switchLowStokAlert, switchLunas, switchOntime, switchTampilkanStruk,
+          switchToast, tvAppVersion);
     }
     String missingId = rootView.getResources().getResourceName(id);
     throw new NullPointerException("Missing required view with ID: ".concat(missingId));

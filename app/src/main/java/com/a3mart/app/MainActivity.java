@@ -6,19 +6,22 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
+
 import com.a3mart.app.databinding.ActivityMainBinding;
 import com.a3mart.app.ui.produk.Produk;
 import com.a3mart.app.ui.produk.ProdukViewModel;
 import com.a3mart.app.ui.transaksi.Transaksi;
 import com.a3mart.app.ui.transaksi.TransaksiViewModel;
-import java.text.NumberFormat;
+import com.a3mart.app.utils.DialogUtils;
+import com.a3mart.app.utils.FormatterUtils;
+
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
@@ -26,24 +29,22 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private ProdukViewModel produkViewModel;
     private TransaksiViewModel transaksiViewModel;
-    
-    private final String UPDATE_JSON_URL = "https://raw.githubusercontent.com/USER_KAMU/REPO_KAMU/main/update.json";
+    private Thread downloadThread;
 
-    private final androidx.activity.result.ActivityResultLauncher<String>
-            requestNotificationPermissionLauncher =
+    private final String UPDATE_JSON_URL =
+            "https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/main/update.json";
+
+    private final androidx.activity.result.ActivityResultLauncher<String[]>
+            requestPermissionsLauncher =
                     registerForActivityResult(
                             new androidx.activity.result.contract.ActivityResultContracts
-                                    .RequestPermission(),
-                            isGranted -> {
-                                if (isGranted) {
-                                    Toast.makeText(this, "Notifikasi aktif!", Toast.LENGTH_SHORT)
-                                            .show();
-                                } else {
-                                    Toast.makeText(
-                                                    this,
-                                                    "Izin ditolak, suara 'Kaching' tidak akan bunyi.",
-                                                    Toast.LENGTH_LONG)
-                                            .show();
+                                    .RequestMultiplePermissions(),
+                            result -> {
+                                Boolean camera =
+                                        result.getOrDefault(
+                                                android.Manifest.permission.CAMERA, false);
+                                if (camera) {
+                                    smartToast("Izin Kamera Aktif");
                                 }
                             });
 
@@ -70,18 +71,15 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-
         SharedPreferences pref = getSharedPreferences("Settings", MODE_PRIVATE);
         if (pref.getBoolean("keep_screen_on", false)) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
 
         checkSecurity();
-        checkNotificationPermission();
+        checkAllPermissions();
         setSupportActionBar(binding.toolbar);
-        
+
         checkUpdate();
 
         produkViewModel = new ViewModelProvider(this).get(ProdukViewModel.class);
@@ -146,13 +144,64 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
+    private void mintaIzinBorongan() {
+        String[] permissions;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            permissions =
+                    new String[] {
+                        android.Manifest.permission.CAMERA,
+                        android.Manifest.permission.POST_NOTIFICATIONS
+                    };
+        } else {
+            permissions =
+                    new String[] {
+                        android.Manifest.permission.CAMERA,
+                        android.Manifest.permission.READ_EXTERNAL_STORAGE,
+                        android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    };
+        }
+
+        requestPermissionsLauncher.launch(permissions);
+    }
+
+    private void checkAllPermissions() {
+        boolean butuhKamera =
+                androidx.core.content.ContextCompat.checkSelfPermission(
+                                this, android.Manifest.permission.CAMERA)
+                        != android.content.pm.PackageManager.PERMISSION_GRANTED;
+
+        boolean butuhNotif = false;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            butuhNotif =
+                    androidx.core.content.ContextCompat.checkSelfPermission(
+                                    this, android.Manifest.permission.POST_NOTIFICATIONS)
+                            != android.content.pm.PackageManager.PERMISSION_GRANTED;
+        }
+
+        if (butuhKamera || butuhNotif) {
+            androidx.appcompat.app.AlertDialog dialog =
+                    new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+                            .setIcon(R.drawable.ic_notifications)
+                            .setTitle("Izin Akses Aplikasi")
+                            .setMessage(
+                                    "A3 Mart memerlukan izin Kamera (Scan Barcode) dan Notifikasi (Suara Pembayaran).")
+                            .setCancelable(false)
+                            .setPositiveButton(
+                                    "Izinkan Semua",
+                                    (d, w) -> {
+                                        mintaIzinBorongan();
+                                    })
+                            .setNegativeButton("Nanti Saja", null)
+                            .create();
+
+            DialogUtils.terapkanEfekMewah(dialog);
+
+            dialog.show();
+        }
+    }
+
     private void updateHeaderInstan(int position) {
         if (getSupportActionBar() == null) return;
-
-        java.text.DecimalFormatSymbols symbols =
-                new java.text.DecimalFormatSymbols(new Locale("in", "ID"));
-        symbols.setCurrencySymbol("Rp");
-        java.text.DecimalFormat df = new java.text.DecimalFormat("Rp#,##0.00;-Rp#,##0.00", symbols);
 
         switch (position) {
             case 0:
@@ -162,7 +211,11 @@ public class MainActivity extends AppCompatActivity {
                     long total = 0;
                     for (Transaksi t : listT) total += t.getTotalHarga();
                     getSupportActionBar()
-                            .setSubtitle("Total: " + listT.size() + " | " + df.format(total));
+                            .setSubtitle(
+                                    "Total: "
+                                            + listT.size()
+                                            + " | "
+                                            + FormatterUtils.formatRupiah(total));
                 } else {
                     getSupportActionBar().setSubtitle("Belum ada data");
                 }
@@ -194,7 +247,9 @@ public class MainActivity extends AppCompatActivity {
                     }
                     getSupportActionBar()
                             .setSubtitle(
-                                    daftarPeminjam.size() + " Orang | " + df.format(totalHutang));
+                                    daftarPeminjam.size()
+                                            + " Orang | "
+                                            + FormatterUtils.formatRupiah(totalHutang));
                 } else {
                     getSupportActionBar().setSubtitle("Tidak ada hutang");
                 }
@@ -257,146 +312,198 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void checkNotificationPermission() {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            if (androidx.core.content.ContextCompat.checkSelfPermission(
-                            this, android.Manifest.permission.POST_NOTIFICATIONS)
-                    == android.content.pm.PackageManager.PERMISSION_GRANTED) {
-                return;
-            }
-
-            new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
-                    .setIcon(R.drawable.ic_notifications)
-                    .setTitle("Aktifkan Notifikasi Kasir")
-                    .setMessage(
-                            "A3 Mart akan membunyikan suara 'Kaching!' tiap ada pembayaran lunas. Izinkan notifikasi di langkah selanjutnya ya!")
-                    .setCancelable(false)
-                    .setPositiveButton(
-                            "Siap!",
-                            (d, w) -> {
-                                requestNotificationPermissionLauncher.launch(
-                                        android.Manifest.permission.POST_NOTIFICATIONS);
-                            })
-                    .setNegativeButton("Nanti Saja", null)
-                    .show();
-        }
-    }
-    
-    
-   private void checkUpdate() {
-        new Thread(() -> {
-            try {
-                java.net.URL url = new java.net.URL(UPDATE_JSON_URL);
-                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
-                java.io.InputStream is = conn.getInputStream();
-                java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
-                String result = s.hasNext() ? s.next() : "";
-                
-                org.json.JSONObject json = new org.json.JSONObject(result);
-                int latestVersion = json.getInt("versionCode");
-                String downloadUrl = json.getString("downloadUrl");
-                String changelog = json.getString("changelog");
-
-                // Bandingkan dengan versi aplikasi sekarang (BuildConfig.VERSION_CODE)
-                try {
-    int currentVersion = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
-    if (latestVersion > currentVersion) {
-        runOnUiThread(() -> showUpdateDialog(downloadUrl, changelog));
-    }
-} catch (Exception e) {
-    e.printStackTrace();
-}
-
-            } catch (Exception e) {
-                e.printStackTrace(); // Abaikan jika gagal koneksi (offline)
-            }
-        }).start();
-    }
-
-    private void showUpdateDialog(String url, String notes) {
-        new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
-                .setTitle("Update Baru Tersedia!")
-                .setIcon(R.drawable.ic_backup) // Pastikan icon ini ada
-                .setMessage("Apa yang baru di versi ini:\n" + notes)
-                .setCancelable(false)
-                .setPositiveButton("Update Sekarang", (d, w) -> downloadAndInstall(url))
-                .setNegativeButton("Nanti", null)
-                .show();
-    }
-
-    private void downloadAndInstall(String apkUrl) {
-        // 1. Siapkan Dialog
-        View dialogView = getLayoutInflater().inflate(R.layout.layout_download_progress, null);
-        com.google.android.material.progressindicator.LinearProgressIndicator progressBar =
-                dialogView.findViewById(R.id.progress_horizontal);
-        TextView tvPercentage = dialogView.findViewById(R.id.tv_percentage);
-
-        androidx.appcompat.app.AlertDialog progressDialog =
-                new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
-                        .setTitle("Memperbarui A3 Mart")
-                        .setView(dialogView)
-                        .setCancelable(false)
-                        .create();
-
-        progressDialog.show();
-
-        // 2. Proses Download di Background
+    private void checkUpdate() {
         new Thread(
                         () -> {
                             try {
-                                java.net.URL url = new java.net.URL(apkUrl);
-                                java.net.HttpURLConnection connection =
+                                java.net.URL url = new java.net.URL(UPDATE_JSON_URL);
+                                java.net.HttpURLConnection conn =
                                         (java.net.HttpURLConnection) url.openConnection();
-                                connection.connect();
+                                java.io.InputStream is = conn.getInputStream();
+                                java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+                                String result = s.hasNext() ? s.next() : "";
 
-                                int fileLength = connection.getContentLength();
-                                java.io.File apkFile =
-                                        new java.io.File(getExternalFilesDir(null), "update.apk");
+                                org.json.JSONObject json = new org.json.JSONObject(result);
+                                int latestVersionCode = json.getInt("versionCode");
+                                String latestVersionName = json.optString("versionName", "Terbaru");
+                                String releaseDate = json.optString("updateDate", "");
+                                String downloadUrl = json.getString("downloadUrl");
+                                String changelog = json.getString("changelog");
 
-                                java.io.InputStream input =
-                                        new java.io.BufferedInputStream(url.openStream());
-                                java.io.OutputStream output = new java.io.FileOutputStream(apkFile);
+                                String fileSize = json.optString("fileSize", "--- MB");
+                                String releaseType =
+                                        json.optString("releaseType", "Official Release");
+                                boolean isForceUpdate = json.optBoolean("isForceUpdate", false);
 
-                                byte[] data = new byte[4096];
-                                long total = 0;
-                                int count;
-                                while ((count = input.read(data)) != -1) {
-                                    total += count;
-                                    if (fileLength > 0) {
-                                        int progress = (int) (total * 100 / fileLength);
-                                        runOnUiThread(
-                                                () -> {
-                                                    progressBar.setProgress(progress);
-                                                    tvPercentage.setText(progress + "%");
-                                                });
-                                    }
-                                    output.write(data, 0, count);
+                                android.content.pm.PackageInfo pInfo =
+                                        getPackageManager().getPackageInfo(getPackageName(), 0);
+                                long currentVersionCode =
+                                        androidx.core.content.pm.PackageInfoCompat
+                                                .getLongVersionCode(pInfo);
+
+                                if (latestVersionCode > currentVersionCode) {
+                                    runOnUiThread(
+                                            () ->
+                                                    showUpdateDialog(
+                                                            downloadUrl,
+                                                            changelog,
+                                                            latestVersionName,
+                                                            releaseDate,
+                                                            fileSize,
+                                                            releaseType,
+                                                            isForceUpdate));
                                 }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        })
+                .start();
+    }
 
-                                output.flush();
-                                output.close();
-                                input.close();
+    public void showUpdateDialog(
+            String url,
+            String notes,
+            String versionName,
+            String date,
+            String size,
+            String type,
+            boolean isForce) {
+
+        View dialogView = getLayoutInflater().inflate(R.layout.layout_dialog_update, null);
+        TextView tvChangelog = dialogView.findViewById(R.id.tv_changelog);
+        TextView tvVersion = dialogView.findViewById(R.id.tv_version_name);
+
+        tvChangelog.setText(notes);
+        String fullInfo =
+                "Versi " + versionName + " | " + size + " (" + type + ")\nDirilis: " + date;
+        tvVersion.setText(fullInfo);
+
+        com.google.android.material.dialog.MaterialAlertDialogBuilder builder =
+                new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+                        .setView(dialogView)
+                        .setCancelable(!isForce)
+                        .setPositiveButton(
+                                "Update Sekarang", (d, w) -> downloadAndInstall(url, versionName));
+
+        if (!isForce) {
+            builder.setNegativeButton("Nanti", null);
+        }
+
+        androidx.appcompat.app.AlertDialog dialog = builder.create();
+
+        DialogUtils.terapkanEfekMewah(dialog);
+
+        dialog.show();
+    }
+
+    private void downloadAndInstall(String apkUrl, String verName) {
+        com.a3mart.app.databinding.LayoutDownloadProgressBinding db =
+                com.a3mart.app.databinding.LayoutDownloadProgressBinding.inflate(
+                        getLayoutInflater());
+
+        androidx.appcompat.app.AlertDialog progressDialog =
+                new com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+                        .setView(db.getRoot())
+                        .setCancelable(false)
+                        .create();
+
+        DialogUtils.terapkanEfekMewah(progressDialog);
+
+        db.tvVersionInfo.setText("Update ke Versi: " + verName);
+        db.tvStatus.setText("Menghubungkan...");
+        db.tvSizeProgress.setText("0 MB / 0 MB");
+
+        progressDialog.show();
+
+        db.btnCancel.setOnClickListener(
+                v -> {
+                    if (downloadThread != null) downloadThread.interrupt();
+                    progressDialog.dismiss();
+                    smartToast("Unduhan dibatalkan");
+                });
+
+        downloadThread =
+                new Thread(
+                        () -> {
+                            try {
+                                java.net.URL url = new java.net.URL(apkUrl);
+                                java.net.HttpURLConnection conn =
+                                        (java.net.HttpURLConnection) url.openConnection();
+                                conn.setInstanceFollowRedirects(true);
+
+                                int status = conn.getResponseCode();
+                                if (status == 301 || status == 302 || status == 303) {
+                                    url = new java.net.URL(conn.getHeaderField("Location"));
+                                    conn = (java.net.HttpURLConnection) url.openConnection();
+                                }
+                                conn.connect();
+
+                                int fileLength = conn.getContentLength();
+                                double totalMb = (double) fileLength / (1024 * 1024);
+                                String totalMbStr =
+                                        String.format(
+                                                java.util.Locale.getDefault(), "%.2f MB", totalMb);
+
+                                java.io.File apkFile =
+                                        new java.io.File(getExternalCacheDir(), "update.apk");
+                                if (apkFile.exists()) apkFile.delete();
+
+                                try (java.io.InputStream input =
+                                                new java.io.BufferedInputStream(
+                                                        conn.getInputStream());
+                                        java.io.OutputStream output =
+                                                new java.io.FileOutputStream(apkFile)) {
+
+                                    byte[] data = new byte[8192];
+                                    long total = 0;
+                                    int count;
+
+                                    runOnUiThread(() -> db.tvStatus.setText("Mengunduh data..."));
+
+                                    while ((count = input.read(data)) != -1) {
+                                        if (Thread.currentThread().isInterrupted()) return;
+                                        total += count;
+
+                                        double currentMb = (double) total / (1024 * 1024);
+                                        String currentMbStr =
+                                                String.format(
+                                                        java.util.Locale.getDefault(),
+                                                        "%.2f MB",
+                                                        currentMb);
+
+                                        if (fileLength > 0) {
+                                            int progress = (int) (total * 100 / fileLength);
+                                            runOnUiThread(
+                                                    () -> {
+                                                        db.progressHorizontal.setProgress(progress);
+                                                        db.tvSizeProgress.setText(
+                                                                currentMbStr + " / " + totalMbStr);
+                                                    });
+                                        }
+                                        output.write(data, 0, count);
+                                    }
+                                    output.flush();
+                                }
 
                                 runOnUiThread(
                                         () -> {
                                             progressDialog.dismiss();
-                                            installApk(apkFile);
+                                            if (apkFile.exists() && apkFile.length() > 100000) {
+                                                installApk(apkFile);
+                                            } else {
+                                                smartToast("File rusak atau tidak lengkap.");
+                                            }
                                         });
 
                             } catch (Exception e) {
                                 runOnUiThread(
                                         () -> {
                                             progressDialog.dismiss();
-                                            Toast.makeText(
-                                                            this,
-                                                            "Gagal download update: "
-                                                                    + e.getMessage(),
-                                                            Toast.LENGTH_LONG)
-                                                    .show();
+                                            smartToast("Gagal: " + e.getMessage());
                                         });
                             }
-                        })
-                .start();
+                        });
+        downloadThread.start();
     }
 
     private void installApk(java.io.File file) {
@@ -410,17 +517,19 @@ public class MainActivity extends AppCompatActivity {
         intent.addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
 
-        // Untuk Android 8.0+
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            if (!getPackageManager().canRequestPackageInstalls()) {
-                startActivity(
-                        new android.content.Intent(
-                                android.provider.Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
-                                android.net.Uri.parse("package:" + getPackageName())));
-                return;
-            }
+        try {
+            startActivity(intent);
+        } catch (Exception e) {
+            smartToast("Gagal membuka installer: " + e.getMessage());
         }
+    }
 
-        startActivity(intent);
+    private void smartToast(String pesan) {
+        SharedPreferences pref = getSharedPreferences("Settings", MODE_PRIVATE);
+        boolean isToastEnabled = pref.getBoolean("show_toast", true);
+
+        if (isToastEnabled) {
+            Toast.makeText(this, pesan, Toast.LENGTH_SHORT).show();
+        }
     }
 }

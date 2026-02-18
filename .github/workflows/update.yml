@@ -3,6 +3,7 @@ name: A3Mart Ultimate Sync
 on:
   release:
     types: [published]
+  workflow_dispatch: # Supaya bisa dijalankan manual jika perlu
 
 jobs:
   sync:
@@ -14,47 +15,70 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Get Release Data & APK Size
+      - name: Get Data and Precision Size
         id: get_data
         run: |
-          # 1. Ambil Version Code dari build.gradle
-          VCODE=$(grep "versionCode" app/build.gradle | awk '{print $2}')
+          echo "Waiting for GitHub API to index assets..."
+          sleep 15
           
-          # 2. Ambil Tag & Info Tanggal
+          # 1. Cari file build.gradle dimanapun (Anti-Error Jalur)
+          GRADLE_FILE=$(find . -name "build.gradle" | grep -v "settings" | head -n 1)
+          VCODE=$(grep "versionCode" $GRADLE_FILE | awk '{print $2}' | tr -d '"' | tr -d "'")
+          echo "Found vCode: $VCODE"
+          
+          # 2. Info Tag & Tanggal
           TAG="${{ github.event.release.tag_name }}"
           TANGGAL=$(date +'%d-%m-%Y')
           
-          # 3. Cari URL Asset APK (Cari file yang namanya A3Mart.apk)
-          URL="https://github.com/${{ github.repository }}/releases/download/$TAG/A3Mart.apk"
+          # 3. Ambil Data Asset dari API (Biar Size & Link 100% Akurat)
+          # Mengambil asset pertama yang berakhiran .apk
+          ASSET_INFO=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG)
+          URL=$(echo "$ASSET_INFO" | jq -r '.assets[] | select(.name | endswith(".apk")) | .browser_download_url' | head -n 1)
+          SIZE_BYTES=$(echo "$ASSET_INFO" | jq -r '.assets[] | select(.name | endswith(".apk")) | .size' | head -n 1)
+
+          if [ -z "$URL" ] || [ "$URL" == "null" ]; then
+            echo "❌ ERROR: APK tidak ditemukan di Release!"
+            exit 1
+          fi
+
+          # 4. Konversi Byte ke MB dengan Python (2 angka di belakang koma)
+          SIZE_MB=$(python3 -c "print(f'{ $SIZE_BYTES / (1024 * 1024):.2f} MB')")
           
-          # 4. DOWNLOAD APK SEBENTAR UNTUK HITUNG SIZE (PENTING!)
-          # Robot perlu download filenya untuk tahu ukurannya
-          wget -O temp_a3mart.apk "$URL"
-          SIZE=$(du -h temp_a3mart.apk | cut -f1 | sed 's/$/ MB/' | sed 's/M MB/ MB/')
-          
-          # Kirim data ke step berikutnya
           echo "vcode=$VCODE" >> $GITHUB_OUTPUT
           echo "tag=$TAG" >> $GITHUB_OUTPUT
-          echo "size=$SIZE" >> $GITHUB_OUTPUT
+          echo "size=$SIZE_MB" >> $GITHUB_OUTPUT
           echo "date=$TANGGAL" >> $GITHUB_OUTPUT
           echo "url=$URL" >> $GITHUB_OUTPUT
 
-      - name: Write update.json
+      - name: Generate update.json (Python Formatter)
+        shell: python
         run: |
-          echo "{
-            \"versionName\": \"${{ steps.get_data.outputs.tag }}\",
-            \"versionCode\": ${{ steps.get_data.outputs.vcode }},
-            \"releaseDate\": \"${{ steps.get_data.outputs.date }}\",
-            \"appSize\": \"${{ steps.get_data.outputs.size }}\",
-            \"downloadUrl\": \"${{ steps.get_data.outputs.url }}\",
-            \"forceUpdate\": true,
-            \"changelog\": [\"Pembaruan versi ${{ steps.get_data.outputs.tag }}\"]
-          }" > update.json
+          import json
+          
+          # Ambil data dari step sebelumnya
+          data = {
+              "versionName": "${{ steps.get_data.outputs.tag }}".replace('v', ''),
+              "versionCode": int("${{ steps.get_data.outputs.vcode }}"),
+              "releaseDate": "${{ steps.get_data.outputs.date }}",
+              "appSize": "${{ steps.get_data.outputs.size }}",
+              "downloadUrl": "${{ steps.get_data.outputs.url }}",
+              "forceUpdate": True,
+              "changelog": [
+                  "Pembaruan sistem ke versi ${{ steps.get_data.outputs.tag }}",
+                  "Peningkatan performa dan perbaikan bug"
+              ]
+          }
 
-      - name: Commit and Push
+          # Simpan dengan indentasi rapi
+          with open('update.json', 'w') as f:
+              json.dump(data, f, indent=2)
+          
+          print("✅ update.json has been updated with precision size!")
+
+      - name: Push to Repository
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add update.json
-          git commit -m "chore: auto-sync update.json for ${{ github.event.release.tag_name }} [skip ci]" || echo "No changes"
+          git commit -m "chore: sync manifest $TAG [skip ci]" || echo "No changes to commit"
           git push origin main

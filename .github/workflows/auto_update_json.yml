@@ -3,6 +3,7 @@ name: Auto Update JSON on Release
 on:
   release:
     types: [published]
+  # Tetap ada ini buat jaga-jaga kalau mau tes manual
   workflow_dispatch:
 
 jobs:
@@ -15,75 +16,66 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Get Metadata & Size
+      - name: Fetch Release Asset Metadata
+        id: get_asset
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # 1. Ambil Tag dan Nama Repo
           TAG="${{ github.event.release.tag_name }}"
-          if [ -z "$TAG" ]; then TAG="v1.1.0"; fi
-          
-          ASSET_NAME="A3Mart.apk"
           REPO="${{ github.repository }}"
+          ASSET_NAME="A3Mart.apk"
+
+          # Ambil data JSON asset langsung dari API GitHub
+          # Kita cari asset yang namanya cocok, lalu ambil ukurannya
+          ASSET_DATA=$(gh api repos/$REPO/releases/tags/$TAG --jq ".assets[] | select(.name==\"$ASSET_NAME\")")
+          
+          if [ -z "$ASSET_DATA" ]; then
+            echo "ERROR: Asset $ASSET_NAME tidak ditemukan di release $TAG"
+            echo "SIZE=--- MB" >> $GITHUB_ENV
+          else
+            SIZE_BYTES=$(echo $ASSET_DATA | jq '.size')
+            # Konversi ke MB (2 desimal)
+            SIZE_MB=$(python3 -c "print(f'{ $SIZE_BYTES / (1024 * 1024):.2f} MB')")
+            echo "SIZE=$SIZE_MB" >> $GITHUB_ENV
+          fi
           
           echo "TAG=$TAG" >> $GITHUB_ENV
           echo "REPO=$REPO" >> $GITHUB_ENV
-          echo "ASSET_NAME=$ASSET_NAME" >> $GITHUB_ENV
+          echo "ASSET=$ASSET_NAME" >> $GITHUB_ENV
           echo "TODAY=$(date +'%d-%m-%Y')" >> $GITHUB_ENV
-
-          # Jeda 30 detik agar GitHub selesai memproses upload asset
-          echo "Waiting for GitHub Release to finalize assets..."
-          sleep 30
-          
-          mkdir -p ./temp
-          
-          # 2. Coba download asset untuk ambil ukurannya
-          if gh release download "$TAG" --pattern "$ASSET_NAME" --dir ./temp --clobber; then
-            SIZE_BYTES=$(stat -c%s "./temp/$ASSET_NAME")
-            # Hitung MB
-            SIZE_MB=$(python3 -c "print(f'{ $SIZE_BYTES / (1024 * 1024):.2f} MB')")
-            echo "FINAL_SIZE=$SIZE_MB" >> $GITHUB_ENV
-            echo "STATUS=SUCCESS" >> $GITHUB_ENV
-          else
-            echo "FINAL_SIZE=Size tidak terbaca" >> $GITHUB_ENV
-            echo "STATUS=FAILED" >> $GITHUB_ENV
-          fi
 
       - name: Update JSON File
         run: |
           python3 -c "
           import json, os
-          filename = 'update.json'
           
-          # Load data lama agar data lain (seperti changelog) tidak hilang
-          try:
-              with open(filename, 'r') as f:
+          file_path = 'update.json'
+          if os.path.exists(file_path):
+              with open(file_path, 'r') as f:
                   data = json.load(f)
-          except:
+          else:
               data = {}
 
-          tag = os.getenv('TAG')
-          repo = os.environ['REPO']
-          asset = os.environ['ASSET_NAME']
-          
-          # Update metadata
+          # Update data dengan variable dari ENV
           data['versionCode'] = data.get('versionCode', 0) + 1
-          data['versionName'] = tag.replace('v', '')
+          data['versionName'] = os.environ['TAG'].lstrip('v')
           data['updateDate'] = os.environ['TODAY']
-          data['fileSize'] = os.environ['FINAL_SIZE']
+          data['fileSize'] = os.environ['SIZE']
           
-          # LINK DOWNLOAD: Pastikan formatnya benar
-          # github.com/USER/REPO/releases/download/v1.0.0/A3Mart.apk
+          # URL format standar GitHub
+          repo = os.environ['REPO']
+          tag = os.environ['TAG']
+          asset = os.environ['ASSET']
           data['downloadUrl'] = f'https://github.com/{repo}/releases/download/{tag}/{asset}'
-          
-          with open(filename, 'w') as f:
+
+          with open(file_path, 'w') as f:
               json.dump(data, f, indent=2)
           "
 
-      - name: Push Updates
+      - name: Push Changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add update.json
-          git commit -m "Auto Update v${{ env.TAG }} - ${{ env.FINAL_SIZE }}" || echo "No changes"
+          git commit -m "Automated Update: ${{ env.TAG }} (${{ env.SIZE }})" || echo "No changes to commit"
           git push

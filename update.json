@@ -1,13 +1,13 @@
 {
-  "versionName": "1.1.0",
-  "versionCode": 3,
-  "releaseDate": "2026-02-18",
-  "appSize": "4.2 MB",
-  "downloadUrl": "https://github.com/user/repo/raw/main/A3Mart_v1.0.5.apk",
+  "versionName": "1.0.5",
+  "versionCode": 5,
+  "releaseDate": "18-02-2026",
+  "appSize": "4.5 MB",
+  "downloadUrl": "https://github.com/dedemardiyanto10/REPO/raw/main/A3Mart_v5.apk",
   "forceUpdate": true,
   "changelog": [
-    "Menambahkan fitur Smart Toast & Notifikasi",
-    "Fix bug logo burik di Toolbar",
-    "Optimasi fitur rekap hutang di SelisihFragment"
+    "Fix logo burik di toolbar",
+    "Tambah fitur Smart Toast & Notifikasi",
+    "Auto-sync sistem update terbaru"
   ]
 }

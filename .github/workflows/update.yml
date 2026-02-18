@@ -85,7 +85,7 @@ jobs:
               "downloadUrl": os.getenv("U"),
               "fileSize": size_str,
               "releaseType": "Official Release",
-              "isForceUpdate": True,
+              "isForceUpdate": False,
               "changelog": f"• Pembaruan versi {os.getenv('TG')}\n• Perbaikan bug dan optimalisasi sistem."
           }
 

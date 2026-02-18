@@ -1,0 +1,26 @@
+name: A3Mart Auto Update Sync
+
+on:
+  push:
+    branches: [ main ] # Jalan otomatis pas lo push ke main
+    paths:
+      - 'update.json'  # Hanya jalan kalau file update.json berubah
+
+jobs:
+  notify-update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Validate JSON
+        run: |
+          echo "🤖 Mengecek format update.json..."
+          cat update.json | python3 -m json.tool
+          echo "✅ Format JSON valid!"
+
+      - name: Summary Release
+        run: |
+          VERSION=$(python3 -c "import json; print(json.load(open('update.json'))['versionName'])")
+          echo "🚀 Versi Baru Terdeteksi: $VERSION"
+          echo "📢 Silakan build APK dan upload ke repo."

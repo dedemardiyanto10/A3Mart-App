@@ -5,9 +5,9 @@
   "appSize": "4.5 MB",
   "downloadUrl": "https://github.com/dedemardiyanto10/A3Mart-App/raw/main/A3Mart_v5.apk",
   "forceUpdate": true,
-  "changelog": [
+  "changelog": 
     "Fix logo burik di toolbar",
     "Tambah fitur Smart Toast & Notifikasi",
     "Auto-sync sistem update terbaru"
-  ]
+  
 }

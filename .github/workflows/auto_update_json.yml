@@ -18,32 +18,37 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Get Metadata & Size
+            - name: Get Metadata & Size
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Ambil Tag (jika lewat release) atau default (jika lewat push)
           TAG="${{ github.event.release.tag_name }}"
-          if [ -z "$TAG" ]; then TAG="v1.1.0"; fi 
+          if [ -z "$TAG" ]; then TAG="v1.1.0"; fi
           
-          # Cari file APK
-          ASSET_NAME=$(gh release view $TAG --json assets -q '.assets[] | select(.name | endswith(".apk")) | .name' | head -n 1 || echo "A3Mart_V1.1.0.apk")
+          # Pakai nama tetap A3Mart.apk
+          ASSET_NAME="A3Mart.apk"
           
           echo "ASSET_NAME=$ASSET_NAME" >> $GITHUB_ENV
           echo "TAG=$TAG" >> $GITHUB_ENV
-          
-          # Hitung tanggal
           echo "TODAY=$(date +'%d-%m-%Y')" >> $GITHUB_ENV
+
+          # Coba ambil size asli dari GitHub Release
+          echo "Menunggu 15 detik agar upload selesai..."
+          sleep 15
           
-          # Hitung size (Jika file tidak ada karena bukan trigger release, default ke 4.5 MB)
-          gh release download $TAG --pattern "$ASSET_NAME" --dir ./temp --clobber || echo "Download skipped"
+          # Download untuk hitung size asli
+          gh release download $TAG --pattern "$ASSET_NAME" --dir ./temp --clobber || echo "Download failed"
+          
           if [ -f "./temp/$ASSET_NAME" ]; then
             SIZE_BYTES=$(stat -c%s "./temp/$ASSET_NAME")
-            SIZE_MB=$(python3 -c "print(f'{$SIZE_BYTES / (1024 * 1024):.1f} MB')")
+            # Hitung MB pakai Python agar akurat
+            SIZE_MB=$(python3 -c "print(f'{ $SIZE_BYTES / (1024 * 1024):.2f} MB')")
             echo "FINAL_SIZE=$SIZE_MB" >> $GITHUB_ENV
           else
-            echo "FINAL_SIZE=4.5 MB" >> $GITHUB_ENV
+            # Jika file tidak ditemukan (misal pas testing push), baru pakai default
+            echo "FINAL_SIZE=--- MB" >> $GITHUB_ENV
           fi
+
       - name: Update JSON File
         run: |
           python3 -c "

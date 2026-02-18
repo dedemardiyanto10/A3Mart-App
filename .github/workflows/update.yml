@@ -18,37 +18,45 @@ jobs:
       - name: Get Data from Release
         id: get_data
         run: |
-          echo "Menunggu 45 detik agar GitHub selesai memproses upload APK..."
-          sleep 45
+          # 1. Kasih waktu 1 menit (GitHub butuh waktu proses aset)
+          echo "Menunggu 60 detik agar GitHub Asset siap..."
+          sleep 60
           
           TAG="${{ github.event.release.tag_name }}"
           REPO="${{ github.repository }}"
           
-          # Ambil data aset dari API (pakai header untuk otentikasi biar lebih akurat)
-          ASSET_INFO=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/$REPO/releases/tags/$TAG")
-          
-          # CARI ASSET APK (Bisa apa saja namanya yang penting akhiran .apk)
-          # Kita ambil size dari asset pertama yang ketemu berakhiran .apk
-          BYTES=$(echo "$ASSET_INFO" | jq -r '.assets[] | select(.name | endswith(".apk")) | .size' | head -n 1)
-          URL=$(echo "$ASSET_INFO" | jq -r '.assets[] | select(.name | endswith(".apk")) | .browser_download_url' | head -n 1)
+          # 2. Ambil Info Aset (Size)
+          ASSET_INFO=$(curl -s "https://api.github.com/repos/$REPO/releases/tags/$TAG")
+          BYTES=$(echo "$ASSET_INFO" | jq -r '.assets[] | select(.name | contains(".apk")) | .size' | head -n 1)
 
-          # Cari vCode dan vName di build.gradle
+          # 3. Ambil vCode & vName dari build.gradle
           GRADLE_FILE=$(find . -name "build.gradle" | grep -v "settings" | head -n 1)
           VCODE=$(grep "versionCode" $GRADLE_FILE | sed 's/[^0-9]*//g' | head -n 1)
           VNAME=$(grep "versionName" $GRADLE_FILE | head -n 1 | awk '{print $2}' | tr -d '"' | tr -d "'")
 
-          # Jika BYTES tidak ditemukan atau 0, kita set fallback
+          # 4. FIX URL: Kalau API kosong, kita rakit sendiri URL-nya (Pasti Berhasil)
+          # Format: https://github.com/USER/REPO/releases/download/TAG/NAMA_FILE.apk
+          # Kita cari nama file APK-nya dulu
+          APK_NAME=$(echo "$ASSET_INFO" | jq -r '.assets[] | select(.name | contains(".apk")) | .name' | head -n 1)
+          
+          if [ -z "$APK_NAME" ] || [ "$APK_NAME" == "null" ]; then
+             # Jika nama file gak ketemu di API, kita tebak berdasarkan nama repo
+             APK_NAME="A3Mart.apk" 
+          fi
+          
+          URL="https://github.com/$REPO/releases/download/$TAG/$APK_NAME"
+
+          # Fallback size
           if [ -z "$BYTES" ] || [ "$BYTES" == "null" ]; then BYTES="0"; fi
-          if [ -z "$URL" ] || [ "$URL" == "null" ]; then URL="https://github.com/$REPO/releases/download/$TAG/A3Mart.apk"; fi
 
           echo "vcode=$VCODE" >> $GITHUB_OUTPUT
           echo "vname=$VNAME" >> $GITHUB_OUTPUT
           echo "bytes=$BYTES" >> $GITHUB_OUTPUT
           echo "url=$URL" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
           echo "date=$(date +'%d-%m-%Y')" >> $GITHUB_OUTPUT
 
-      - name: Generate JSON
+      - name: Generate JSON (Final Solution)
         shell: python
         env:
           B: ${{ steps.get_data.outputs.bytes }}
@@ -56,12 +64,12 @@ jobs:
           VC: ${{ steps.get_data.outputs.vcode }}
           VN: ${{ steps.get_data.outputs.vname }}
           DT: ${{ steps.get_data.outputs.date }}
-          TG: ${{ github.event.release.tag_name }}
+          TG: ${{ steps.get_data.outputs.tag }}
         run: |
           import json
           import os
 
-          # Konversi bytes ke MB secara aman
+          # Hitung MB
           try:
               b_val = int(os.getenv("B", "0"))
               size_str = f"{b_val / (1024 * 1024):.2f} MB" if b_val > 0 else "--- MB"
@@ -76,7 +84,7 @@ jobs:
               "fileSize": size_str,
               "releaseType": "Official Release",
               "isForceUpdate": True,
-              "changelog": f"• Pembaruan versi {os.getenv('TG')}\n• Perbaikan bug dan optimalisasi."
+              "changelog": f"• Pembaruan versi {os.getenv('TG')}\n• Perbaikan bug dan optimalisasi sistem."
           }
 
           with open('update.json', 'w') as f:
@@ -87,5 +95,5 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add update.json
-          git commit -m "chore: sync update.json [skip ci]" || echo "No changes"
+          git commit -m "fix: auto-update manifest for ${{ steps.get_data.outputs.tag }}" || echo "No changes"
           git push origin main

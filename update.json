@@ -1,13 +1,8 @@
 {
-    "versionName": "1.1.0",
-    "versionCode": 3,
-    "releaseDate": "18-02-2026",
-    "appSize": "4.5 MB",
-    "downloadUrl": "https://github.com/dedemardiyanto10/A3Mart-App/releases/download//A3Mart.apk",
-    "forceUpdate": true,
-    "changelog": [
-        "Fix logo burik di toolbar",
-        "Tambah fitur Smart Toast & Notifikasi",
-        "Auto-sync sistem update terbaru"
-    ]
+  "versionName": "1.0.0",
+  "versionCode": 1771415917,
+  "releaseDate": "18-02-2026",
+  "downloadUrl": "https://github.com/dedemardiyanto10/A3Mart-App/releases/download/v1.0.0/A3Mart.apk",
+  "forceUpdate": true,
+  "changelog": ["New release v1.0.0"]
 }

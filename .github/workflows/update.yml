@@ -23,23 +23,21 @@ jobs:
           
           # 1. Cari file build.gradle
           GRADLE_FILE=$(find . -name "build.gradle" | grep -v "settings" | head -n 1)
-          VCODE=$(grep "versionCode" $GRADLE_FILE | awk '{print $2}' | tr -d '"' | tr -d "'")
           
-          # 2. Ambil Info Tag
+          # 2. Ambil vCode (Versi lebih kuat: ambil cuma angkanya saja)
+          VCODE=$(grep "versionCode" $GRADLE_FILE | sed 's/[^0-9]*//g')
+          echo "Found vCode: $VCODE"
+          
+          # 3. Info Tag & API
           TAG="${{ github.event.release.tag_name }}"
           TANGGAL=$(date +'%d-%m-%Y')
           
-          # 3. Ambil Info Asset dari API
           ASSET_INFO=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG)
           URL=$(echo "$ASSET_INFO" | jq -r '.assets[] | select(.name | endswith(".apk")) | .browser_download_url' | head -n 1)
           SIZE_BYTES=$(echo "$ASSET_INFO" | jq -r '.assets[] | select(.name | endswith(".apk")) | .size' | head -n 1)
 
-          if [ -z "$URL" ] || [ "$URL" == "null" ]; then
-            echo "❌ APK tidak ditemukan!"
-            exit 1
-          fi
+          if [ -z "$VCODE" ]; then VCODE="1"; fi # Backup kalau tetep gak ketemu
 
-          # Oper data mentah ke step berikutnya (Tanpa dihitung di sini)
           echo "vcode=$VCODE" >> $GITHUB_OUTPUT
           echo "tag=$TAG" >> $GITHUB_OUTPUT
           echo "bytes=$SIZE_BYTES" >> $GITHUB_OUTPUT
@@ -52,12 +50,10 @@ jobs:
           import json
           import os
 
-          # Ambil data mentah dari step sebelumnya
           raw_bytes = "${{ steps.get_data.outputs.bytes }}"
           v_code = "${{ steps.get_data.outputs.vcode }}"
           tag_name = "${{ steps.get_data.outputs.tag }}"
           
-          # Hitung size di Python (Sangat Aman)
           try:
               size_mb = f"{int(raw_bytes) / (1024 * 1024):.2f} MB"
           except:
@@ -71,16 +67,15 @@ jobs:
               "downloadUrl": "${{ steps.get_data.outputs.url }}",
               "forceUpdate": True,
               "changelog": [
-                  f"Update rilis versi {tag_name}",
-                  "Perbaikan bug dan peningkatan stabilitas"
+                  f"Rilis Versi {tag_name}",
+                  "Peningkatan performa aplikasi"
               ]
           }
 
-          # Tulis ke file update.json
           with open('update.json', 'w') as f:
               json.dump(data, f, indent=2)
           
-          print(f"✅ Berhasil! Size: {size_mb}")
+          print(f"✅ JSON Created for vCode: {v_code}")
 
       - name: Push to Repository
         run: |

@@ -22,7 +22,7 @@ jobs:
         run: |
           # 1. Ambil Nama Tag (v1.1.0 -> 1.1.0)
           TAG_NAME="${{ github.event.release.tag_name }}"
-          VERSION_NAME=$(echo $TAG_NAME | sed 's/v//g')
+          VERSION_NAME=$(echo $TAG_NAME | sed 's/[vV]//g')
           
           # 2. Ambil URL Download APK (mencari file .apk pertama di Assets)
           # Jika tidak ada APK, gunakan URL halaman rilis sebagai fallback

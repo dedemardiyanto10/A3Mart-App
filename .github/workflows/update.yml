@@ -1,50 +1,74 @@
-name: Sync Update from Release
+name: A3Mart Ultimate Sync
 
 on:
   release:
-    types: [published] # Robot jalan otomatis saat lo klik "Publish Release"
+    types: [published] # Robot jalan otomatis saat lo klik 'Publish Release'
 
 jobs:
-  sync-manifest:
+  sync-update-json:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write # Izin wajib supaya robot bisa nulis ke update.json
 
     steps:
-      - name: Checkout Code
+      - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Get Release Info & Update JSON
+      - name: Ambil Data Dari Project
+        id: get_data
         run: |
-          # 1. Ambil nama Tag (misal: v1.0.6)
+          # 1. Ambil Version Code dari build.gradle (Cari baris versionCode)
+          V_CODE=$(grep "versionCode" app/build.gradle | awk '{print $2}')
+          
+          # 2. Ambil Version Name dari build.gradle (Hapus tanda kutip)
+          V_NAME=$(grep "versionName" app/build.gradle | awk '{print $2}' | tr -d '"')
+          
+          # 3. Ambil Nama Tag (misal v1.0.6)
           TAG_NAME="${{ github.event.release.tag_name }}"
           
-          # 2. Ambil URL APK dari aset release pertama
-          # Robot mencari file yang berakhiran .apk di dalam Release tersebut
-          DOWNLOAD_URL="https://github.com/${{ github.repository }}/releases/download/$TAG_NAME/A3Mart.apk"
-          
+          # 4. Ambil Tanggal Hari Ini
           TANGGAL=$(date +'%d-%m-%Y')
           
-          # 3. Update update.json
+          # 5. Cari Link Download APK dari Asset Release
+          # Kita ambil link asset pertama yang ekstensinya .apk
+          DOWNLOAD_URL="https://github.com/${{ github.repository }}/releases/download/$TAG_NAME/A3Mart.apk"
+
+          echo "v_code=$V_CODE" >> $GITHUB_OUTPUT
+          echo "v_name=$V_NAME" >> $GITHUB_OUTPUT
+          echo "url=$DOWNLOAD_URL" >> $GITHUB_OUTPUT
+          echo "date=$TANGGAL" >> $GITHUB_OUTPUT
+
+      - name: Update update.json
+        run: |
           python3 -c "
           import json, os
+          
           path = 'update.json'
-          data = json.load(open(path)) if os.path.exists(path) else {}
-          
-          # Update data berdasarkan Release baru
-          data['versionName'] = '$TAG_NAME'.replace('v', '')
-          data['releaseDate'] = '$TANGGAL'
-          data['downloadUrl'] = '$DOWNLOAD_URL'
-          
+          # Baca file lama, kalau gak ada bikin baru
+          if os.path.exists(path):
+              with open(path, 'r') as f:
+                  data = json.load(f)
+          else:
+              data = {}
+
+          # Masukkan data baru hasil scan robot
+          data['versionName'] = '${{ steps.get_data.outputs.v_name }}'
+          data['versionCode'] = int('${{ steps.get_data.outputs.v_code }}')
+          data['releaseDate'] = '${{ steps.get_data.outputs.date }}'
+          data['downloadUrl'] = '${{ steps.get_data.outputs.url }}'
+          data['forceUpdate'] = True
+          data['changelog'] = [\"Update rilis versi ${{ github.event.release.tag_name }}\"]
+
           with open(path, 'w') as f:
               json.dump(data, f, indent=4)
           "
-          echo "✅ update.json sinkron ke Release $TAG_NAME"
 
-      - name: Commit & Push Changes
+      - name: Push Perubahan ke Repo
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add update.json
-          git commit -m "chore: update manifest to release $TAG_NAME [skip ci]" || echo "No changes"
+          git commit -m "chore: auto-update update.json for version ${{ steps.get_data.outputs.v_name }} [skip ci]" || echo "Tidak ada perubahan"
           git push

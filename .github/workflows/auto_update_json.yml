@@ -1,85 +1,72 @@
-name: Update Release JSON
+name: Auto Update JSON on Release
 
 on:
   release:
     types: [published]
-
-permissions:
-  contents: write # Wajib 'write' agar bisa update file update.json secara otomatis
+  push:
+    branches:
+      - main  # Workflow akan jalan setiap kali kamu push ke main untuk testing
+  workflow_dispatch: # Tombol manual
 
 jobs:
-  update-json-file:
+  update-json:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Process Release Data
-        id: data
+      - name: Get Metadata & Size
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          # 1. Version Name dari Tag (v1.1.0 -> 1.1.0)
-          VN=$(echo "${{ github.event.release.tag_name }}" | sed 's/v//')
+          # Ambil Tag (jika lewat release) atau default (jika lewat push)
+          TAG="${{ github.event.release.tag_name }}"
+          if [ -z "$TAG" ]; then TAG="v1.1.0"; fi 
           
-          # 2. Ambil Link Download APK
-          URL=$(echo '${{ toJson(github.event.release.assets) }}' | jq -r '.[] | select(.name | endswith(".apk")) | .browser_download_url' | head -n 1)
+          # Cari file APK
+          ASSET_NAME=$(gh release view $TAG --json assets -q '.assets[] | select(.name | endswith(".apk")) | .name' | head -n 1 || echo "A3Mart_V1.1.0.apk")
           
-          # 3. Ambil Size APK & Konversi ke MB
-          SIZE_BYTES=$(echo '${{ toJson(github.event.release.assets) }}' | jq -r '.[] | select(.name | endswith(".apk")) | .size' | head -n 1)
-          if [ -z "$SIZE_BYTES" ] || [ "$SIZE_BYTES" = "null" ]; then
-            SIZE="Size tidak terbaca"
+          echo "ASSET_NAME=$ASSET_NAME" >> $GITHUB_ENV
+          echo "TAG=$TAG" >> $GITHUB_ENV
+          
+          # Hitung tanggal
+          echo "TODAY=$(date +'%d-%m-%Y')" >> $GITHUB_ENV
+          
+          # Hitung size (Jika file tidak ada karena bukan trigger release, default ke 4.5 MB)
+          gh release download $TAG --pattern "$ASSET_NAME" --dir ./temp --clobber || echo "Download skipped"
+          if [ -f "./temp/$ASSET_NAME" ]; then
+            SIZE_BYTES=$(stat -c%s "./temp/$ASSET_NAME")
+            SIZE_MB=$(python3 -c "print(f'{$SIZE_BYTES / (1024 * 1024):.1f} MB')")
+            echo "FINAL_SIZE=$SIZE_MB" >> $GITHUB_ENV
           else
-            SIZE=$(echo "scale=2; $SIZE_BYTES / 1048576" | bc)
-            SIZE="$SIZE MB"
+            echo "FINAL_SIZE=4.5 MB" >> $GITHUB_ENV
           fi
-
-          # 4. Release Type (Official vs Beta)
-          if [ "${{ github.event.release.prerelease }}" = "true" ]; then
-            TYPE="Beta Release"
-          else
-            TYPE="Official Release"
-          fi
-
-          # 5. Force Update (Cek jika ada teks [FORCE] di deskripsi)
-          if echo "${{ github.event.release.body }}" | grep -iq "\[FORCE\]"; then
-            FORCE=true
-          else
-            FORCE=false
-          fi
-
-          # Simpan semua ke environment variabel
-          echo "VER_NAME=$VN" >> $GITHUB_ENV
-          echo "DL_URL=$URL" >> $GITHUB_ENV
-          echo "FILE_SIZE=$SIZE" >> $GITHUB_ENV
-          echo "REL_TYPE=$TYPE" >> $GITHUB_ENV
-          echo "IS_FORCE=$FORCE" >> $GITHUB_ENV
-
-      - name: Modify update.json
+      - name: Update JSON File
         run: |
-          # Bersihkan changelog dari tag [FORCE]
-          LOG=$(echo "${{ github.event.release.body }}" | sed 's/\[FORCE\]//gI' | xargs)
-
-          jq --arg vn "$VER_NAME" \
-             --arg url "$DL_URL" \
-             --arg size "$FILE_SIZE" \
-             --arg type "$REL_TYPE" \
-             --argjson force "$IS_FORCE" \
-             --arg date "$(date +'%d-%m-%Y')" \
-             --arg log "$LOG" \
-             '.versionCode += 1 | 
-              .versionName = $vn | 
-              .updateDate = $date | 
-              .downloadUrl = $url | 
-              .fileSize = $size | 
-              .releaseType = $type | 
-              .isForceUpdate = $force | 
-              .changelog = $log' update.json > tmp.json && mv tmp.json update.json
-
-      - name: Push Changes
+          python3 -c "
+          import json, os
+          filename = 'update.json'
+          with open(filename, 'r') as f:
+              data = json.load(f)
+          tag = os.environ['TAG']
+          asset = os.environ['ASSET_NAME']
+          
+          data['versionCode'] = data.get('versionCode', 0) + 1
+          data['versionName'] = tag.replace('v', '')
+          data['updateDate'] = os.environ['TODAY']
+          data['fileSize'] = os.environ['FINAL_SIZE']
+          data['downloadUrl'] = f'https://github.com/${{ github.repository }}/releases/download/{tag}/{asset}'
+          
+          with open(filename, 'w') as f:
+              json.dump(data, f, indent=2)
+          "
+      - name: Push Updates
         run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add update.json
-          git commit -m "chore: update update.json to version $VER_NAME" || exit 0
+          git commit -m "Auto update version info" || echo "No changes to commit"
           git push

@@ -1,9 +1,9 @@
 {
-  "versionName": "1.2.0",
+  "versionName": "1.1.0",
   "versionCode": 2,
   "releaseDate": "18-02-2026",
   "appSize": "4.5 MB",
-  "downloadUrl": "https://github.com/dedemardiyanto10/A3Mart-App/raw/main/A3Mart_v5.apk",
+  "downloadUrl": "https://github.com/dedemardiyanto10/A3Mart-App/releases/download//A3Mart.apk",
   "forceUpdate": true,
   "changelog": [
     "Fix logo burik di toolbar",

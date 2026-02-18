@@ -1,15 +1,15 @@
-name: A3Mart Auto Sync Update
+name: A3Mart Auto Sync
 
 on:
   push:
     branches: [ main ]
     paths:
-      - '*.apk'        # Robot jalan HANYA kalau lo push file APK baru
+      - '*.apk' # Robot hanya jalan kalau ada file APK masuk
 
 jobs:
-  sync-manifest:
+  sync:
     runs-on: ubuntu-latest
-    # Izin untuk menulis kembali ke Repo (Penting agar tidak Failure)
+    # --- BAGIAN KRUSIAL: Kasih izin nulis ke repo ---
     permissions:
       contents: write
 
@@ -17,34 +17,49 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Update JSON Data
-        run: |
-          # 1. Cari file APK terbaru
-          APK_FILE=$(ls *.apk | head -n 1)
-          echo "Ditemukan APK: $APK_FILE"
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
 
-          # 2. Hitung Ukuran & Tanggal
+      - name: Update Manifest
+        run: |
+          # Ambil file APK pertama yang ketemu
+          APK_FILE=$(ls *.apk | head -n 1)
+          
+          if [ -z "$APK_FILE" ]; then
+            echo "Gak ada file APK, skip robot."
+            exit 0
+          fi
+
           SIZE=$(du -h "$APK_FILE" | cut -f1)
           TANGGAL=$(date +'%d-%m-%Y')
-          
-          # 3. Update update.json pake Python
-          python3 -c "
-          import json
-          with open('update.json', 'r+') as f:
-              data = json.load(f)
-              data['appSize'] = '$SIZE'
-              data['releaseDate'] = '$TANGGAL'
-              data['downloadUrl'] = 'https://github.com/${{ github.repository }}/raw/main/' + '$APK_FILE'
-              f.seek(0)
-              json.dump(data, f, indent=4)
-              f.truncate()
-          "
-          echo "✅ update.json berhasil diperbarui di server."
+          URL="https://github.com/${{ github.repository }}/raw/main/$APK_FILE"
 
-      - name: Commit & Push Changes
+          # Update JSON secara paksa
+          python3 -c "
+          import json, os
+          file_path = 'update.json'
+          # Jika file gak ada, buat baru
+          if not os.path.exists(file_path):
+              data = {}
+          else:
+              with open(file_path, 'r') as f:
+                  data = json.load(f)
+          
+          data['appSize'] = '$SIZE'
+          data['releaseDate'] = '$TANGGAL'
+          data['downloadUrl'] = '$URL'
+          
+          with open(file_path, 'w') as f:
+              json.dump(data, f, indent=4)
+          "
+          echo "✅ Update.json updated!"
+
+      - name: Push Perubahan
         run: |
-          git config --global user.name "A3Mart-Bot"
-          git config --global user.email "bot@a3mart.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add update.json
-          git commit -m "chore: auto-sync update.json metadata [skip ci]" || echo "No changes to commit"
-          git push
+          # Hanya commit kalau ada perubahan
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: auto-update manifest [skip ci]" && git push)

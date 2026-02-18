@@ -3,19 +3,19 @@ name: Auto Update JSON on Release
 on:
   release:
     types: [published]
-  workflow_dispatch:
 
 jobs:
   update-json:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      releases: read
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Fetch Metadata & Size from API
+      - name: Fetch Metadata & Size
         id: get_data
         env:
           GH_TOKEN: ${{ github.token }}
@@ -24,17 +24,18 @@ jobs:
           REPO="${{ github.repository }}"
           ASSET_NAME="A3Mart.apk"
 
-          # Ambil data asset langsung dari API GitHub (Lebih stabil & instan)
-          ASSET_DATA=$(gh api repos/$REPO/releases/tags/$TAG --jq ".assets[] | select(.name==\"$ASSET_NAME\")")
+          # Kasih jeda dikit biar upload asset kelar di server GitHub
+          sleep 15
+
+          # Ambil data asset via API
+          ASSET_DATA=$(gh api repos/$REPO/releases/tags/$TAG --jq ".assets[] | select(.name==\"$ASSET_NAME\")" || echo "")
           
           if [ -z "$ASSET_DATA" ]; then
             echo "SIZE=--- MB" >> $GITHUB_ENV
-            echo "ASSET_FOUND=false" >> $GITHUB_ENV
           else
             SIZE_BYTES=$(echo $ASSET_DATA | jq '.size')
             SIZE_MB=$(python3 -c "print(f'{ $SIZE_BYTES / (1024 * 1024):.2f} MB')")
             echo "SIZE=$SIZE_MB" >> $GITHUB_ENV
-            echo "ASSET_FOUND=true" >> $GITHUB_ENV
           fi
           
           echo "TAG=$TAG" >> $GITHUB_ENV
@@ -54,25 +55,17 @@ jobs:
           else:
               data = {}
 
-          # Ambil variable dari ENV dengan aman
-          tag = os.environ['TAG']
-          repo = os.environ['REPO']
-          asset = os.environ['ASSET']
-          size = os.environ['SIZE']
-          today = os.environ['TODAY']
+          # Ambil data dari ENV dengan fallback biar gak crash
+          tag = os.getenv('TAG', 'v1.0.0')
+          repo = os.getenv('REPO', '')
+          asset = os.getenv('ASSET', 'A3Mart.apk')
+          size = os.getenv('SIZE', '--- MB')
 
-          # 1. Update Version Code (Naik otomatis)
+          # Update field JSON
           data['versionCode'] = data.get('versionCode', 0) + 1
-          
-          # 2. Update Version Name (Hapus v atau V, ambil angkanya saja)
           data['versionName'] = tag.lower().replace('v', '')
-          
-          # 3. Update Date & Size
-          data['updateDate'] = today
+          data['updateDate'] = os.getenv('TODAY', '')
           data['fileSize'] = size
-          
-          # 4. DOWNLOAD URL (Sesuai dengan format link GitHub Release)
-          # Format: https://github.com/USER/REPO/releases/download/TAG/FILE
           data['downloadUrl'] = f'https://github.com/{repo}/releases/download/{tag}/{asset}'
 
           with open(file_path, 'w') as f:
@@ -84,5 +77,5 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add update.json
-          git commit -m "Auto Update Version ${{ env.TAG }} [${{ env.SIZE }}]" || echo "No changes to commit"
+          git commit -m "Auto Update Version ${{ env.TAG }}" || echo "No changes"
           git push

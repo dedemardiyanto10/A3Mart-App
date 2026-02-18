@@ -3,7 +3,7 @@ name: A3Mart Ultimate Sync
 on:
   release:
     types: [published]
-  workflow_dispatch: # Supaya lo bisa klik tombol "Run" manual buat ngetes
+  workflow_dispatch: # Biar bisa klik tombol 'Run' buat ngetes
 
 jobs:
   sync:
@@ -14,52 +14,56 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }} # Pakai token bawaan
 
-      - name: Ambil Info Gradle
-        id: info
+      - name: Debug & Update JSON
         run: |
-          # Cari versionCode & versionName di app/build.gradle
-          VCODE=$(grep "versionCode" app/build.gradle | awk '{print $2}')
-          VNAME=$(grep "versionName" app/build.gradle | awk '{print $2}' | tr -d '"')
-          TAG="${{ github.event.release.tag_name }}"
-          # Link Release Asset (Pastikan nama file pas upload adalah A3Mart.apk)
-          URL="https://github.com/${{ github.repository }}/releases/download/$TAG/A3Mart.apk"
+          # 1. Ambil data dari build.gradle
+          # Pakai find buat mastiin filenya ketemu dimanapun
+          GRADLE_PATH=$(find . -name "build.gradle" | grep "app" | head -n 1)
+          VCODE=$(grep "versionCode" $GRADLE_PATH | awk '{print $2}')
+          VNAME=$(grep "versionName" $GRADLE_PATH | awk '{print $2}' | tr -d '"' | tr -d "'")
           
-          echo "vcode=$VCODE" >> $GITHUB_OUTPUT
-          echo "vname=$VNAME" >> $GITHUB_OUTPUT
-          echo "url=$URL" >> $GITHUB_OUTPUT
+          # 2. Info Release
+          TAG="${{ github.event.release.tag_name }}"
+          URL="https://github.com/${{ github.repository }}/releases/download/$TAG/A3Mart.apk"
+          TANGGAL=$(date +'%d-%m-%Y')
 
-      - name: Update JSON File
-        run: |
+          echo "DEBUG: vCode=$VCODE, vName=$VNAME, Tag=$TAG"
+
+          # 3. Update JSON pake Python (Mode Overwrite)
           python3 -c "
-          import json, os, datetime
+          import json, os
           path = 'update.json'
-          # Buat template kalau file hilang/rusak
-          data = {'versionName': '0', 'versionCode': 0, 'changelog': []}
+          data = {}
           if os.path.exists(path):
-              try:
-                  with open(path, 'r') as f: data = json.load(f)
-              except: pass
+              with open(path, 'r') as f:
+                  try: data = json.load(f)
+                  except: data = {}
 
-          data['versionName'] = '${{ steps.info.outputs.vname }}'
-          data['versionCode'] = int('${{ steps.info.outputs.vcode }}')
-          data['releaseDate'] = datetime.datetime.now().strftime('%d-%m-%Y')
-          data['downloadUrl'] = '${{ steps.info.outputs.url }}'
+          data.update({
+              'versionName': '$VNAME',
+              'versionCode': int('$VCODE'),
+              'releaseDate': '$TANGGAL',
+              'downloadUrl': '$URL',
+              'forceUpdate': True
+          })
           
           with open(path, 'w') as f:
-              json.dump(data, f, indent=2)
+              json.dump(data, f, indent=4)
           "
+          
+          # Cek apakah file beneran berubah di server sementara
+          echo "ISI JSON TERBARU:"
+          cat update.json
 
-      - name: Commit & Push Force
+      - name: Force Commit & Push
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add update.json
-          # Pakai git status buat cek apakah ada perubahan
+          # Commit hanya jika ada perbedaan
           if git diff --staged --quiet; then
-            echo "Gak ada perubahan di JSON."
+            echo "⚠️ Gak ada perubahan yang terdeteksi, mungkin datanya sama."
           else
             git commit -m "chore: auto-sync update.json [skip ci]"
             git push origin main

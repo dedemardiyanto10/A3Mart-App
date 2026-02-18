@@ -4,12 +4,18 @@ on:
   release:
     types: [published]
 
+# PENTING: Memberikan izin tulis ke repositori
+permissions:
+  contents: write
+
 jobs:
   update-json:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Extract Release Info
         id: info
@@ -17,39 +23,43 @@ jobs:
           # 1. Version Name (v1.1.0 -> 1.1.0)
           VERSION_NAME=$(echo "${{ github.event.release.tag_name }}" | sed 's/v//')
           
-          # 2. Download URL (Mencari file .apk)
+          # 2. Cari APK dan ambil URL-nya
           DOWNLOAD_URL=$(echo '${{ toJson(github.event.release.assets) }}' | jq -r '.[] | select(.name | endswith(".apk")) | .browser_download_url' | head -n 1)
           
-          # 3. File Size (Konversi ke MB)
+          # 3. Hitung Size APK (Konversi ke MB)
           FILE_SIZE_BYTES=$(echo '${{ toJson(github.event.release.assets) }}' | jq -r '.[] | select(.name | endswith(".apk")) | .size' | head -n 1)
-          FILE_SIZE_MB=$(echo "scale=2; $FILE_SIZE_BYTES / 1048576" | bc)
+          if [ -z "$FILE_SIZE_BYTES" ] || [ "$FILE_SIZE_BYTES" = "null" ]; then
+            FILE_SIZE="Size tidak terbaca"
+          else
+            FILE_SIZE=$(echo "scale=2; $FILE_SIZE_BYTES / 1048576" | bc)
+            FILE_SIZE="$FILE_SIZE MB"
+          fi
           
-          # 4. Release Type (Check apakah Pre-release atau Official)
+          # 4. Release Type & Force Update Logic
+          # Cek deskripsi rilis untuk kata [FORCE]
+          if echo "${{ github.event.release.body }}" | grep -iq "\[FORCE\]"; then
+            FORCE=true
+          else
+            FORCE=false
+          fi
+
           if [ "${{ github.event.release.prerelease }}" = "true" ]; then
-            RELEASE_TYPE="Beta Release"
+            TYPE="Beta Release"
           else
-            RELEASE_TYPE="Official Release"
+            TYPE="Official Release"
           fi
 
-          # 5. Force Update Logic
-          # Akan jadi TRUE jika di dalam deskripsi rilis ada kata "[FORCE_UPDATE]"
-          if echo "${{ github.event.release.body }}" | grep -q "\[FORCE_UPDATE\]"; then
-            FORCE_UPDATE=true
-          else
-            FORCE_UPDATE=false
-          fi
-
-          # Simpan ke Env
+          # Simpan variabel ke environment
           echo "VN=$VERSION_NAME" >> $GITHUB_ENV
           echo "URL=$DOWNLOAD_URL" >> $GITHUB_ENV
-          echo "SIZE=$FILE_SIZE_MB MB" >> $GITHUB_ENV
-          echo "TYPE=$RELEASE_TYPE" >> $GITHUB_ENV
-          echo "FORCE=$FORCE_UPDATE" >> $GITHUB_ENV
+          echo "SIZE=$FILE_SIZE" >> $GITHUB_ENV
+          echo "TYPE=$TYPE" >> $GITHUB_ENV
+          echo "FORCE=$FORCE" >> $GITHUB_ENV
 
-      - name: Update update.json
+      - name: Write to update.json
         run: |
-          # Bersihkan body release dari tag [FORCE_UPDATE] agar rapi di JSON
-          CLEAN_LOG=$(echo "${{ github.event.release.body }}" | sed 's/\[FORCE_UPDATE\]//g')
+          # Hapus tag [FORCE] dari changelog agar tampilan user bersih
+          CLEAN_LOG=$(echo "${{ github.event.release.body }}" | sed 's/\[FORCE\]//gI' | xargs)
 
           jq --arg vn "$VN" \
              --arg url "$URL" \
@@ -69,8 +79,8 @@ jobs:
 
       - name: Commit and Push
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
           git add update.json
-          git commit -m "chore: auto update version to ${{ env.VN }}"
-          git push
+          # Commit hanya jika ada perubahan
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update version to $VN" && git push)

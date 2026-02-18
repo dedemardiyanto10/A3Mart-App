@@ -14,44 +14,46 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Penting untuk rebase
 
       - name: Get Accurate Metadata
         id: meta
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # 1. Ambil Tag
+          # 1. Ambil Tag terbaru
           TAG="${{ github.event.release.tag_name }}"
-          # Jika jalan manual tanpa release, ambil tag terbaru
           if [ -z "$TAG" ]; then TAG=$(git describe --tags --abbrev=0); fi
           
-          # 2. Ambil data Asset (APK) menggunakan GitHub API
-          # Ini mengambil Nama File, Ukuran (bytes), dan URL secara real-time
+          # 2. Ambil data Asset APK dari API GitHub
+          # Mengambil Nama, Ukuran, dan URL secara instan
           ASSET_DATA=$(gh api repos/${{ github.repository }}/releases/tags/$TAG --jq '.assets[] | select(.name | endswith(".apk"))' | head -n 1)
           
           ASSET_NAME=$(echo "$ASSET_DATA" | jq -r '.name')
           ASSET_SIZE=$(echo "$ASSET_DATA" | jq -r '.size')
           DL_URL=$(echo "$ASSET_DATA" | jq -r '.browser_download_url')
           
-          # 3. Konversi Size ke MB
+          # 3. Hitung Size ke MB
           FINAL_SIZE=$(python3 -c "print(f'{$ASSET_SIZE / (1024 * 1024):.1f} MB')")
           
-          # 4. Tentukan Release Type & Force Update
-          # Cek jika rilis diset sebagai Pre-release di GitHub
+          # 4. Tentukan Release Type (Official/Beta)
           IS_PRERELEASE=$(gh api repos/${{ github.repository }}/releases/tags/$TAG --jq '.prerelease')
           if [ "$IS_PRERELEASE" = "true" ]; then TYPE="Beta Release"; else TYPE="Official Release"; fi
           
-          # Cek kata [FORCE] di deskripsi rilis
+          # 5. Ambil Changelog & Cek Force Update
           BODY=$(gh api repos/${{ github.repository }}/releases/tags/$TAG --jq '.body')
           if echo "$BODY" | grep -iq "\[FORCE\]"; then FORCE="true"; else FORCE="false"; fi
+          # Hapus tag [FORCE] dari teks changelog
+          CLEAN_BODY=$(echo "$BODY" | sed 's/\[FORCE\]//gI' | xargs)
 
-          # Simpan ke env untuk dipakai di step python
+          # Ekspor ke Environment
           echo "TAG=$TAG" >> $GITHUB_ENV
-          echo "ASSET_NAME=$ASSET_NAME" >> $GITHUB_ENV
-          echo "FINAL_SIZE=$FINAL_SIZE" >> $GITHUB_ENV
           echo "DL_URL=$DL_URL" >> $GITHUB_ENV
+          echo "FINAL_SIZE=$FINAL_SIZE" >> $GITHUB_ENV
           echo "REL_TYPE=$TYPE" >> $GITHUB_ENV
           echo "IS_FORCE=$FORCE" >> $GITHUB_ENV
+          echo "CHANGELOG=$CLEAN_BODY" >> $GITHUB_ENV
           echo "TODAY=$(date +'%d-%m-%Y')" >> $GITHUB_ENV
 
       - name: Update JSON File
@@ -59,16 +61,18 @@ jobs:
           python3 -c "
           import json, os
           filename = 'update.json'
+          
           with open(filename, 'r') as f:
               data = json.load(f)
 
           data['versionCode'] = data.get('versionCode', 0) + 1
           data['versionName'] = os.environ['TAG'].replace('v', '')
           data['updateDate'] = os.environ['TODAY']
-          data['fileSize'] = os.environ['FINAL_SIZE']
           data['downloadUrl'] = os.environ['DL_URL']
+          data['fileSize'] = os.environ['FINAL_SIZE']
           data['releaseType'] = os.environ['REL_TYPE']
           data['isForceUpdate'] = os.environ['IS_FORCE'].lower() == 'true'
+          data['changelog'] = os.environ['CHANGELOG']
           
           with open(filename, 'w') as f:
               json.dump(data, f, indent=2)
@@ -79,5 +83,15 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add update.json
-          git commit -m "chore: auto update version to ${{ env.TAG }}" || echo "No changes"
-          git push
+          
+          # Hanya commit jika ada perubahan
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          
+          git commit -m "chore: auto update version info to ${{ env.TAG }}"
+          
+          # Solusi error 'rejected': Pull dulu baru Push
+          git pull --rebase origin main
+          git push origin main

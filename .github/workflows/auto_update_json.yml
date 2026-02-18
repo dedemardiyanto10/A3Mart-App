@@ -5,8 +5,8 @@ on:
     types: [published]
   push:
     branches:
-      - main  # Workflow akan jalan setiap kali kamu push ke main untuk testing
-  workflow_dispatch: # Tombol manual
+      - main
+  workflow_dispatch:
 
 jobs:
   update-json:
@@ -18,34 +18,36 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-            - name: Get Metadata & Size
+      - name: Get Metadata & Size
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          # Ambil Tag, jika dari push main gunakan default v1.1.0
           TAG="${{ github.event.release.tag_name }}"
           if [ -z "$TAG" ]; then TAG="v1.1.0"; fi
           
-          # Pakai nama tetap A3Mart.apk
           ASSET_NAME="A3Mart.apk"
           
           echo "ASSET_NAME=$ASSET_NAME" >> $GITHUB_ENV
           echo "TAG=$TAG" >> $GITHUB_ENV
+          echo "REPO=${{ github.repository }}" >> $GITHUB_ENV
           echo "TODAY=$(date +'%d-%m-%Y')" >> $GITHUB_ENV
 
-          # Coba ambil size asli dari GitHub Release
           echo "Menunggu 15 detik agar upload selesai..."
           sleep 15
           
-          # Download untuk hitung size asli
+          # Buat folder temp
+          mkdir -p ./temp
+          
+          # Download APK untuk cek size asli
           gh release download $TAG --pattern "$ASSET_NAME" --dir ./temp --clobber || echo "Download failed"
           
           if [ -f "./temp/$ASSET_NAME" ]; then
             SIZE_BYTES=$(stat -c%s "./temp/$ASSET_NAME")
-            # Hitung MB pakai Python agar akurat
+            # Hitung MB dengan akurasi 2 desimal
             SIZE_MB=$(python3 -c "print(f'{ $SIZE_BYTES / (1024 * 1024):.2f} MB')")
             echo "FINAL_SIZE=$SIZE_MB" >> $GITHUB_ENV
           else
-            # Jika file tidak ditemukan (misal pas testing push), baru pakai default
             echo "FINAL_SIZE=--- MB" >> $GITHUB_ENV
           fi
 
@@ -54,24 +56,34 @@ jobs:
           python3 -c "
           import json, os
           filename = 'update.json'
-          with open(filename, 'r') as f:
-              data = json.load(f)
+          
+          # Baca file JSON yang ada
+          if os.path.exists(filename):
+              with open(filename, 'r') as f:
+                  data = json.load(f)
+          else:
+              data = {}
+
           tag = os.environ['TAG']
           asset = os.environ['ASSET_NAME']
+          repo = os.environ['REPO']
           
+          # Update data
           data['versionCode'] = data.get('versionCode', 0) + 1
-          data['versionName'] = tag.replace('v', '')
+          data['versionName'] = tag.lstrip('v')
           data['updateDate'] = os.environ['TODAY']
           data['fileSize'] = os.environ['FINAL_SIZE']
-          data['downloadUrl'] = f'https://github.com/${{ github.repository }}/releases/download/{tag}/{asset}'
+          # Perbaikan cara penulisan URL agar tidak corrupt
+          data['downloadUrl'] = f'https://github.com/{repo}/releases/download/{tag}/{asset}'
           
           with open(filename, 'w') as f:
               json.dump(data, f, indent=2)
           "
+
       - name: Push Updates
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add update.json
-          git commit -m "Auto update version info" || echo "No changes to commit"
+          git commit -m "Update version info to ${{ env.TAG }}" || echo "No changes to commit"
           git push

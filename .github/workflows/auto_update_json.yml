@@ -1,9 +1,9 @@
-name: Auto Update Bot
+name: Update Version Manifest
 
 on:
   release:
     types: [published]
-  workflow_dispatch: # Biar bisa ngetes manual kapan aja
+  workflow_dispatch: 
 
 jobs:
   update-json:
@@ -27,8 +27,9 @@ jobs:
             RELEASE_JSON=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/latest)
           fi
 
-          # 2. BACA DATA MANUAL DARI JSON LAMA (versionCode & isForceUpdate)
-          if [ -f "update.json" ]; then
+          # 2. BACA DATA MANUAL DENGAN PROTEKSI
+          # Cek apakah file ada dan valid
+          if [ -f "update.json" ] && jq '.' update.json > /dev/null 2>&1; then
             V_CODE=$(jq -r '.versionCode // 1' update.json)
             FORCE_UPDATE=$(jq -r '.isForceUpdate // false' update.json)
           else
@@ -37,11 +38,11 @@ jobs:
           fi
 
           # 3. Ambil Tag & Version Name
-          TAG_NAME=$(echo "$RELEASE_JSON" | jq -r .tag_name)
+          TAG_NAME=$(echo "$RELEASE_JSON" | jq -r .tag_name // "v1.0.0")
           VERSION_NAME=$(echo $TAG_NAME | sed 's/[vV]//g')
           
           # 4. Cari Asset APK, URL, dan Size
-          APK_INFO=$(echo "$RELEASE_JSON" | jq -r '.assets[] | select(.name | endswith(".apk")) | "\(.browser_download_url)|\(.size)"' | head -n 1)
+          APK_INFO=$(echo "$RELEASE_JSON" | jq -r '.assets[]? | select(.name | endswith(".apk")) | "\(.browser_download_url)|\(.size)"' | head -n 1)
           
           if [ -z "$APK_INFO" ]; then
             DOWNLOAD_URL=$(echo "$RELEASE_JSON" | jq -r .html_url)
@@ -52,10 +53,10 @@ jobs:
             FILE_SIZE=$(awk "BEGIN {printf \"%.1f MB\", $SIZE_BYTES/1048576}")
           fi
           
-          # 5. Ambil Changelog (mengubah newline jadi \n agar valid JSON)
-          CHANGELOG=$(echo "$RELEASE_JSON" | jq -r .body | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g' | sed 's/null/Pembaruan sistem terbaru/g')
+          # 5. Ambil Changelog (Pembersihan karakter lebih ketat)
+          CHANGELOG=$(echo "$RELEASE_JSON" | jq -r .body | sed 's/null/Pembaruan sistem terbaru/g' | jq -Rs .)
           
-          # Export semua ke GitHub Output
+          # Export ke Output
           echo "v_code=$V_CODE" >> $GITHUB_OUTPUT
           echo "f_update=$FORCE_UPDATE" >> $GITHUB_OUTPUT
           echo "v_name=$VERSION_NAME" >> $GITHUB_OUTPUT
@@ -66,18 +67,25 @@ jobs:
 
       - name: Generate update.json
         run: |
-          cat <<EOF > update.json
-          {
-            "versionCode": ${{ steps.get_data.outputs.v_code }},
-            "versionName": "${{ steps.get_data.outputs.v_name }}",
-            "updateDate": "${{ steps.get_data.outputs.date }}",
-            "downloadUrl": "${{ steps.get_data.outputs.d_url }}",
-            "changelog": "${{ steps.get_data.outputs.c_log }}",
-            "fileSize": "${{ steps.get_data.outputs.f_size }}",
-            "releaseType": "Official Release",
-            "isForceUpdate": ${{ steps.get_data.outputs.f_update }}
-          }
-          EOF
+          # Menggunakan jq untuk generate biar gak berantakan tanda petiknya
+          jq -n \
+            --arg v_code "${{ steps.get_data.outputs.v_code }}" \
+            --arg v_name "${{ steps.get_data.outputs.v_name }}" \
+            --arg date "${{ steps.get_data.outputs.date }}" \
+            --arg d_url "${{ steps.get_data.outputs.d_url }}" \
+            --argjson c_log ${{ steps.get_data.outputs.c_log }} \
+            --arg f_size "${{ steps.get_data.outputs.f_size }}" \
+            --argjson f_update ${{ steps.get_data.outputs.f_update }} \
+            '{
+              versionCode: ($v_code | tonumber),
+              versionName: $v_name,
+              updateDate: $date,
+              downloadUrl: $d_url,
+              changelog: $c_log,
+              fileSize: $f_size,
+              releaseType: "Official Release",
+              isForceUpdate: $f_update
+            }' > update.json
 
       - name: Push to Repository
         run: |
@@ -85,8 +93,8 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add update.json
           if git diff --quiet && git diff --staged --quiet; then
-            echo "Tidak ada perubahan pada manifest."
+            echo "Gak ada perubahan."
           else
-            git commit -m "chore: auto-update manifest data [skip ci]"
+            git commit -m "chore: auto-update update.json [skip ci]"
             git push origin main
           fi

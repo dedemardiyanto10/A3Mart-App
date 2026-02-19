@@ -45,12 +45,13 @@ Project ini menggunakan otomatisasi tingkat lanjut untuk mengelola siklus rilis:
 ### 🛒 Menu Utama
 | Dashboard | Transaksi | Produk | Rekap |
 | :---: | :---: | :---: | :---: |
-| ![Dashboard](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_20260219-230739.A3Mart.png) | ![Transaksi](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_20260219-230744.A3Mart.png) | ![Produk](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_20260219-230756.A3Mart.png) | ![Rekap](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_REKAP_LO.png) |
+| ![Dashboard](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_20260219-230739.A3Mart.png) | ![Transaksi](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_20260219-230744.A3Mart.png) | ![Produk](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_20260219-233243.A3Mart.png) | ![Rekap](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_20260219-233246.A3Mart.png) |
 
 ### ⚙️ Sistem & Pengaturan
 | Update | Settings | Restore | Backup |
 | :---: | :---: | :---: | :---: |
-| ![Update](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_UPDATE_LO.png) | ![Settings](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_SETTINGS_LO.png) | ![Restore](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_RESTORE_LO.png) | ![Backup](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_BACKUP_LO.png) |
+| ![Update](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_20260219-233256.A3Mart.png) | ![Settings](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_20260219-233309.A3Mart.png) | ![Restore](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_20260219-233321.A3Mart.png) | ![Backup](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_20260219-233504.A3Mart.png) |
+
 
 ---
 

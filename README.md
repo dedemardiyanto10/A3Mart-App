@@ -42,11 +42,9 @@ Project ini menggunakan otomatisasi tingkat lanjut untuk mengelola siklus rilis:
 
 ## 📸 Tampilan Aplikasi
 
-| Dashboard | Buat Transaksi | Produk |
-| :---: | :---: | :---: |
-| ![Dashboard](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_20260219-230739.A3Mart.png) | ![Transaksi](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_20260219-230744.A3Mart.png) | ![Produk](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_20260219-230756.A3Mart.png) |
-
-
+| Dashboard | Transaksi | Produk | Rekap |
+| :---: | :---: | :---: | :---: |
+| ![Dashboard](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_20260219-230739.A3Mart.png) | ![Transaksi](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_20260219-230744.A3Mart.png) | ![Produk](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_20260219-230756.A3Mart.png) | ![Update](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_TAMPILAN_UPDATE.png) |
 
 ---
 

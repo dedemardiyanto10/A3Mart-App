@@ -44,7 +44,7 @@ Project ini menggunakan otomatisasi tingkat lanjut untuk mengelola siklus rilis:
 
 | Dashboard | Buat Transaksi |
 | :---: | :---: |
-| ![Dashboard](https://via.placeholder.com/250x500.png?text=Dashboard+A3+Mart) | ![Transaksi](https://via.placeholder.com/250x500.png?text=Transaksi+A3+Mart) |
+| ![Dashboard]([https://via.placeholder.com/250x500.png?text=Dashboard+A3+Mart](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_20260219-230739.A3Mart.png)) | ![Transaksi](https://via.placeholder.com/250x500.png?text=Transaksi+A3+Mart) |
 
 > **Note:** Ganti gambar di atas dengan screenshot asli aplikasi dari folder `/assets` atau `/screenshots`.
 

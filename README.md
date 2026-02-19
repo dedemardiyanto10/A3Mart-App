@@ -42,9 +42,15 @@ Project ini menggunakan otomatisasi tingkat lanjut untuk mengelola siklus rilis:
 
 ## 📸 Tampilan Aplikasi
 
+### 🛒 Menu Utama
 | Dashboard | Transaksi | Produk | Rekap |
 | :---: | :---: | :---: | :---: |
-| ![Dashboard](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_20260219-230739.A3Mart.png) | ![Transaksi](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_20260219-230744.A3Mart.png) | ![Produk](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_20260219-230756.A3Mart.png) | ![Update](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_TAMPILAN_UPDATE.png) |
+| ![Dashboard](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_20260219-230739.A3Mart.png) | ![Transaksi](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_20260219-230744.A3Mart.png) | ![Produk](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_20260219-230756.A3Mart.png) | ![Rekap](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_REKAP_LO.png) |
+
+### ⚙️ Sistem & Pengaturan
+| Update | Settings | Restore | Backup |
+| :---: | :---: | :---: | :---: |
+| ![Update](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_UPDATE_LO.png) | ![Settings](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_SETTINGS_LO.png) | ![Restore](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_RESTORE_LO.png) | ![Backup](https://raw.githubusercontent.com/dedemardiyanto10/A3Mart-App/refs/heads/main/screenshots/Screenshot_BACKUP_LO.png) |
 
 ---
 

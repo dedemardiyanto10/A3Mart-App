@@ -36,11 +36,11 @@ jobs:
             FORCE_UPDATE="false"
           fi
 
-          # 3. Ambil Tag & Version Name (Proteksi jika tag kosong)
+          # 3. Ambil Tag & Version Name
           TAG_NAME=$(echo "$RELEASE_JSON" | jq -r '.tag_name // "v1.0.0"')
           VERSION_NAME=$(echo $TAG_NAME | sed 's/[vV]//g')
           
-          # 4. Cari Asset APK (Pake tanda ? biar gak error kalau assets kosong)
+          # 4. Cari Asset APK
           APK_INFO=$(echo "$RELEASE_JSON" | jq -r '.assets[]? | select(.name | endswith(".apk")) | "\(.browser_download_url)|\(.size)"' | head -n 1)
           
           if [ -z "$APK_INFO" ]; then
@@ -52,27 +52,31 @@ jobs:
             FILE_SIZE=$(awk "BEGIN {printf \"%.1f MB\", $SIZE_BYTES/1048576}")
           fi
           
-          # 5. Ambil Changelog (Gunakan jq -Rs untuk bungkus teks mentah)
+          # 5. Ambil Changelog (Gunakan delimiter EOF untuk teks panjang)
           CHANGELOG_TEXT=$(echo "$RELEASE_JSON" | jq -r '.body // "Pembaruan sistem terbaru"')
-          CHANGELOG_JSON=$(echo "$CHANGELOG_TEXT" | jq -Rs .)
           
-          # Export ke Output
+          # Kirim ke Output menggunakan teknik Delimiter (Penting agar gak error)
           echo "v_code=$V_CODE" >> $GITHUB_OUTPUT
           echo "f_update=$FORCE_UPDATE" >> $GITHUB_OUTPUT
           echo "v_name=$VERSION_NAME" >> $GITHUB_OUTPUT
           echo "d_url=$DOWNLOAD_URL" >> $GITHUB_OUTPUT
           echo "f_size=$FILE_SIZE" >> $GITHUB_OUTPUT
-          echo "c_log=$CHANGELOG_JSON" >> $GITHUB_OUTPUT
           echo "date=$(date +'%d-%m-%Y')" >> $GITHUB_OUTPUT
+          
+          # Khusus Changelog pakai cara ini:
+          echo "c_log<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG_TEXT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Generate update.json
         run: |
+          # Gunakan jq --arg untuk membungkus teks changelog secara aman menjadi JSON string
           jq -n \
             --arg v_code "${{ steps.get_data.outputs.v_code }}" \
             --arg v_name "${{ steps.get_data.outputs.v_name }}" \
             --arg date "${{ steps.get_data.outputs.date }}" \
             --arg d_url "${{ steps.get_data.outputs.d_url }}" \
-            --argjson c_log ${{ steps.get_data.outputs.c_log }} \
+            --arg c_log "${{ steps.get_data.outputs.c_log }}" \
             --arg f_size "${{ steps.get_data.outputs.f_size }}" \
             --argjson f_update ${{ steps.get_data.outputs.f_update }} \
             '{

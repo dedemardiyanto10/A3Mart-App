@@ -27,9 +27,11 @@ jobs:
             RELEASE_JSON=$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/latest)
           fi
 
-          # 2. BACA DATA MANUAL DARI JSON LAMA
+          # 2. BACA DATA MANUAL DARI JSON LAMA & AUTO-INCREMENT VERSION CODE
           if [ -f "update.json" ] && jq '.' update.json > /dev/null 2>&1; then
-            V_CODE=$(jq -r '.versionCode // 1' update.json)
+            # Ambil versionCode lama dan tambah 1 otomatis
+            OLD_V_CODE=$(jq -r '.versionCode // 1' update.json)
+            V_CODE=$((OLD_V_CODE + 1))
             FORCE_UPDATE=$(jq -r '.isForceUpdate // false' update.json)
           else
             V_CODE="1"
@@ -52,10 +54,10 @@ jobs:
             FILE_SIZE=$(awk "BEGIN {printf \"%.1f MB\", $SIZE_BYTES/1048576}")
           fi
           
-          # 5. Ambil Changelog (Gunakan delimiter EOF untuk teks panjang)
+          # 5. Ambil Changelog
           CHANGELOG_TEXT=$(echo "$RELEASE_JSON" | jq -r '.body // "Pembaruan sistem terbaru"')
           
-          # Kirim ke Output menggunakan teknik Delimiter (Penting agar gak error)
+          # Output data
           echo "v_code=$V_CODE" >> $GITHUB_OUTPUT
           echo "f_update=$FORCE_UPDATE" >> $GITHUB_OUTPUT
           echo "v_name=$VERSION_NAME" >> $GITHUB_OUTPUT
@@ -63,14 +65,12 @@ jobs:
           echo "f_size=$FILE_SIZE" >> $GITHUB_OUTPUT
           echo "date=$(date +'%d-%m-%Y')" >> $GITHUB_OUTPUT
           
-          # Khusus Changelog pakai cara ini:
           echo "c_log<<EOF" >> $GITHUB_OUTPUT
           echo "$CHANGELOG_TEXT" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Generate update.json
         run: |
-          # Gunakan jq --arg untuk membungkus teks changelog secara aman menjadi JSON string
           jq -n \
             --arg v_code "${{ steps.get_data.outputs.v_code }}" \
             --arg v_name "${{ steps.get_data.outputs.v_name }}" \
@@ -91,18 +91,16 @@ jobs:
             }' > update.json
 
       - name: Push to Repository
-  run: |
-    git config --global user.name "github-actions[bot]"
-    git config --global user.email "github-actions[bot]@users.noreply.github.com"
-    
-    git add update.json
-    
-    # Cek apakah ada perubahan sebelum commit
-    if git diff --quiet && git diff --staged --quiet; then
-      echo "Gak ada perubahan untuk di-commit."
-    else
-      git commit -m "chore: auto-update update.json [skip ci]"
-      # GUNAKAN INI: Push dari HEAD lokal ke branch main di remote
-      git push origin HEAD:main
-    fi
-
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add update.json
+          
+          if git diff --quiet && git diff --staged --quiet; then
+            echo "Gak ada perubahan untuk di-commit."
+          else
+            git commit -m "chore: auto-update update.json [skip ci]"
+            # Gunakan HEAD:main agar bot bisa push meskipun dalam kondisi detached HEAD
+            git push origin HEAD:main
+          fi

@@ -1,10 +1,10 @@
 {
-    "versionCode": 2,
-    "versionName": "1.2.0",
-    "updateDate": "19-02-2026",
-    "downloadUrl": "https:\/\/github.com\/dedemardiyanto10\/A3Mart-App\/releases\/download\/V1.2.0\/A3Mart.apk",
-    "changelog": "Pembaruan Sistem:\r\n• Implementasi mekanisme pengecekan versi aplikasi secara real-time melalui integrasi GitHub Actions.\r\n• Optimasi sinkronisasi data manifest untuk memastikan validitas informasi pembaruan.\r\n• Peningkatan keamanan jalur akses unduhan paket aplikasi (APK).\r\n\r\nOptimasi & Performa:\r\n• Peningkatan stabilitas sistem secara keseluruhan untuk penggunaan jangka panjang.\r\n• Optimasi pemuatan aset gambar (Glide) guna mengurangi penggunaan memori pada perangkat.\r\n• Pengurangan latensi pada proses inisialisasi awal aplikasi.\r\n\r\nPerbaikan Bug:\r\n• Perbaikan masalah pada komponen dialog informasi yang terkadang tidak muncul secara presisi.\r\n• Penanganan beberapa bug minor yang dilaporkan pengguna terkait kompatibilitas pada versi Android lama.\r",
-    "fileSize": "18.0 MB",
-    "releaseType": "Official Release",
-    "isForceUpdate": false
+  "versionCode": 3,
+  "versionName": "1.3.0",
+  "updateDate": "21-02-2026",
+  "downloadUrl": "https://github.com/dedemardiyanto10/A3Mart-App/releases/download/V1.3.0/A3Mart.apk",
+  "changelog": "🚀 A3Mart Update v1.3.0 - Developer Edition\n​Apa yang baru?\nKami menghadirkan kendali penuh bagi pengembang langsung dari genggaman Anda. Update ini berfokus pada efisiensi manajemen repositori dan transparansi data.\n​✨ Fitur Utama:\n​Developer Control Center: Kelola konfigurasi aplikasi secara real-time.\n​JSON Smart Editor: Edit metadata update.json dengan validasi instan dan tampilan pretty-print yang rapi.\n​GitHub Release Integration: Buat release baru dan upload APK langsung ke GitHub tanpa perlu buka PC.\n​Mewah UI Engine: Dialog dan transisi baru dengan efek sudut membulat dan animasi halus (Material 3).\n​🛠 Perbaikan & Optimasi:\n​Fix Layout Error: Memperbaiki masalah inflate pada beberapa perangkat Android.\n​Auto-Prettify: JSON otomatis dirapikan saat dimuat dari server.\n​Network Stability: Optimasi koneksi Retrofit untuk unggahan file besar (APK).",
+  "fileSize": "13.3 MB",
+  "releaseType": "Official Release",
+  "isForceUpdate": false
 }

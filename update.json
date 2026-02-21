@@ -1,10 +1,10 @@
 {
-  "versionCode": 2,
-  "versionName": "1.2.0",
-  "updateDate": "19-02-2026",
-  "downloadUrl": "https://github.com/dedemardiyanto10/A3Mart-App/releases/download/V1.2.0/A3Mart.apk",
-  "changelog": "Pembaruan Sistem:\r\n• Implementasi mekanisme pengecekan versi aplikasi secara real-time melalui integrasi GitHub Actions.\r\n• Optimasi sinkronisasi data manifest untuk memastikan validitas informasi pembaruan.\r\n• Peningkatan keamanan jalur akses unduhan paket aplikasi (APK).\r\n\r\nOptimasi & Performa:\r\n• Peningkatan stabilitas sistem secara keseluruhan untuk penggunaan jangka panjang.\r\n• Optimasi pemuatan aset gambar (Glide) guna mengurangi penggunaan memori pada perangkat.\r\n• Pengurangan latensi pada proses inisialisasi awal aplikasi.\r\n\r\nPerbaikan Bug:\r\n• Perbaikan masalah pada komponen dialog informasi yang terkadang tidak muncul secara presisi.\r\n• Penanganan beberapa bug minor yang dilaporkan pengguna terkait kompatibilitas pada versi Android lama.\r",
-  "fileSize": "18.0 MB",
-  "releaseType": "Official Release",
-  "isForceUpdate": false
+    "versionCode": 3,
+    "versionName": "1.2.0",
+    "updateDate": "19-02-2026",
+    "downloadUrl": "https:\/\/github.com\/dedemardiyanto10\/A3Mart-App\/releases\/download\/V1.2.0\/A3Mart.apk",
+    "changelog": "Pembaruan Sistem:\r\n• Implementasi mekanisme pengecekan versi aplikasi secara real-time melalui integrasi GitHub Actions.\r\n• Optimasi sinkronisasi data manifest untuk memastikan validitas informasi pembaruan.\r\n• Peningkatan keamanan jalur akses unduhan paket aplikasi (APK).\r\n\r\nOptimasi & Performa:\r\n• Peningkatan stabilitas sistem secara keseluruhan untuk penggunaan jangka panjang.\r\n• Optimasi pemuatan aset gambar (Glide) guna mengurangi penggunaan memori pada perangkat.\r\n• Pengurangan latensi pada proses inisialisasi awal aplikasi.\r\n\r\nPerbaikan Bug:\r\n• Perbaikan masalah pada komponen dialog informasi yang terkadang tidak muncul secara presisi.\r\n• Penanganan beberapa bug minor yang dilaporkan pengguna terkait kompatibilitas pada versi Android lama.\r",
+    "fileSize": "18.0 MB",
+    "releaseType": "Official Release",
+    "isForceUpdate": false
 }

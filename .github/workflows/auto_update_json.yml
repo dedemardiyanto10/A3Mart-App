@@ -99,5 +99,5 @@ jobs:
             echo "Gak ada perubahan."
           else
             git commit -m "chore: auto-update update.json [skip ci]"
-            git push origin main
+            git push origin HEAD:main
           fi

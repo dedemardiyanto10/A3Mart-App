@@ -1,10 +1,10 @@
 {
-    "versionCode": 2,
-    "versionName": "1.3.0",
-    "updateDate": "21-02-2026",
-    "downloadUrl": "https:\/\/github.com\/dedemardiyanto10\/A3Mart-App\/releases\/download\/V1.3.0\/A3Mart.apk",
-    "changelog": "🚀 A3Mart Update v1.3.0 - Developer Edition\n​Apa yang baru?\nKami menghadirkan kendali penuh bagi pengembang langsung dari genggaman Anda. Update ini berfokus pada efisiensi manajemen repositori dan transparansi data.\n​✨ Fitur Utama:\n​Developer Control Center: Kelola konfigurasi aplikasi secara real-time.\n​JSON Smart Editor: Edit metadata update.json dengan validasi instan dan tampilan pretty-print yang rapi.\n​GitHub Release Integration: Buat release baru dan upload APK langsung ke GitHub tanpa perlu buka PC.\n​Mewah UI Engine: Dialog dan transisi baru dengan efek sudut membulat dan animasi halus (Material 3).\n​🛠 Perbaikan & Optimasi:\n​Fix Layout Error: Memperbaiki masalah inflate pada beberapa perangkat Android.\n​Auto-Prettify: JSON otomatis dirapikan saat dimuat dari server.\n​Network Stability: Optimasi koneksi Retrofit untuk unggahan file besar (APK).",
-    "fileSize": "13.3 MB",
-    "releaseType": "Official Release",
-    "isForceUpdate": false
+  "versionCode": 3,
+  "versionName": "23",
+  "updateDate": "22-02-2026",
+  "downloadUrl": "https://github.com/dedemardiyanto10/A3Mart-App/releases/tag/v23",
+  "changelog": "ru",
+  "fileSize": "-- MB",
+  "releaseType": "Official Release",
+  "isForceUpdate": false
 }
